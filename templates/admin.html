@@ -1,0 +1,917 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+:root {
+  --indigo: #4f46e5;
+  --indigo-dark: #3730a3;
+  --indigo-light: #e0e7ff;
+  --orange: #f97316;
+  --orange-dark: #ea580c;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --radius-lg: 1.5rem;
+  --radius-md: 1rem;
+  --radius-sm: 0.75rem;
+  --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* ====== Сетка ====== */
+.admin-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .admin-grid {
+    grid-template-columns: 380px 1fr;
+  }
+}
+
+/* ====== Боковая панель ====== */
+.admin-sidebar {
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border-left: 6px solid var(--indigo);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-base);
+}
+
+.admin-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--indigo), var(--orange));
+  opacity: 0.1;
+}
+
+.admin-sidebar:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+.admin-sidebar h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  margin-bottom: 0.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.admin-sidebar h2::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--indigo);
+  border-radius: 2px;
+}
+
+.admin-role {
+  font-size: 0.75rem;
+  color: var(--slate-500);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+/* ====== Кнопка 1С ====== */
+.onec-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, var(--orange) 0%, #fb923c 100%);
+  color: white;
+  font-weight: 700;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3);
+  transition: var(--transition-base);
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.onec-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s;
+}
+
+.onec-button:hover::before {
+  left: 100%;
+}
+
+.onec-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(249, 115, 22, 0.4);
+}
+
+.onec-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ====== Форма рассылки ====== */
+.bulk-upload-form {
+  background: var(--slate-50);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--slate-200);
+}
+
+.bulk-upload-form h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--slate-800);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bulk-upload-form h3 svg {
+  width: 18px;
+  height: 18px;
+  color: var(--indigo);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--slate-700);
+  margin-bottom: 0.5rem;
+}
+
+.form-select, .form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  transition: var(--transition-base);
+  background: white;
+}
+
+.form-select:focus, .form-input:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* ====== Область загрузки файлов ====== */
+.file-upload-zone {
+  border: 2px dashed var(--slate-300);
+  border-radius: var(--radius-md);
+  padding: 2rem 1rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  transition: var(--transition-base);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.file-upload-zone:hover {
+  border-color: var(--indigo);
+  background: rgba(79, 70, 229, 0.03);
+  transform: translateY(-1px);
+}
+
+.file-upload-zone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, transparent 0%, rgba(79,70,229,0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.file-upload-zone:hover::before {
+  opacity: 1;
+}
+
+.file-upload-zone input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-upload-content {
+  position: relative;
+  z-index: 2;
+}
+
+.file-upload-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  color: var(--slate-400);
+  transition: var(--transition-base);
+}
+
+.file-upload-zone:hover .file-upload-icon {
+  color: var(--indigo);
+  transform: scale(1.1);
+}
+
+.file-upload-text {
+  font-size: 0.9rem;
+  color: var(--slate-600);
+  font-weight: 500;
+}
+
+.file-upload-hint {
+  font-size: 0.8rem;
+  color: var(--slate-400);
+  margin-top: 0.5rem;
+}
+
+/* ====== Кнопка отправки ====== */
+.submit-button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-dark) 100%);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
+.submit-button.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.submit-button.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ====== Основной контент ====== */
+.admin-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ====== Поисковая панель ====== */
+.search-panel {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-base);
+}
+
+.search-panel:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.search-form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--slate-400);
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 2px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  transition: var(--transition-base);
+  background: white;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.search-button {
+  background: var(--slate-800);
+  color: white;
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.search-button:hover {
+  background: var(--slate-900);
+  transform: translateY(-1px);
+}
+
+.reset-button {
+  background: #fee2e2;
+  color: #dc2626;
+  text-decoration: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reset-button:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
+}
+
+/* ====== Таблица учреждений ====== */
+.schools-table-container {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: var(--transition-base);
+}
+
+.schools-table-container:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.table-header h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--slate-900);
+  margin: 0;
+}
+
+.schools-count {
+  background: var(--indigo-light);
+  color: var(--indigo-dark);
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.schools-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.schools-table thead {
+  background: var(--slate-50);
+}
+
+.schools-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--slate-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.schools-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--slate-100);
+  transition: var(--transition-base);
+}
+
+.schools-table tbody tr {
+  transition: var(--transition-base);
+}
+
+.schools-table tbody tr:hover {
+  background: rgba(79, 70, 229, 0.02);
+}
+
+.schools-table tbody tr:hover td {
+  transform: translateX(4px);
+}
+
+.school-name {
+  font-weight: 600;
+  color: var(--slate-800);
+}
+
+.district-badge {
+  background: var(--slate-100);
+  color: var(--slate-700);
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.food-type {
+  font-size: 0.9rem;
+  color: var(--slate-600);
+  font-weight: 500;
+}
+
+.robot-link {
+  background: var(--indigo-light);
+  color: var(--indigo-dark);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.manage-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  color: var(--slate-700);
+  text-decoration: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--slate-200);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: var(--transition-base);
+}
+
+.manage-button:hover {
+  background: var(--indigo);
+  color: white;
+  border-color: var(--indigo);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.manage-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ====== Состояние пустой таблицы ====== */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--slate-500);
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  color: var(--slate-300);
+}
+
+.empty-state-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-subtext {
+  font-size: 0.9rem;
+  color: var(--slate-400);
+}
+
+/* ====== Анимации ====== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* ====== Уведомления ====== */
+.notification {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  background: var(--slate-900);
+  color: white;
+  font-weight: 600;
+  box-shadow: var(--shadow-xl);
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.notification.show {
+  transform: translateX(0);
+}
+
+.notification.success {
+  background: #059669;
+}
+
+.notification.error {
+  background: #dc2626;
+}
+</style>
+
+<div class="container">
+  <div class="admin-grid fade-in-up">
+    <!-- Боковая панель -->
+    <aside class="admin-sidebar">
+      <h2>Панель администратора</h2>
+      <div class="admin-role">
+        {{ 'Региональный уровень' if admin.role == 'regional_admin' else 'Районный уровень (' + admin.district + ')' }}
+      </div>
+
+      <a href="{{ admin.url_1c }}" target="_blank" class="onec-button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1С: Питание (Web)
+      </a>
+
+      <form class="bulk-upload-form" action="/bulk-upload" method="post" enctype="multipart/form-data"
+            onsubmit="handleFormSubmit(this)">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Массовая рассылка
+        </h3>
+
+        <input type="hidden" name="admin_id" value="{{ admin.id }}">
+
+        <div class="form-group">
+          <label class="form-label">Тип питания</label>
+          <select name="target_type" class="form-select">
+            {% for ft in food_types %}
+            <option value="{{ ft }}">{{ ft }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Период</label>
+          <div class="form-grid">
+            <input type="number" name="year" value="2025" class="form-input" min="2020" max="2030">
+            <select name="month" class="form-select">
+              {% for m_id, m_name in months.items() %}
+              <option value="{{ m_id }}">{{ m_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Файлы для рассылки</label>
+          <div class="file-upload-zone" onclick="this.querySelector('input').click()">
+            <input type="file" name="files" multiple required onchange="handleFileSelect(this)">
+            <div class="file-upload-content">
+              <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <div class="file-upload-text">Выберите файлы или перетащите сюда</div>
+              <div class="file-upload-hint">Поддерживаются все форматы</div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-button">
+          Запустить рассылку
+        </button>
+      </form>
+    </aside>
+
+    <!-- Основной контент -->
+    <main class="admin-main">
+      <!-- Поисковая панель -->
+      <section class="search-panel">
+        <form class="search-form" action="/admin" method="get">
+          <input type="hidden" name="admin_id" value="{{ admin.id }}">
+          
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" name="q" value="{{ search_query }}" 
+                   placeholder="Поиск учреждения по названию..." class="search-input">
+          </div>
+          
+          <button type="submit" class="search-button">Найти</button>
+          
+          {% if search_query %}
+          <a href="/admin?admin_id={{ admin.id }}" class="reset-button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Сброс
+          </a>
+          {% endif %}
+        </form>
+      </section>
+
+      <!-- Таблица учреждений -->
+      <section class="schools-table-container">
+        <div class="table-header">
+          <h2>Учреждения питания</h2>
+          <span class="schools-count">Найдено: {{ schools|length }}</span>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="schools-table">
+            <thead>
+              <tr>
+                <th>Учреждение</th>
+                <th>Район</th>
+                <th>Тип питания</th>
+                <th>Ссылка робота</th>
+                <th style="text-align: center;">Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for school in schools %}
+              <tr>
+                <td>
+                  <div class="school-name">{{ school.unit_name }}</div>
+                </td>
+                <td>
+                  <span class="district-badge">{{ school.district }}</span>
+                </td>
+                <td>
+                  <span class="food-type">{{ school.food_type }}</span>
+                </td>
+                <td>
+                  <code class="robot-link">/{{ school.id }}/food/</code>
+                </td>
+                <td style="text-align: center;">
+                  <a href="/dashboard?uid={{ school.id }}" class="manage-button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 15l5-5-5-5"></path>
+                    </svg>
+                    Управление
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          {% if not schools %}
+          <div class="empty-state">
+            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"></path>
+            </svg>
+            <div class="empty-state-text">Учреждения не найдены</div>
+            <div class="empty-state-subtext">
+              {% if search_query %}
+              Попробуйте изменить условия поиска
+              {% else %}
+              Нет учреждений для отображения
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Уведомление -->
+<div class="notification" id="notification"></div>
+
+<script>
+// Обработчик отправки формы
+function handleFormSubmit(form) {
+  const button = form.querySelector('.submit-button');
+  button.classList.add('loading');
+  button.disabled = true;
+  
+  // Показываем уведомление об успехе через 2 секунды (имитация)
+  setTimeout(() => {
+    showNotification('Рассылка успешно запущена!', 'success');
+  }, 2000);
+}
+
+// Обработчик выбора файлов
+function handleFileSelect(input) {
+  const zone = input.closest('.file-upload-zone');
+  const text = zone.querySelector('.file-upload-text');
+  const hint = zone.querySelector('.file-upload-hint');
+  
+  if (input.files.length > 0) {
+    const fileCount = input.files.length;
+    const totalSize = Array.from(input.files).reduce((sum, file) => sum + file.size, 0);
+    const sizeMB = (totalSize / (1024 * 1024)).toFixed(1);
+    
+    text.textContent = `Выбрано файлов: ${fileCount}`;
+    hint.textContent = `Общий размер: ${sizeMB} МБ`;
+    
+    zone.style.borderColor = '#10b981';
+    zone.style.background = 'rgba(16, 185, 129, 0.05)';
+  } else {
+    text.textContent = 'Выберите файлы или перетащите сюда';
+    hint.textContent = 'Поддерживаются все форматы';
+    zone.style.borderColor = '';
+    zone.style.background = '';
+  }
+}
+
+// Drag and drop для области загрузки
+document.addEventListener('DOMContentLoaded', function() {
+  const uploadZones = document.querySelectorAll('.file-upload-zone');
+  
+  uploadZones.forEach(zone => {
+    zone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '#4f46e5';
+      this.style.background = 'rgba(79, 70, 229, 0.1)';
+    });
+    
+    zone.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '';
+      this.style.background = '';
+    });
+    
+    zone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      const input = this.querySelector('input[type="file"]');
+      input.files = e.dataTransfer.files;
+      handleFileSelect(input);
+    });
+  });
+});
+
+// Показ уведомлений
+function showNotification(message, type = 'success') {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.className = `notification ${type} show`;
+  
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, 3000);
+}
+
+// Анимация появления элементов
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, observerOptions);
+
+// Наблюдаем за всеми элементами с анимацией
+document.querySelectorAll('.fade-in-up').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+{% endblock %}
