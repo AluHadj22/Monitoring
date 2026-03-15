@@ -1,13 +1,24 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./food_management_final.db"
+load_dotenv()
 
-# Для SQLite обязательно: check_same_thread=False
+# Берем настройки из файла .env
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", 
+    "postgresql://postgres:Toshiba3377@localhost:5432/food_management"
+)
+
+# Создаем подключение к PostgreSQL
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    connect_args={"check_same_thread": False}
+    DATABASE_URL,
+    pool_size=20,        # Сколько соединений держать открытыми
+    max_overflow=10,     # Сколько дополнительных соединений можно создать
+    pool_pre_ping=True,  # Проверять соединения перед использованием
+    echo=False           # Поставь True, если хочешь видеть все SQL запросы
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

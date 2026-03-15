@@ -1,0 +1,402 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    .upload-container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+    
+    .upload-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 40px;
+        border-radius: var(--radius-lg);
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-xl);
+        text-align: center;
+    }
+    
+    .upload-header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+    
+    .upload-card {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 40px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: var(--slate-800);
+        font-size: 1.1em;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--slate-700);
+        font-size: 1em;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+    
+    .file-upload {
+        border: 3px dashed var(--border);
+        border-radius: var(--radius-lg);
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--surface);
+    }
+    
+    .file-upload:hover {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+    
+    .file-upload-icon {
+        font-size: 3em;
+        margin-bottom: 15px;
+        color: var(--slate-400);
+    }
+    
+    .file-upload-text {
+        color: var(--slate-500);
+        font-size: 1.1em;
+    }
+    
+    .file-upload input {
+        display: none;
+    }
+    
+    .file-info {
+        margin-top: 20px;
+        padding: 15px;
+        background: var(--blue-light);
+        border-radius: var(--radius-md);
+        display: none;
+    }
+    
+    .file-info.show {
+        display: block;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    .btn-upload {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 1.2em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+    
+    .btn-upload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-upload:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+        margin-top: 20px;
+        overflow: hidden;
+        display: none;
+    }
+    
+    .progress-bar.show {
+        display: block;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981, #059669);
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    
+    .tags-input {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+    }
+    
+    .tag {
+        background: var(--blue-light);
+        color: var(--blue-dark);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .tag-remove {
+        cursor: pointer;
+        font-weight: bold;
+    }
+    
+    .tag-remove:hover {
+        color: #ef4444;
+    }
+    
+    .tags-input input {
+        border: none;
+        background: transparent;
+        padding: 5px;
+        flex: 1;
+        min-width: 100px;
+    }
+    
+    .tags-input input:focus {
+        outline: none;
+    }
+</style>
+
+<div class="upload-container">
+    <div class="upload-header">
+        <h1>📤 Загрузка документа</h1>
+        <p>Добавьте новый документ в библиотеку знаний</p>
+    </div>
+    
+    <div class="upload-card">
+        <form id="uploadForm" method="POST" action="/knowledge-base/admin/upload" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Название документа *</label>
+                <input type="text" name="title" class="form-control" required placeholder="Введите полное название документа">
+            </div>
+            
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea name="description" class="form-control" rows="4" placeholder="Краткое описание содержимого документа"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Категория</label>
+                <select name="category_id" class="form-control">
+                    <option value="">-- Без категории --</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.icon }} {{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Тип документа</label>
+                <select name="document_type" class="form-control">
+                    {% for key, value in document_types.items() %}
+                    <option value="{{ key }}" {% if key == 'document' %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Теги (для поиска)</label>
+                <div class="tags-input" id="tagsContainer">
+                    <div id="tagsList"></div>
+                    <input type="text" id="tagInput" placeholder="Введите тег и нажмите Enter">
+                </div>
+                <input type="hidden" name="tags" id="tagsHidden">
+            </div>
+            
+            <div class="form-group">
+                <label>Основной файл *</label>
+                <div class="file-upload" id="fileUpload" onclick="document.getElementById('file').click()">
+                    <div class="file-upload-icon">📄</div>
+                    <div class="file-upload-text" id="fileText">Нажмите или перетащите файл</div>
+                    <input type="file" name="file" id="file" required>
+                </div>
+                <div class="file-info" id="fileInfo"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Обложка (необязательно)</label>
+                <div class="file-upload" onclick="document.getElementById('cover').click()">
+                    <div class="file-upload-icon">🖼️</div>
+                    <div class="file-upload-text" id="coverText">Нажмите или перетащите изображение</div>
+                    <input type="file" name="cover_image" id="cover" accept="image/*">
+                </div>
+                <div class="file-info" id="coverInfo"></div>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-group">
+                    <input type="checkbox" name="is_featured" value="true">
+                    <span>📌 Отметить как рекомендуемый документ</span>
+                </label>
+            </div>
+            
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <button type="submit" class="btn-upload" id="submitBtn">
+                Загрузить документ
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Предпросмотр файла
+document.getElementById('file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('fileText').textContent = file.name;
+        document.getElementById('fileInfo').textContent = `Размер: ${(file.size / 1024).toFixed(2)} KB`;
+        document.getElementById('fileInfo').classList.add('show');
+    }
+});
+
+document.getElementById('cover').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('coverText').textContent = file.name;
+        document.getElementById('coverInfo').textContent = `Размер: ${(file.size / 1024).toFixed(2)} KB`;
+        document.getElementById('coverInfo').classList.add('show');
+    }
+});
+
+// Drag and drop
+['file', 'cover'].forEach(id => {
+    const dropZone = document.getElementById(id).parentElement;
+    
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#10b981';
+        dropZone.style.background = 'rgba(16, 185, 129, 0.05)';
+    });
+    
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '';
+        dropZone.style.background = '';
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '';
+        dropZone.style.background = '';
+        
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            document.getElementById(id).files = e.dataTransfer.files;
+            if (id === 'file') {
+                document.getElementById('fileText').textContent = file.name;
+                document.getElementById('fileInfo').textContent = `Размер: ${(file.size / 1024).toFixed(2)} KB`;
+                document.getElementById('fileInfo').classList.add('show');
+            } else {
+                document.getElementById('coverText').textContent = file.name;
+                document.getElementById('coverInfo').textContent = `Размер: ${(file.size / 1024).toFixed(2)} KB`;
+                document.getElementById('coverInfo').classList.add('show');
+            }
+        }
+    });
+});
+
+// Теги
+const tagsContainer = document.getElementById('tagsContainer');
+const tagsList = document.getElementById('tagsList');
+const tagInput = document.getElementById('tagInput');
+const tagsHidden = document.getElementById('tagsHidden');
+let tags = [];
+
+tagInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const tag = this.value.trim();
+        if (tag && !tags.includes(tag)) {
+            tags.push(tag);
+            renderTags();
+            this.value = '';
+        }
+    }
+});
+
+function renderTags() {
+    tagsList.innerHTML = '';
+    tags.forEach(tag => {
+        const tagEl = document.createElement('span');
+        tagEl.className = 'tag';
+        tagEl.innerHTML = `${tag} <span class="tag-remove" onclick="removeTag('${tag}')">&times;</span>`;
+        tagsList.appendChild(tagEl);
+    });
+    tagsHidden.value = tags.join(',');
+}
+
+function removeTag(tag) {
+    tags = tags.filter(t => t !== tag);
+    renderTags();
+}
+
+// Прогресс загрузки
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Загрузка...';
+    progressBar.classList.add('show');
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 10;
+        progressFill.style.width = progress + '%';
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+        }
+    }, 300);
+});
+</script>
+{% endblock %}

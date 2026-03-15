@@ -1,0 +1,4371 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    
+    .dashboard-builder {
+        display: flex;
+        height: calc(100vh - 80px);
+        background: var(--surface);
+        overflow: hidden;
+    }
+
+    /* Левая панель инструментов */
+    .toolbox-panel {
+        width: 250px;
+        background: var(--card);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .toolbox-header {
+        padding: 15px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .toolbox-header h2 {
+        font-size: 1.1rem;
+        color: var(--slate-700);
+        margin: 0;
+    }
+
+    .toolbox-categories {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    .toolbox-category {
+        margin-bottom: 20px;
+    }
+
+    .toolbox-category h3 {
+        font-size: 0.85rem;
+        color: var(--slate-500);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tool-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        margin-bottom: 5px;
+        cursor: grab;
+        transition: all 0.2s;
+        user-select: none;
+    }
+
+    .tool-item:hover {
+        border-color: var(--blue);
+        background: rgba(96, 165, 250, 0.05);
+        transform: translateX(4px);
+    }
+
+    .tool-item i {
+        width: 20px;
+        color: var(--blue);
+    }
+
+    .tool-item span {
+        font-size: 0.9rem;
+        color: var(--slate-600);
+    }
+
+    /* Рабочая область */
+    .workspace {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: var(--surface);
+    }
+
+    .workspace-toolbar {
+        padding: 10px 15px;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .dashboard-name-input {
+        width: 300px;
+        padding: 8px 12px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--card);
+        color: var(--slate-700);
+    }
+
+    .dashboard-name-input:focus {
+        border-color: var(--blue);
+        outline: none;
+    }
+
+    .toolbar-btn {
+        padding: 8px 15px;
+        background: var(--blue);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .toolbar-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    .toolbar-btn.secondary {
+        background: var(--surface);
+        color: var(--slate-600);
+        border: 1px solid var(--border);
+    }
+
+    .toolbar-btn.success {
+        background: #10b981;
+    }
+
+    .toolbar-btn.danger {
+        background: #ef4444;
+    }
+
+    .toolbar-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Grid контейнер */
+    .grid-container {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-rows: 80px;
+        gap: 10px;
+        min-height: 100%;
+        position: relative;
+    }
+
+    .grid-item {
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        will-change: transform, width, height;
+    }
+
+    .grid-item.dragging {
+        opacity: 0.9;
+        transform: scale(1.02) rotate(0.5deg);
+        box-shadow: var(--shadow-xl);
+        z-index: 1000;
+        cursor: grabbing;
+        transition: none;
+    }
+
+    .grid-item.resizing {
+        opacity: 0.9;
+        user-select: none;
+        transition: none;
+    }
+
+    .grid-item.selected {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+    }
+
+    .grid-item:hover .widget-controls {
+        opacity: 1;
+    }
+
+    .grid-item:hover .resize-handle {
+        opacity: 1;
+    }
+
+    .grid-item-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+        cursor: grab;
+        flex-shrink: 0;
+    }
+
+    .grid-item-header:active {
+        cursor: grabbing;
+    }
+
+    .drag-handle {
+        color: var(--slate-400);
+        font-size: 1rem;
+        margin-right: 0.5rem;
+        cursor: grab;
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .widget-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--slate-700);
+        flex: 1;
+    }
+
+    .widget-title i {
+        color: var(--blue);
+        width: 16px;
+    }
+
+    .widget-controls {
+        display: flex;
+        gap: 5px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .widget-control {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: var(--slate-500);
+        transition: all 0.2s;
+    }
+
+    .widget-control:hover {
+        background: var(--surface);
+        color: var(--blue);
+    }
+
+    .widget-control.delete:hover {
+        color: #ef4444;
+    }
+
+    /* Ручки изменения размера */
+    .resize-handle {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--slate-400);
+        font-size: 0.9rem;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .resize-handle:hover {
+        color: var(--blue);
+        border-color: var(--blue);
+        transform: scale(1.1);
+    }
+
+    .resize-handle.right {
+        top: 50%;
+        right: -12px;
+        transform: translateY(-50%);
+        cursor: ew-resize;
+    }
+
+    .resize-handle.bottom {
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: ns-resize;
+    }
+
+    .resize-handle.corner {
+        bottom: -12px;
+        right: -12px;
+        cursor: nwse-resize;
+    }
+
+    .size-indicator {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        font-size: 0.7rem;
+        color: var(--slate-400);
+        background: var(--card);
+        padding: 2px 6px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        opacity: 0.5;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    /* Правая панель редактора */
+    .editor-panel {
+        width: 400px;
+        background: var(--card);
+        border-left: 1px solid var(--border);
+        display: none;
+        flex-direction: column;
+    }
+
+    .editor-panel.show {
+        display: flex;
+    }
+
+    .editor-header {
+        padding: 15px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .editor-header h3 {
+        font-size: 1rem;
+        color: var(--slate-700);
+        margin: 0;
+    }
+
+    .editor-close {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: var(--slate-500);
+    }
+
+    .editor-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    .editor-section {
+        margin-bottom: 20px;
+    }
+
+    .editor-section label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--slate-600);
+        margin-bottom: 5px;
+    }
+
+    .editor-section input,
+    .editor-section select,
+    .editor-section textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--slate-700);
+        font-size: 0.9rem;
+    }
+
+    .editor-section textarea {
+        min-height: 80px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        resize: vertical;
+    }
+
+    .color-picker-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .color-picker {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 1px solid var(--border);
+        cursor: pointer;
+    }
+
+    .multi-color-picker {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 5px;
+    }
+
+    .color-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .color-item input[type="color"] {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .color-item input[type="text"] {
+        width: 70px;
+        text-align: center;
+        font-size: 0.8rem;
+    }
+
+    .add-color-btn {
+        padding: 8px;
+        background: var(--surface);
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+        color: var(--slate-600);
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .add-color-btn:hover {
+        background: var(--blue-light);
+        border-color: var(--blue);
+        color: var(--blue);
+    }
+
+    .data-table-editor {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+    }
+
+    .data-table-editor table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table-editor th,
+    .data-table-editor td {
+        padding: 8px;
+        border: 1px solid var(--border);
+    }
+
+    .data-table-editor th {
+        background: var(--surface);
+        font-weight: 600;
+    }
+
+    .data-table-editor input {
+        width: 100%;
+        border: none;
+        padding: 4px;
+        background: transparent;
+    }
+
+    .data-table-editor input:focus {
+        outline: 2px solid var(--blue);
+        border-radius: 2px;
+    }
+
+    .data-table-controls {
+        display: flex;
+        gap: 5px;
+        margin-top: 5px;
+    }
+
+    .data-table-btn {
+        padding: 4px 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 0.8rem;
+        color: var(--slate-600);
+    }
+
+    .data-table-btn:hover {
+        background: var(--blue);
+        color: white;
+    }
+
+    .editor-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .editor-actions button {
+        flex: 1;
+        padding: 8px;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-save {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-save:hover {
+        opacity: 0.9;
+    }
+
+    .btn-cancel {
+        background: var(--surface);
+        color: var(--slate-600);
+        border: 1px solid var(--border);
+    }
+
+    .btn-cancel:hover {
+        background: var(--slate-100);
+    }
+
+    /* Компоненты */
+    .widget-content {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .text-component {
+        padding: 10px;
+        min-height: 50px;
+        font-size: 16px;
+        color: var(--slate-700);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .list-component {
+        padding-left: 20px;
+        font-size: 14px;
+        color: var(--slate-700);
+    }
+
+    .list-component li {
+        margin-bottom: 3px;
+    }
+
+    .list-component ul, 
+    .list-component ol {
+        padding-left: 20px;
+        margin: 0;
+    }
+
+    .table-component {
+        overflow-x: auto;
+    }
+
+    .table-component table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .table-component th,
+    .table-component td {
+        padding: 8px;
+        border: 1px solid var(--border);
+        text-align: left;
+    }
+
+    .table-component th {
+        background: rgba(96, 165, 250, 0.1);
+        font-weight: 600;
+        color: var(--slate-700);
+        position: relative;
+    }
+
+    .table-component td {
+        color: var(--slate-600);
+    }
+
+    .table-component .table-actions {
+        display: flex;
+        gap: 4px;
+        justify-content: flex-end;
+        margin-bottom: 8px;
+    }
+
+    .table-component .table-btn {
+        padding: 4px 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 0.8rem;
+        color: var(--slate-600);
+        transition: all 0.2s;
+    }
+
+    .table-component .table-btn:hover {
+        background: var(--blue);
+        color: white;
+        border-color: var(--blue);
+    }
+
+    .table-component .table-btn.delete:hover {
+        background: #ef4444;
+        border-color: #ef4444;
+    }
+
+    .table-component .remove-col {
+        margin-left: 5px;
+        color: #ef4444;
+        cursor: pointer;
+        opacity: 0.5;
+        font-size: 0.8rem;
+    }
+
+    .table-component .remove-col:hover {
+        opacity: 1;
+    }
+
+    .table-component.table-striped tr:nth-child(even) td {
+        background: rgba(96, 165, 250, 0.05);
+    }
+
+    .chart-container {
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        position: relative;
+    }
+
+    .slicer-component {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .slicer-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .slicer-btn {
+        padding: 6px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        color: var(--slate-600);
+    }
+
+    .slicer-btn:hover {
+        background: var(--slate-100);
+    }
+
+    .slicer-btn.active {
+        background: var(--blue);
+        color: white;
+        border-color: var(--blue);
+    }
+
+    .slicer-connections {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-top: 5px;
+        padding: 8px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px dashed var(--border);
+    }
+
+    .slicer-connection {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 8px;
+        background: var(--card);
+        border-radius: var(--radius-sm);
+    }
+
+    .slicer-connection input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .slicer-connection label {
+        flex: 1;
+        font-size: 0.9rem;
+        color: var(--slate-600);
+        cursor: pointer;
+    }
+
+    .gauge-component {
+        padding: 10px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gauge-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--blue);
+        line-height: 1.2;
+    }
+
+    .gauge-label {
+        font-size: 0.9rem;
+        color: var(--slate-500);
+        margin-bottom: 10px;
+    }
+
+    .gauge-bar {
+        width: 100%;
+        height: 20px;
+        background: var(--surface);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .gauge-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), #818cf8);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-component {
+        padding: 10px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .progress-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+    }
+
+    .progress-label {
+        color: var(--slate-600);
+    }
+
+    .progress-percent {
+        color: var(--blue);
+        font-weight: 600;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--surface);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), #818cf8);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .sparkline-component {
+        padding: 10px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sparkline-svg {
+        width: 100%;
+        height: 80%;
+        min-height: 60px;
+    }
+
+    .sparkline-line {
+        fill: none;
+        stroke: var(--blue);
+        stroke-width: 2;
+    }
+
+    .sparkline-area {
+        fill: rgba(96, 165, 250, 0.1);
+    }
+
+    .sparkline-values {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--slate-500);
+        margin-top: 5px;
+    }
+
+    /* Математические компоненты */
+    .matrix-component {
+        padding: 10px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+    }
+
+    .matrix-table {
+        border-collapse: collapse;
+        margin: 0 auto;
+    }
+
+    .matrix-table td {
+        padding: 8px;
+        text-align: center;
+        border: 1px solid var(--border);
+        min-width: 60px;
+    }
+
+    .matrix-table td input {
+        width: 60px;
+        padding: 4px;
+        border: 1px solid transparent;
+        text-align: center;
+        background: transparent;
+        color: var(--slate-700);
+    }
+
+    .matrix-table td input:focus {
+        outline: 2px solid var(--blue);
+        border-radius: 2px;
+        background: var(--surface);
+    }
+
+    .matrix-brackets {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .matrix-left-bracket,
+    .matrix-right-bracket {
+        font-size: 3rem;
+        font-weight: 300;
+        color: var(--slate-500);
+        line-height: 1;
+    }
+
+    .matrix-controls {
+        display: flex;
+        gap: 5px;
+        margin-top: 10px;
+        justify-content: center;
+    }
+
+    .matrix-btn {
+        padding: 4px 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 0.8rem;
+        color: var(--slate-600);
+    }
+
+    .matrix-btn:hover {
+        background: var(--blue);
+        color: white;
+    }
+
+    .formula-component {
+        padding: 15px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        font-family: 'Courier New', monospace;
+    }
+
+    .formula-display {
+        font-size: 1.5rem;
+        text-align: center;
+        padding: 15px;
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        color: var(--slate-800);
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .formula-input {
+        width: 100%;
+        padding: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--slate-700);
+    }
+
+    .formula-variables {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+    }
+
+    .variable-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        background: var(--card);
+        border-radius: var(--radius-sm);
+    }
+
+    .variable-name {
+        font-weight: 600;
+        color: var(--blue);
+    }
+
+    .variable-value {
+        padding: 2px 4px;
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        width: 60px;
+    }
+
+    .statistics-component {
+        padding: 10px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        overflow: auto;
+    }
+
+    .stats-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--slate-700);
+        font-family: monospace;
+    }
+
+    .stats-results {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .stat-item {
+        padding: 8px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--slate-500);
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--blue);
+    }
+
+    .percentage-component {
+        padding: 15px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .percentage-calculator {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .percentage-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .percentage-input {
+        width: 100px;
+        padding: 6px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--slate-700);
+        text-align: center;
+    }
+
+    .percentage-label {
+        min-width: 80px;
+        color: var(--slate-600);
+    }
+
+    .percentage-result {
+        flex: 1;
+        padding: 6px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        color: var(--blue);
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .percentage-display {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--blue);
+        text-align: center;
+        padding: 20px;
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+    }
+
+    .ratio-component {
+        padding: 15px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .ratio-inputs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .ratio-field {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .ratio-field input {
+        width: 100px;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--slate-700);
+        text-align: center;
+    }
+
+    .ratio-field label {
+        font-size: 0.8rem;
+        color: var(--slate-500);
+    }
+
+    .ratio-equals {
+        font-size: 1.5rem;
+        color: var(--slate-400);
+    }
+
+    .ratio-result {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--blue);
+        text-align: center;
+        padding: 15px;
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+    }
+
+    .function-plot-component {
+        padding: 10px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .function-input {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .function-expression {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--slate-700);
+        font-family: monospace;
+    }
+
+    .function-range {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .function-range input {
+        width: 70px;
+        padding: 6px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--slate-700);
+        text-align: center;
+    }
+
+    .function-canvas {
+        width: 100%;
+        height: 150px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+    }
+
+    /* Модальные окна */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        place-items: center;
+        z-index: 10000;
+    }
+
+    .modal-window {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        min-width: 350px;
+        max-width: 500px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .modal-window h3 {
+        margin: 0 0 10px 0;
+        color: var(--slate-700);
+    }
+
+    .modal-window p {
+        color: var(--slate-500);
+        margin-bottom: 15px;
+    }
+
+    .modal-window input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        margin: 10px 0;
+        background: var(--surface);
+        color: var(--slate-700);
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .modal-buttons button {
+        padding: 6px 15px;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .modal-btn-primary {
+        background: var(--blue);
+        color: white;
+    }
+
+    .modal-btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .modal-btn-secondary {
+        background: var(--surface);
+        color: var(--slate-600);
+        border: 1px solid var(--border);
+    }
+
+    .modal-btn-secondary:hover {
+        background: var(--slate-100);
+    }
+
+    /* Уведомления */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background: var(--card);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        border-left: 4px solid #10b981;
+        transform: translateX(400px);
+        transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+        z-index: 10001;
+        color: var(--slate-700);
+        font-weight: 500;
+    }
+
+    .notification.show {
+        transform: translateX(0);
+    }
+
+    .notification.success { border-left-color: #10b981; }
+    .notification.error { border-left-color: #ef4444; }
+    .notification.warning { border-left-color: #f59e0b; }
+    .notification.info { border-left-color: var(--blue); }
+
+    .no-selection {
+        text-align: center;
+        color: var(--slate-400);
+        padding: 2rem;
+        font-style: italic;
+    }
+
+    .dashboard-title-input {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.5rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--card);
+        color: var(--slate-700);
+        margin-bottom: 1rem;
+    }
+
+    .dashboard-desc-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--slate-700);
+        margin-bottom: 1.5rem;
+        resize: vertical;
+    }
+
+    .case-toggle {
+        display: flex;
+        gap: 5px;
+        margin-top: 5px;
+    }
+
+    .case-btn {
+        flex: 1;
+        padding: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--slate-600);
+        transition: all 0.2s;
+    }
+
+    .case-btn:hover,
+    .case-btn.active {
+        background: var(--blue);
+        color: white;
+        border-color: var(--blue);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-builder">
+    <!-- Левая панель инструментов -->
+    <div class="toolbox-panel">
+        <div class="toolbox-header">
+            <h2><i class="fas fa-cube" style="margin-right: 8px;"></i>Компоненты</h2>
+        </div>
+        
+        <div class="toolbox-categories">
+            <!-- Диаграммы -->
+            <div class="toolbox-category">
+                <h3><i class="fas fa-chart-bar" style="margin-right: 5px;"></i>Диаграммы</h3>
+                <div class="tool-item" draggable="true" data-type="chart" data-chart-type="bar">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Столбчатая</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="chart" data-chart-type="line">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Линейная</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="chart" data-chart-type="pie">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Круговая</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="chart" data-chart-type="doughnut">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Кольцевая</span>
+                </div>
+            </div>
+
+            <!-- Текст и списки -->
+            <div class="toolbox-category">
+                <h3><i class="fas fa-font" style="margin-right: 5px;"></i>Текст</h3>
+                <div class="tool-item" draggable="true" data-type="text">
+                    <i class="fas fa-font"></i>
+                    <span>Текстовый блок</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="list">
+                    <i class="fas fa-list"></i>
+                    <span>Список</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="table">
+                    <i class="fas fa-table"></i>
+                    <span>Таблица</span>
+                </div>
+            </div>
+
+            <!-- Визуализация данных -->
+            <div class="toolbox-category">
+                <h3><i class="fas fa-chart-line" style="margin-right: 5px;"></i>Визуализация</h3>
+                <div class="tool-item" draggable="true" data-type="gauge">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Индикатор</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="progress">
+                    <i class="fas fa-tasks"></i>
+                    <span>Прогресс-бар</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="sparkline">
+                    <i class="fas fa-wave-square"></i>
+                    <span>Спарклайн</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="comparison">
+                    <i class="fas fa-chart-simple"></i>
+                    <span>Сравнение</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="timeline">
+                    <i class="fas fa-timeline"></i>
+                    <span>Временная шкала</span>
+                </div>
+            </div>
+
+            <!-- Математические инструменты -->
+            <div class="toolbox-category">
+                <h3><i class="fas fa-calculator" style="margin-right: 5px;"></i>Математика</h3>
+                <div class="tool-item" draggable="true" data-type="matrix">
+                    <i class="fas fa-border-all"></i>
+                    <span>Матрица</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="formula">
+                    <i class="fas fa-square-root-alt"></i>
+                    <span>Формула</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="statistics">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Статистика</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="percentage">
+                    <i class="fas fa-percent"></i>
+                    <span>Проценты</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="ratio">
+                    <i class="fas fa-divide"></i>
+                    <span>Пропорции</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="function">
+                    <i class="fas fa-wave-square"></i>
+                    <span>Функция</span>
+                </div>
+            </div>
+
+            <!-- Декоративные элементы -->
+            <div class="toolbox-category">
+                <h3><i class="fas fa-paint-brush" style="margin-right: 5px;"></i>Декорации</h3>
+                <div class="tool-item" draggable="true" data-type="icon">
+                    <i class="fas fa-icons"></i>
+                    <span>Иконка</span>
+                </div>
+                <div class="tool-item" draggable="true" data-type="badge">
+                    <i class="fas fa-tag"></i>
+                    <span>Бейдж</span>
+                </div>
+            </div>
+
+            <!-- Фильтры -->
+            <div class="toolbox-category">
+                <h3><i class="fas fa-filter" style="margin-right: 5px;"></i>Фильтры</h3>
+                <div class="tool-item" draggable="true" data-type="slicer">
+                    <i class="fas fa-filter"></i>
+                    <span>Срез</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Центральная рабочая область -->
+    <div class="workspace">
+        <div class="workspace-toolbar">
+            <input type="text" class="dashboard-name-input" id="dashboardTitle" 
+                   placeholder="Название дашборда" value="{{ dashboard.title if dashboard else 'Новый дашборд' }}">
+            <button class="toolbar-btn" id="saveDashboardBtn"><i class="fas fa-save"></i> Сохранить</button>
+            <button class="toolbar-btn success" id="publishDashboardBtn"><i class="fas fa-globe"></i> Опубликовать</button>
+            <button class="toolbar-btn secondary" id="undoBtn" disabled><i class="fas fa-undo"></i></button>
+            <button class="toolbar-btn secondary" id="redoBtn" disabled><i class="fas fa-redo"></i></button>
+            <button class="toolbar-btn danger" id="clearDashboardBtn"><i class="fas fa-trash"></i></button>
+        </div>
+
+        <div class="grid-container">
+            <div class="dashboard-grid" id="dashboardGrid">
+                <!-- Виджеты будут добавляться сюда -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая панель редактора -->
+    <div class="editor-panel" id="editorPanel">
+        <div class="editor-header">
+            <h3 id="editorTitle">Редактор</h3>
+            <button class="editor-close" id="closeEditor"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="editor-content" id="editorContent">
+            <div class="no-selection">
+                <i class="fas fa-arrow-up" style="font-size: 2rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+                <p>Выберите виджет для настройки</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-window">
+        <h3 id="confirmTitle">Подтверждение</h3>
+        <p id="confirmMessage">Вы уверены?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn-secondary" id="confirmCancel">Отмена</button>
+            <button class="modal-btn-primary" id="confirmOk">ОК</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно публикации -->
+<div class="modal-overlay" id="publishModal">
+    <div class="modal-window">
+        <h3>🌐 Публикация дашборда</h3>
+        <p>Дашборд будет доступен по ссылке:</p>
+        <input type="text" id="publicUrl" readonly value="">
+        <div class="modal-buttons">
+            <button class="modal-btn-secondary" id="closePublishModal">Закрыть</button>
+            <button class="modal-btn-primary" id="copyPublicUrl">Копировать</button>
+        </div>
+    </div>
+</div>
+
+<!-- Уведомление -->
+<div class="notification" id="notification">
+    <span id="notificationMessage"></span>
+</div>
+
+<!-- Скрытые шаблоны редакторов -->
+<div style="display: none;">
+    <!-- Текст -->
+    <div id="template-text-editor">
+        <div class="editor-section">
+            <label>Текст</label>
+            <textarea id="textContent" rows="6" placeholder="Введите текст..."></textarea>
+        </div>
+        <div class="editor-section">
+            <label>Регистр</label>
+            <div class="case-toggle">
+                <button type="button" class="case-btn" onclick="applyTextCase('normal')">Обычный</button>
+                <button type="button" class="case-btn" onclick="applyTextCase('lower')">Нижний</button>
+                <button type="button" class="case-btn" onclick="applyTextCase('upper')">Верхний</button>
+                <button type="button" class="case-btn" onclick="applyTextCase('capitalize')">Заглавные</button>
+            </div>
+        </div>
+        <div class="editor-section">
+            <label>Размер шрифта (px)</label>
+            <input type="number" id="textSize" value="16" min="8" max="72">
+        </div>
+        <div class="editor-section">
+            <label>Цвет текста</label>
+            <input type="color" id="textColor" value="#334155">
+        </div>
+        <div class="editor-section">
+            <label>Выравнивание</label>
+            <select id="textAlign">
+                <option value="left">Влево</option>
+                <option value="center">По центру</option>
+                <option value="right">Вправо</option>
+            </select>
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveTextBtn">Применить</button>
+            <button class="btn-cancel" id="cancelTextBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Список -->
+    <div id="template-list-editor">
+        <div class="editor-section">
+            <label>Тип списка</label>
+            <select id="listStyle">
+                <option value="disc">● Маркер</option>
+                <option value="circle">○ Пустой круг</option>
+                <option value="square">■ Квадрат</option>
+                <option value="decimal">1. Числа</option>
+                <option value="lower-alpha">a. Строчные буквы</option>
+                <option value="upper-alpha">A. Заглавные буквы</option>
+                <option value="lower-roman">i. Римские (строчные)</option>
+                <option value="upper-roman">I. Римские (заглавные)</option>
+            </select>
+        </div>
+        <div class="editor-section">
+            <label>Элементы (по одному в строке)</label>
+            <textarea id="listItems" rows="6" placeholder="Первый элемент&#10;Второй элемент&#10;Третий элемент"></textarea>
+        </div>
+        <div class="editor-section">
+            <label>Размер шрифта (px)</label>
+            <input type="number" id="listSize" value="14" min="8" max="36">
+        </div>
+        <div class="editor-section">
+            <label>Цвет текста</label>
+            <input type="color" id="listColor" value="#334155">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveListBtn">Применить</button>
+            <button class="btn-cancel" id="cancelListBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Таблица -->
+    <div id="template-table-editor">
+        <div class="editor-section">
+            <label>Стиль таблицы</label>
+            <select id="tableStyle">
+                <option value="default">Обычная</option>
+                <option value="striped">Полосатая</option>
+            </select>
+        </div>
+        <div class="editor-section">
+            <label>Редактор таблицы</label>
+            <div class="data-table-editor" id="tableEditor">
+                <!-- Динамически заполняется -->
+            </div>
+            <div class="data-table-controls">
+                <button class="data-table-btn" onclick="addTableRowEditor()"><i class="fas fa-plus"></i> Строку</button>
+                <button class="data-table-btn" onclick="addTableColEditor()"><i class="fas fa-plus"></i> Столбец</button>
+            </div>
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveTableBtn">Применить</button>
+            <button class="btn-cancel" id="cancelTableBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Диаграмма -->
+    <div id="template-chart-editor">
+        <div class="editor-section">
+            <label>Тип диаграммы</label>
+            <select id="chartType" onchange="toggleChartColors()">
+                <option value="bar">Столбчатая</option>
+                <option value="line">Линейная</option>
+                <option value="pie">Круговая</option>
+                <option value="doughnut">Кольцевая</option>
+            </select>
+        </div>
+        <div class="editor-section">
+            <label>Название</label>
+            <input type="text" id="chartTitle" placeholder="Название диаграммы">
+        </div>
+        <div class="editor-section">
+            <label>Метки (через запятую)</label>
+            <input type="text" id="chartLabels" value="Янв, Фев, Мар, Апр">
+        </div>
+        <div class="editor-section">
+            <label>Данные (через запятую)</label>
+            <input type="text" id="chartData" value="10, 20, 15, 25">
+        </div>
+        <div class="editor-section">
+            <label>Цвета</label>
+            <div id="chartColorsContainer" class="multi-color-picker"></div>
+            <button class="add-color-btn" onclick="addChartColor()"><i class="fas fa-plus"></i> Добавить цвет</button>
+        </div>
+        <div class="editor-section">
+            <label>Подписи данных</label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="showDataLabels">
+                Показывать значения
+            </label>
+        </div>
+        <div class="editor-section" id="dataLabelsColorSection">
+            <label>Цвет подписей</label>
+            <input type="color" id="dataLabelsColor" value="#334155">
+        </div>
+        <div class="editor-section">
+            <label>Позиция подписей</label>
+            <select id="dataLabelsPosition">
+                <option value="top">Сверху</option>
+                <option value="center">Центр</option>
+                <option value="bottom">Снизу</option>
+            </select>
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveChartBtn">Применить</button>
+            <button class="btn-cancel" id="cancelChartBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Индикатор (Gauge) -->
+    <div id="template-gauge-editor">
+        <div class="editor-section">
+            <label>Значение</label>
+            <input type="number" id="gaugeValue" value="75" min="0" max="100">
+        </div>
+        <div class="editor-section">
+            <label>Подпись</label>
+            <input type="text" id="gaugeLabel" value="Прогресс">
+        </div>
+        <div class="editor-section">
+            <label>Цвет</label>
+            <input type="color" id="gaugeColor" value="#60a5fa">
+        </div>
+        <div class="editor-section">
+            <label>Максимальное значение</label>
+            <input type="number" id="gaugeMax" value="100" min="1">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveGaugeBtn">Применить</button>
+            <button class="btn-cancel" id="cancelGaugeBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Прогресс-бар -->
+    <div id="template-progress-editor">
+        <div class="editor-section">
+            <label>Данные (метка:значение через запятую)</label>
+            <textarea id="progressData" rows="5">Задача 1:45
+Задача 2:80
+Задача 3:30</textarea>
+        </div>
+        <div class="editor-section">
+            <label>Цвет</label>
+            <input type="color" id="progressColor" value="#60a5fa">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveProgressBtn">Применить</button>
+            <button class="btn-cancel" id="cancelProgressBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Спарклайн -->
+    <div id="template-sparkline-editor">
+        <div class="editor-section">
+            <label>Данные (через запятую)</label>
+            <input type="text" id="sparklineData" value="5, 8, 12, 7, 15, 10, 9">
+        </div>
+        <div class="editor-section">
+            <label>Подписи (через запятую, опционально)</label>
+            <input type="text" id="sparklineLabels" value="Пн, Вт, Ср, Чт, Пт, Сб, Вс">
+        </div>
+        <div class="editor-section">
+            <label>Цвет линии</label>
+            <input type="color" id="sparklineColor" value="#60a5fa">
+        </div>
+        <div class="editor-section">
+            <label>Показывать область</label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="sparklineArea" checked>
+                Заливка под линией
+            </label>
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveSparklineBtn">Применить</button>
+            <button class="btn-cancel" id="cancelSparklineBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Срез -->
+    <div id="template-slicer-editor">
+        <div class="editor-section">
+            <label>Название среза</label>
+            <input type="text" id="slicerName" value="Фильтр">
+        </div>
+        <div class="editor-section">
+            <label>Значения (по одному в строке)</label>
+            <textarea id="slicerValues" rows="5">Все
+Январь
+Февраль
+Март
+Апрель</textarea>
+        </div>
+        <div class="editor-section">
+            <label>Подключенные диаграммы</label>
+            <div id="slicerConnections" class="slicer-connections">
+                <!-- Динамически заполняется -->
+            </div>
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveSlicerBtn">Применить</button>
+            <button class="btn-cancel" id="cancelSlicerBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Матрица -->
+    <div id="template-matrix-editor">
+        <div class="editor-section">
+            <label>Количество строк</label>
+            <input type="number" id="matrixRows" value="3" min="1" max="6">
+        </div>
+        <div class="editor-section">
+            <label>Количество столбцов</label>
+            <input type="number" id="matrixCols" value="3" min="1" max="6">
+        </div>
+        <div class="editor-section">
+            <label>Данные матрицы</label>
+            <div id="matrixEditor" class="data-table-editor">
+                <!-- Динамически заполняется -->
+            </div>
+            <div class="data-table-controls">
+                <button class="data-table-btn" onclick="addMatrixRow()"><i class="fas fa-plus"></i> Строку</button>
+                <button class="data-table-btn" onclick="addMatrixCol()"><i class="fas fa-plus"></i> Столбец</button>
+            </div>
+        </div>
+        <div class="editor-section">
+            <label>Операции</label>
+            <select id="matrixOperation">
+                <option value="none">Нет</option>
+                <option value="transpose">Транспонировать</option>
+                <option value="determinant">Определитель</option>
+                <option value="inverse">Обратная матрица</option>
+                <option value="multiply">Умножить на число</option>
+            </select>
+        </div>
+        <div class="editor-section" id="matrixMultiplySection" style="display: none;">
+            <label>Множитель</label>
+            <input type="number" id="matrixMultiplier" value="2" step="0.1">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveMatrixBtn">Применить</button>
+            <button class="btn-cancel" id="cancelMatrixBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Формула -->
+    <div id="template-formula-editor">
+        <div class="editor-section">
+            <label>Формула</label>
+            <input type="text" id="formulaExpression" value="y = ax² + bx + c" placeholder="Введите формулу">
+        </div>
+        <div class="editor-section">
+            <label>Переменные</label>
+            <div id="formulaVariables">
+                <div class="formula-variable">
+                    <input type="text" value="a = 2" placeholder="a = 2">
+                </div>
+                <div class="formula-variable">
+                    <input type="text" value="b = 3" placeholder="b = 3">
+                </div>
+                <div class="formula-variable">
+                    <input type="text" value="c = 1" placeholder="c = 1">
+                </div>
+                <div class="formula-variable">
+                    <input type="text" value="x = 5" placeholder="x = 5">
+                </div>
+            </div>
+            <button class="add-color-btn" onclick="addFormulaVariable()"><i class="fas fa-plus"></i> Добавить переменную</button>
+        </div>
+        <div class="editor-section">
+            <label>Размер шрифта</label>
+            <input type="number" id="formulaSize" value="24" min="12" max="48">
+        </div>
+        <div class="editor-section">
+            <label>Цвет</label>
+            <input type="color" id="formulaColor" value="#334155">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveFormulaBtn">Применить</button>
+            <button class="btn-cancel" id="cancelFormulaBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div id="template-statistics-editor">
+        <div class="editor-section">
+            <label>Данные (числа через запятую)</label>
+            <input type="text" id="statsData" value="12, 45, 67, 23, 89, 34, 56, 78, 90, 21">
+        </div>
+        <div class="editor-section">
+            <label>Показывать</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="showMean" checked> Среднее</label>
+                <label><input type="checkbox" id="showMedian" checked> Медиана</label>
+                <label><input type="checkbox" id="showMode" checked> Мода</label>
+                <label><input type="checkbox" id="showStdDev" checked> Стд отклонение</label>
+                <label><input type="checkbox" id="showVariance" checked> Дисперсия</label>
+                <label><input type="checkbox" id="showMin" checked> Минимум</label>
+                <label><input type="checkbox" id="showMax" checked> Максимум</label>
+                <label><input type="checkbox" id="showRange" checked> Размах</label>
+                <label><input type="checkbox" id="showSum" checked> Сумма</label>
+                <label><input type="checkbox" id="showCount" checked> Количество</label>
+            </div>
+        </div>
+        <div class="editor-section">
+            <label>Цвет значений</label>
+            <input type="color" id="statsColor" value="#60a5fa">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveStatsBtn">Применить</button>
+            <button class="btn-cancel" id="cancelStatsBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Проценты -->
+    <div id="template-percentage-editor">
+        <div class="editor-section">
+            <label>Тип калькулятора</label>
+            <select id="percentageType">
+                <option value="basic">Базовый</option>
+                <option value="change">Изменение в %</option>
+                <option value="of">Сколько % от числа</option>
+                <option value="increase">Увеличение на %</option>
+                <option value="decrease">Уменьшение на %</option>
+            </select>
+        </div>
+        <div class="editor-section">
+            <label>Цвет</label>
+            <input type="color" id="percentageColor" value="#60a5fa">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="savePercentageBtn">Применить</button>
+            <button class="btn-cancel" id="cancelPercentageBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Пропорции -->
+    <div id="template-ratio-editor">
+        <div class="editor-section">
+            <label>Тип пропорции</label>
+            <select id="ratioType">
+                <option value="simple">a : b = c : d</option>
+                <option value="part">Часть от целого</option>
+                <option value="scale">Масштаб</option>
+            </select>
+        </div>
+        <div class="editor-section">
+            <label>Цвет</label>
+            <input type="color" id="ratioColor" value="#60a5fa">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveRatioBtn">Применить</button>
+            <button class="btn-cancel" id="cancelRatioBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Функция -->
+    <div id="template-function-editor">
+        <div class="editor-section">
+            <label>Функция</label>
+            <input type="text" id="functionExpression" value="sin(x)" placeholder="Например: sin(x), x^2, 2*x+1">
+        </div>
+        <div class="editor-section">
+            <label>Диапазон X</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="functionXMin" value="-5" placeholder="min">
+                <span>до</span>
+                <input type="number" id="functionXMax" value="5" placeholder="max">
+            </div>
+        </div>
+        <div class="editor-section">
+            <label>Цвет линии</label>
+            <input type="color" id="functionColor" value="#60a5fa">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveFunctionBtn">Применить</button>
+            <button class="btn-cancel" id="cancelFunctionBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Сравнение -->
+    <div id="template-comparison-editor">
+        <div class="editor-section">
+            <label>Количество элементов</label>
+            <input type="number" id="comparisonCount" value="4" min="2" max="8">
+        </div>
+        <div class="editor-section">
+            <label>Данные (название:значение1:значение2)</label>
+            <textarea id="comparisonData" rows="5">Продукт A:85:60
+Продукт B:70:75
+Продукт C:95:45
+Продукт D:50:80</textarea>
+        </div>
+        <div class="editor-section">
+            <label>Цвет первой серии</label>
+            <input type="color" id="comparisonColor1" value="#60a5fa">
+        </div>
+        <div class="editor-section">
+            <label>Цвет второй серии</label>
+            <input type="color" id="comparisonColor2" value="#f59e0b">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveComparisonBtn">Применить</button>
+            <button class="btn-cancel" id="cancelComparisonBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Временная шкала -->
+    <div id="template-timeline-editor">
+        <div class="editor-section">
+            <label>Количество точек</label>
+            <input type="number" id="timelineCount" value="5" min="2" max="10">
+        </div>
+        <div class="editor-section">
+            <label>Данные (название:значение)</label>
+            <textarea id="timelineData" rows="5">Янв:10
+Фев:25
+Мар:15
+Апр:30
+Май:20</textarea>
+        </div>
+        <div class="editor-section">
+            <label>Цвет</label>
+            <input type="color" id="timelineColor" value="#60a5fa">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveTimelineBtn">Применить</button>
+            <button class="btn-cancel" id="cancelTimelineBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Иконка -->
+    <div id="template-icon-editor">
+        <div class="editor-section">
+            <label>Выберите иконку</label>
+            <select id="iconName">
+                <option value="fa-star">⭐ Звезда</option>
+                <option value="fa-heart">❤️ Сердце</option>
+                <option value="fa-flag">🚩 Флаг</option>
+                <option value="fa-bell">🔔 Колокол</option>
+                <option value="fa-circle-check">✅ Галочка</option>
+                <option value="fa-circle-exclamation">⚠️ Внимание</option>
+                <option value="fa-circle-info">ℹ️ Инфо</option>
+                <option value="fa-chart-line">📈 График</option>
+                <option value="fa-chart-bar">📊 Диаграмма</option>
+                <option value="fa-table">🗂️ Таблица</option>
+                <option value="fa-filter">🔍 Фильтр</option>
+                <option value="fa-download">⬇️ Скачать</option>
+                <option value="fa-upload">⬆️ Загрузить</option>
+                <option value="fa-print">🖨️ Печать</option>
+                <option value="fa-share-alt">📤 Поделиться</option>
+            </select>
+        </div>
+        <div class="editor-section">
+            <label>Размер (px)</label>
+            <input type="number" id="iconSize" value="48" min="16" max="128" step="8">
+        </div>
+        <div class="editor-section">
+            <label>Цвет</label>
+            <input type="color" id="iconColor" value="#60a5fa">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveIconBtn">Применить</button>
+            <button class="btn-cancel" id="cancelIconBtn">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Бейдж -->
+    <div id="template-badge-editor">
+        <div class="editor-section">
+            <label>Текст</label>
+            <input type="text" id="badgeText" value="Новинка">
+        </div>
+        <div class="editor-section">
+            <label>Тип</label>
+            <select id="badgeType">
+                <option value="primary">Синий</option>
+                <option value="success">Зеленый</option>
+                <option value="warning">Желтый</option>
+                <option value="danger">Красный</option>
+                <option value="info">Фиолетовый</option>
+            </select>
+        </div>
+        <div class="editor-section">
+            <label>Размер шрифта (px)</label>
+            <input type="number" id="badgeSize" value="14" min="10" max="24">
+        </div>
+        <div class="editor-actions">
+            <button class="btn-save" id="saveBadgeBtn">Применить</button>
+            <button class="btn-cancel" id="cancelBadgeBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+// Регистрируем плагин для подписей данных
+Chart.register(ChartDataLabels);
+
+// Глобальные переменные
+let selectedElement = null;
+let charts = {};
+let elements = [];
+let nextId = 1;
+let draggedElement = null;
+let resizingElement = null;
+let dashboardId = null;
+let history = [];
+let historyIndex = -1;
+let animationFrame = null;
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM загружен, начинаем инициализацию...');
+    
+    // Загружаем существующие элементы, если они есть
+    {% if dashboard and dashboard.elements %}
+        console.log('Загружаем дашборд с элементами:', {{ dashboard.elements|length }});
+        
+        // Находим максимальный ID среди загруженных элементов
+        let maxId = 0;
+        
+        {% for element in dashboard.elements %}
+            try {
+                const elementData = {{ element|tojson }};
+                console.log('Загружаем элемент типа:', elementData.type, 'ID:', elementData.id);
+                
+                if (elementData.id > maxId) maxId = elementData.id;
+                
+                // Подготавливаем данные элемента с правильными значениями по умолчанию
+                const element = {
+                    id: elementData.id,
+                    type: elementData.type,
+                    chartType: elementData.chartType || null,
+                    title: elementData.title || getDefaultTitle({type: elementData.type, chartType: elementData.chartType}),
+                    content: elementData.content || getDefaultContent({type: elementData.type, chartType: elementData.chartType}),
+                    settings: elementData.settings || getDefaultSettings(),
+                    size: elementData.size || { w: 4, h: 4 },
+                    position: elementData.position || { x: 0, y: 0 },
+                    options: elementData.options || {
+                        showDataLabels: false,
+                        dataLabelsColor: '#334155',
+                        dataLabelsPosition: 'top'
+                    }
+                };
+                
+                // Убеждаемся, что у content есть все необходимые поля для конкретного типа
+                if (element.type === 'progress') {
+                    if (!element.content.items || !Array.isArray(element.content.items)) {
+                        element.content.items = [
+                            { label: "Задача 1", value: 45 },
+                            { label: "Задача 2", value: 80 },
+                            { label: "Задача 3", value: 30 }
+                        ];
+                    }
+                    if (!element.content.color) element.content.color = '#60a5fa';
+                }
+                
+                if (element.type === 'gauge') {
+                    if (element.content.value === undefined) element.content.value = 75;
+                    if (!element.content.label) element.content.label = "Прогресс";
+                    if (!element.content.color) element.content.color = "#60a5fa";
+                    if (!element.content.max) element.content.max = 100;
+                }
+                
+                if (element.type === 'sparkline') {
+                    if (!element.content.data || !Array.isArray(element.content.data)) {
+                        element.content.data = [5, 8, 12, 7, 15, 10, 9];
+                    }
+                    if (!element.content.labels) element.content.labels = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+                    if (!element.content.color) element.content.color = "#60a5fa";
+                    if (element.content.showArea === undefined) element.content.showArea = true;
+                }
+                
+                if (element.type === 'slicer') {
+                    if (!element.content.values || !Array.isArray(element.content.values)) {
+                        element.content.values = ["Все", "Январь", "Февраль", "Март", "Апрель"];
+                    }
+                    if (!element.content.activeValue) element.content.activeValue = element.content.values[0] || "Все";
+                    if (!element.content.connections) element.content.connections = [];
+                    if (!element.content.name) element.content.name = "Фильтр";
+                }
+                
+                if (element.type === 'table') {
+                    if (!element.content.headers) element.content.headers = ['Заголовок 1', 'Заголовок 2', 'Заголовок 3'];
+                    if (!element.content.rows) element.content.rows = [
+                        ['Значение 1', 'Значение 2', 'Значение 3'],
+                        ['Значение 4', 'Значение 5', 'Значение 6'],
+                        ['Значение 7', 'Значение 8', 'Значение 9']
+                    ];
+                    if (!element.content.tableStyle) element.content.tableStyle = 'default';
+                }
+                
+                if (element.type === 'list') {
+                    if (!element.content.items) element.content.items = [
+                        { text: 'Первый пункт', type: 'disc' },
+                        { text: 'Второй пункт', type: 'disc' },
+                        { text: 'Третий пункт', type: 'disc' }
+                    ];
+                    if (!element.content.listStyle) element.content.listStyle = 'disc';
+                }
+                
+                if (element.type === 'chart') {
+                    if (!element.content.labels) element.content.labels = ['Янв', 'Фев', 'Мар', 'Апр'];
+                    if (!element.content.datasets) {
+                        element.content.datasets = [{
+                            label: 'Значения',
+                            data: [10, 20, 15, 25],
+                            backgroundColor: ['#60a5fa', '#34d399', '#fbbf24', '#f87171'],
+                            borderColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                            borderWidth: 2
+                        }];
+                    }
+                }
+                
+                if (element.type === 'matrix') {
+                    if (!element.content.rows) element.content.rows = 3;
+                    if (!element.content.cols) element.content.cols = 3;
+                    if (!element.content.data) {
+                        element.content.data = [
+                            [1, 2, 3],
+                            [4, 5, 6],
+                            [7, 8, 9]
+                        ];
+                    }
+                }
+                
+                if (element.type === 'formula') {
+                    if (!element.content.expression) element.content.expression = "y = ax² + bx + c";
+                    if (!element.content.variables) {
+                        element.content.variables = [
+                            "a = 2",
+                            "b = 3", 
+                            "c = 1",
+                            "x = 5"
+                        ];
+                    }
+                    if (!element.content.size) element.content.size = 24;
+                    if (!element.content.color) element.content.color = '#334155';
+                }
+                
+                if (element.type === 'statistics') {
+                    if (!element.content.data) element.content.data = "12, 45, 67, 23, 89, 34, 56, 78, 90, 21";
+                    if (!element.content.stats) {
+                        element.content.stats = {
+                            mean: true,
+                            median: true,
+                            mode: true,
+                            stdDev: true,
+                            variance: true,
+                            min: true,
+                            max: true,
+                            range: true,
+                            sum: true,
+                            count: true
+                        };
+                    }
+                    if (!element.content.color) element.content.color = '#60a5fa';
+                }
+                
+                if (element.type === 'percentage') {
+                    if (!element.content.type) element.content.type = 'basic';
+                    if (!element.content.color) element.content.color = '#60a5fa';
+                }
+                
+                if (element.type === 'ratio') {
+                    if (!element.content.type) element.content.type = 'simple';
+                    if (!element.content.color) element.content.color = '#60a5fa';
+                }
+                
+                if (element.type === 'function') {
+                    if (!element.content.expression) element.content.expression = "sin(x)";
+                    if (!element.content.xMin) element.content.xMin = -5;
+                    if (!element.content.xMax) element.content.xMax = 5;
+                    if (!element.content.color) element.content.color = '#60a5fa';
+                }
+                
+                if (element.type === 'comparison') {
+                    if (!element.content.items) {
+                        element.content.items = [
+                            { label: 'Продукт A', value1: 85, value2: 60 },
+                            { label: 'Продукт B', value1: 70, value2: 75 },
+                            { label: 'Продукт C', value1: 95, value2: 45 },
+                            { label: 'Продукт D', value1: 50, value2: 80 }
+                        ];
+                    }
+                    if (!element.content.color1) element.content.color1 = '#60a5fa';
+                    if (!element.content.color2) element.content.color2 = '#f59e0b';
+                }
+                
+                if (element.type === 'timeline') {
+                    if (!element.content.items) {
+                        element.content.items = [
+                            { label: 'Янв', value: 10 },
+                            { label: 'Фев', value: 25 },
+                            { label: 'Мар', value: 15 },
+                            { label: 'Апр', value: 30 },
+                            { label: 'Май', value: 20 }
+                        ];
+                    }
+                    if (!element.content.color) element.content.color = '#60a5fa';
+                }
+                
+                if (element.type === 'icon') {
+                    if (!element.content.name) element.content.name = 'fa-star';
+                    if (!element.content.size) element.content.size = 48;
+                    if (!element.content.color) element.content.color = '#60a5fa';
+                }
+                
+                if (element.type === 'badge') {
+                    if (!element.content.text) element.content.text = 'Новинка';
+                    if (!element.content.type) element.content.type = 'primary';
+                    if (!element.content.size) element.content.size = 14;
+                }
+                
+                elements.push(element);
+                console.log('Элемент добавлен:', element.type, element.id);
+                
+            } catch(e) {
+                console.error('Ошибка загрузки элемента:', e);
+            }
+        {% endfor %}
+        
+        nextId = maxId + 1;
+        console.log('Загружено элементов:', elements.length);
+        
+        // Рендерим все элементы
+        elements.forEach(element => {
+            renderElement(element);
+        });
+        
+        // Устанавливаем название дашборда
+        document.getElementById('dashboardTitle').value = '{{ dashboard.title }}';
+        if (document.getElementById('dashboardDescription')) {
+            document.getElementById('dashboardDescription').value = '{{ dashboard.description or '' }}';
+        }
+        
+        saveToHistory();
+        console.log('Инициализация завершена');
+        
+    {% else %}
+        console.log('Нет данных для загрузки, создаем новый дашборд');
+    {% endif %}
+    
+    setupDragAndDrop();
+    setupElementDragging();
+    setupResizeHandles();
+    initEventListeners();
+    updateHistoryButtons();
+});
+
+function setupDragAndDrop() {
+    // Drag and drop из панели инструментов
+    document.querySelectorAll('.tool-item').forEach(item => {
+        item.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', JSON.stringify({
+                type: item.dataset.type,
+                chartType: item.dataset.chartType
+            }));
+            item.classList.add('dragging');
+        });
+        
+        item.addEventListener('dragend', e => {
+            item.classList.remove('dragging');
+        });
+    });
+
+    document.getElementById('dashboardGrid').addEventListener('dragover', e => {
+        e.preventDefault();
+    });
+
+    document.getElementById('dashboardGrid').addEventListener('drop', e => {
+        e.preventDefault();
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        addElement(data);
+    });
+}
+
+function setupElementDragging() {
+    let isDragging = false;
+    let startX, startY;
+    let elementId;
+    let dragElement;
+
+    document.getElementById('dashboardGrid').addEventListener('mousedown', function(e) {
+        const header = e.target.closest('.grid-item-header');
+        if (!header) return;
+        
+        const gridItem = header.closest('.grid-item');
+        if (!gridItem) return;
+        
+        e.preventDefault();
+        
+        isDragging = true;
+        elementId = parseInt(gridItem.dataset.id);
+        dragElement = gridItem;
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        
+        dragElement.classList.add('dragging');
+        
+        function onMouseMove(e) {
+            if (!isDragging) return;
+            
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            
+            animationFrame = requestAnimationFrame(() => {
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                dragElement.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            });
+        }
+        
+        function onMouseUp(e) {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            dragElement.classList.remove('dragging');
+            dragElement.style.transform = '';
+            
+            // Вычисляем новую позицию в сетке
+            const gridRect = document.getElementById('dashboardGrid').getBoundingClientRect();
+            const elementRect = dragElement.getBoundingClientRect();
+            
+            const colWidth = gridRect.width / 12;
+            const rowHeight = 80;
+            
+            const newCol = Math.floor((elementRect.left - gridRect.left) / colWidth);
+            const newRow = Math.floor((elementRect.top - gridRect.top) / rowHeight);
+            
+            const element = elements.find(el => el.id === elementId);
+            if (element) {
+                element.position = { 
+                    x: Math.max(0, Math.min(11 - element.size.w + 1, Math.round(newCol))), 
+                    y: Math.max(0, Math.round(newRow)) 
+                };
+                
+                dragElement.style.gridColumn = `${element.position.x + 1} / span ${element.size.w}`;
+                dragElement.style.gridRow = `${element.position.y + 1} / span ${element.size.h}`;
+                
+                saveToHistory();
+            }
+            
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+        }
+        
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+}
+
+function setupResizeHandles() {
+    let isResizing = false;
+    let startX, startY;
+    let startWidth, startHeight;
+    let elementId;
+    let resizeElement;
+    let resizeDirection = null;
+
+    document.getElementById('dashboardGrid').addEventListener('mousedown', function(e) {
+        const handle = e.target.closest('.resize-handle');
+        if (!handle) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const gridItem = handle.closest('.grid-item');
+        if (!gridItem) return;
+        
+        isResizing = true;
+        elementId = parseInt(gridItem.dataset.id);
+        resizeElement = gridItem;
+        
+        // Определяем направление изменения размера
+        if (handle.classList.contains('right')) {
+            resizeDirection = 'right';
+        } else if (handle.classList.contains('bottom')) {
+            resizeDirection = 'bottom';
+        } else if (handle.classList.contains('corner')) {
+            resizeDirection = 'corner';
+        }
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        
+        const element = elements.find(el => el.id === elementId);
+        startWidth = element.size.w;
+        startHeight = element.size.h;
+        
+        resizeElement.classList.add('resizing');
+        
+        function onResizeMouseMove(e) {
+            if (!isResizing || !resizeDirection) return;
+            
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            
+            animationFrame = requestAnimationFrame(() => {
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                const gridRect = document.getElementById('dashboardGrid').getBoundingClientRect();
+                const colWidth = gridRect.width / 12;
+                const rowHeight = 80;
+                
+                const deltaCols = Math.round(deltaX / colWidth);
+                const deltaRows = Math.round(deltaY / rowHeight);
+                
+                const element = elements.find(el => el.id === elementId);
+                if (element) {
+                    if (resizeDirection === 'right' || resizeDirection === 'corner') {
+                        const newWidth = Math.max(2, Math.min(12 - element.position.x, startWidth + deltaCols));
+                        element.size.w = newWidth;
+                    }
+                    
+                    if (resizeDirection === 'bottom' || resizeDirection === 'corner') {
+                        const newHeight = Math.max(2, Math.min(10, startHeight + deltaRows));
+                        element.size.h = newHeight;
+                    }
+                    
+                    resizeElement.style.gridColumn = `${element.position.x + 1} / span ${element.size.w}`;
+                    resizeElement.style.gridRow = `${element.position.y + 1} / span ${element.size.h}`;
+                    
+                    // Обновляем индикатор размера
+                    const sizeIndicator = resizeElement.querySelector('.size-indicator');
+                    if (sizeIndicator) {
+                        sizeIndicator.textContent = `${element.size.w} x ${element.size.h}`;
+                    }
+                    
+                    // Обновляем график если нужно
+                    if (element.type === 'chart' && charts[elementId]) {
+                        charts[elementId].resize();
+                    }
+                }
+            });
+        }
+        
+        function onResizeMouseUp() {
+            if (!isResizing) return;
+            
+            isResizing = false;
+            resizeDirection = null;
+            resizeElement.classList.remove('resizing');
+            
+            document.removeEventListener('mousemove', onResizeMouseMove);
+            document.removeEventListener('mouseup', onResizeMouseUp);
+            
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            
+            saveToHistory();
+        }
+        
+        document.addEventListener('mousemove', onResizeMouseMove);
+        document.addEventListener('mouseup', onResizeMouseUp);
+    });
+}
+
+function addElement(data) {
+    const element = {
+        id: nextId++,
+        type: data.type,
+        chartType: data.chartType || null,
+        title: getDefaultTitle(data),
+        content: getDefaultContent(data),
+        settings: getDefaultSettings(),
+        size: { w: 4, h: 4 },
+        position: { x: 0, y: 0 },
+        options: {
+            showDataLabels: false,
+            dataLabelsColor: '#334155',
+            dataLabelsPosition: 'top'
+        },
+        connections: []
+    };
+    
+    elements.push(element);
+    renderElement(element);
+    saveToHistory();
+    selectElement(element.id);
+}
+
+function getDefaultTitle(data) {
+    switch (data.type) {
+        case 'chart':
+            if (data.chartType === 'bar') return 'Столбчатая диаграмма';
+            if (data.chartType === 'line') return 'Линейная диаграмма';
+            if (data.chartType === 'pie') return 'Круговая диаграмма';
+            if (data.chartType === 'doughnut') return 'Кольцевая диаграмма';
+            return 'Диаграмма';
+        case 'text': return 'Текстовый блок';
+        case 'list': return 'Список';
+        case 'table': return 'Таблица';
+        case 'gauge': return 'Индикатор';
+        case 'progress': return 'Прогресс-бар';
+        case 'sparkline': return 'Спарклайн';
+        case 'slicer': return 'Срез';
+        case 'matrix': return 'Матрица';
+        case 'formula': return 'Формула';
+        case 'statistics': return 'Статистика';
+        case 'percentage': return 'Проценты';
+        case 'ratio': return 'Пропорции';
+        case 'function': return 'Функция';
+        case 'comparison': return 'Сравнение';
+        case 'timeline': return 'Временная шкала';
+        case 'icon': return 'Иконка';
+        case 'badge': return 'Бейдж';
+        default: return 'Новый элемент';
+    }
+}
+
+function getDefaultContent(data) {
+    switch (data.type) {
+        case 'chart':
+            return {
+                labels: ['Янв', 'Фев', 'Мар', 'Апр'],
+                datasets: [{
+                    label: 'Значения',
+                    data: [10, 20, 15, 25],
+                    backgroundColor: ['#60a5fa', '#34d399', '#fbbf24', '#f87171'],
+                    borderColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 2
+                }]
+            };
+        case 'text':
+            return { text: 'Введите ваш текст здесь. Вы можете редактировать его в панели свойств.' };
+        case 'list':
+            return {
+                items: [
+                    { text: 'Первый пункт', type: 'disc' },
+                    { text: 'Второй пункт', type: 'disc' },
+                    { text: 'Третий пункт', type: 'disc' }
+                ],
+                listStyle: 'disc'
+            };
+        case 'table':
+            return {
+                headers: ['Заголовок 1', 'Заголовок 2', 'Заголовок 3'],
+                rows: [
+                    ['Значение 1', 'Значение 2', 'Значение 3'],
+                    ['Значение 4', 'Значение 5', 'Значение 6'],
+                    ['Значение 7', 'Значение 8', 'Значение 9']
+                ],
+                tableStyle: 'default'
+            };
+        case 'gauge':
+            return {
+                value: 75,
+                label: 'Прогресс',
+                color: '#60a5fa',
+                max: 100
+            };
+        case 'progress':
+            return {
+                items: [
+                    { label: 'Задача 1', value: 45 },
+                    { label: 'Задача 2', value: 80 },
+                    { label: 'Задача 3', value: 30 }
+                ],
+                color: '#60a5fa'
+            };
+        case 'sparkline':
+            return {
+                data: [5, 8, 12, 7, 15, 10, 9],
+                labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                color: '#60a5fa',
+                showArea: true
+            };
+        case 'slicer':
+            return {
+                name: 'Фильтр',
+                values: ['Все', 'Январь', 'Февраль', 'Март', 'Апрель'],
+                activeValue: 'Все',
+                connections: []
+            };
+        case 'matrix':
+            return {
+                rows: 3,
+                cols: 3,
+                data: [
+                    [1, 2, 3],
+                    [4, 5, 6],
+                    [7, 8, 9]
+                ]
+            };
+        case 'formula':
+            return {
+                expression: "y = ax² + bx + c",
+                variables: ["a = 2", "b = 3", "c = 1", "x = 5"],
+                size: 24,
+                color: "#334155"
+            };
+        case 'statistics':
+            return {
+                data: "12, 45, 67, 23, 89, 34, 56, 78, 90, 21",
+                stats: {
+                    mean: true,
+                    median: true,
+                    mode: true,
+                    stdDev: true,
+                    variance: true,
+                    min: true,
+                    max: true,
+                    range: true,
+                    sum: true,
+                    count: true
+                },
+                color: "#60a5fa"
+            };
+        case 'percentage':
+            return {
+                type: "basic",
+                color: "#60a5fa"
+            };
+        case 'ratio':
+            return {
+                type: "simple",
+                color: "#60a5fa"
+            };
+        case 'function':
+            return {
+                expression: "sin(x)",
+                xMin: -5,
+                xMax: 5,
+                color: "#60a5fa"
+            };
+        case 'comparison':
+            return {
+                items: [
+                    { label: 'Продукт A', value1: 85, value2: 60 },
+                    { label: 'Продукт B', value1: 70, value2: 75 },
+                    { label: 'Продукт C', value1: 95, value2: 45 },
+                    { label: 'Продукт D', value1: 50, value2: 80 }
+                ],
+                color1: "#60a5fa",
+                color2: "#f59e0b"
+            };
+        case 'timeline':
+            return {
+                items: [
+                    { label: 'Янв', value: 10 },
+                    { label: 'Фев', value: 25 },
+                    { label: 'Мар', value: 15 },
+                    { label: 'Апр', value: 30 },
+                    { label: 'Май', value: 20 }
+                ],
+                color: "#60a5fa"
+            };
+        case 'icon':
+            return {
+                name: "fa-star",
+                size: 48,
+                color: "#60a5fa"
+            };
+        case 'badge':
+            return {
+                text: "Новинка",
+                type: "primary",
+                size: 14
+            };
+        default:
+            return {};
+    }
+}
+
+function getDefaultSettings() {
+    return {
+        textSize: '14px',
+        textColor: '#334155',
+        backgroundColor: '#ffffff',
+        borderColor: '#e2e8f0'
+    };
+}
+
+function renderElement(element) {
+    const grid = document.getElementById('dashboardGrid');
+    
+    if (document.querySelector(`[data-id="${element.id}"]`)) {
+        console.log('Элемент уже существует, пропускаем:', element.id);
+        return;
+    }
+    
+    console.log('Рендерим элемент:', element.type, element.id);
+    
+    const elDiv = document.createElement('div');
+    elDiv.className = 'grid-item';
+    elDiv.dataset.id = element.id;
+    
+    const startCol = element.position?.x || 0;
+    const startRow = element.position?.y || 0;
+    elDiv.style.gridColumn = `${startCol + 1} / span ${element.size.w}`;
+    elDiv.style.gridRow = `${startRow + 1} / span ${element.size.h}`;
+    
+    const icon = getIcon(element.type, element.chartType);
+    
+    elDiv.innerHTML = `
+        <div class="grid-item-header">
+            <i class="fas fa-grip-vertical drag-handle"></i>
+            <div class="widget-title">
+                <i class="${icon}"></i>
+                <span>${element.title}</span>
+            </div>
+            <div class="widget-controls">
+                <button class="widget-control" onclick="selectElement(${element.id})" title="Редактировать">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="widget-control delete" onclick="deleteElement(${element.id})" title="Удалить">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="resize-handle right" title="Изменить ширину">
+            <i class="fas fa-arrows-alt-h"></i>
+        </div>
+        <div class="resize-handle bottom" title="Изменить высоту">
+            <i class="fas fa-arrows-alt-v"></i>
+        </div>
+        <div class="resize-handle corner" title="Изменить размер">
+            <i class="fas fa-expand-alt"></i>
+        </div>
+        <div class="size-indicator">${element.size.w} x ${element.size.h}</div>
+        <div class="widget-content" id="content-${element.id}">
+            ${renderElementContent(element)}
+        </div>
+    `;
+    
+    grid.appendChild(elDiv);
+    
+    if (element.type === 'chart') {
+        setTimeout(() => initChart(element.id, element), 100);
+    }
+}
+
+function getIcon(type, chartType) {
+    if (type === 'chart') {
+        if (chartType === 'bar') return 'fas fa-chart-bar';
+        if (chartType === 'line') return 'fas fa-chart-line';
+        return 'fas fa-chart-pie';
+    }
+    if (type === 'text') return 'fas fa-font';
+    if (type === 'list') return 'fas fa-list';
+    if (type === 'table') return 'fas fa-table';
+    if (type === 'gauge') return 'fas fa-tachometer-alt';
+    if (type === 'progress') return 'fas fa-tasks';
+    if (type === 'sparkline') return 'fas fa-wave-square';
+    if (type === 'slicer') return 'fas fa-filter';
+    if (type === 'matrix') return 'fas fa-border-all';
+    if (type === 'formula') return 'fas fa-square-root-alt';
+    if (type === 'statistics') return 'fas fa-chart-bar';
+    if (type === 'percentage') return 'fas fa-percent';
+    if (type === 'ratio') return 'fas fa-divide';
+    if (type === 'function') return 'fas fa-wave-square';
+    if (type === 'comparison') return 'fas fa-chart-simple';
+    if (type === 'timeline') return 'fas fa-timeline';
+    if (type === 'icon') return 'fas fa-icons';
+    if (type === 'badge') return 'fas fa-tag';
+    return 'fas fa-cube';
+}
+
+function renderElementContent(element) {
+    switch (element.type) {
+        case 'text':
+            return `
+                <div class="text-component" style="font-size: ${element.settings.textSize}; color: ${element.settings.textColor}; text-align: ${element.settings.textAlign || 'left'};">
+                    ${(element.content.text || '').replace(/\n/g, '<br>')}
+                </div>
+            `;
+            
+        case 'list':
+            const listStyle = element.content.listStyle || 'disc';
+            const items = element.content.items || [];
+            
+            // Определяем тег списка
+            const listTag = listStyle.startsWith('decimal') || 
+                           listStyle.startsWith('lower') || 
+                           listStyle.startsWith('upper') ? 'ol' : 'ul';
+            
+            return `
+                <div class="list-component">
+                    <${listTag} style="list-style-type: ${listStyle}; font-size: ${element.settings.textSize}; color: ${element.settings.textColor};">
+                        ${items.map(item => 
+                            `<li>${item.text || ''}</li>`
+                        ).join('')}
+                    </${listTag}>
+                </div>
+            `;
+            
+        case 'table':
+            const tableClass = element.content.tableStyle === 'striped' ? 'table-striped' : '';
+            return `
+                <div class="table-component ${tableClass}" id="table-${element.id}">
+                    <div class="table-actions">
+                        <button class="table-btn" onclick="addTableRow(${element.id})"><i class="fas fa-plus"></i> Строку</button>
+                        <button class="table-btn" onclick="addTableColumn(${element.id})"><i class="fas fa-plus"></i> Столбец</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                ${(element.content.headers || []).map((h, idx) => `
+                                    <th>
+                                        ${h || ''}
+                                        <span class="remove-col" onclick="removeTableColumn(${element.id}, ${idx})" title="Удалить столбец">×</span>
+                                    </th>
+                                `).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(element.content.rows || []).map((row, rowIdx) => `
+                                <tr>
+                                    ${row.map((cell, colIdx) => `
+                                        <td contenteditable="true" onblur="updateTableCell(${element.id}, ${rowIdx}, ${colIdx}, this.innerText)">${cell || ''}</td>
+                                    `).join('')}
+                                    <td>
+                                        <button class="table-btn delete" onclick="removeTableRow(${element.id}, ${rowIdx})"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+        case 'gauge':
+            const percent = (element.content.value / element.content.max) * 100;
+            return `
+                <div class="gauge-component">
+                    <div class="gauge-value" style="color: ${element.content.color};">${element.content.value}</div>
+                    <div class="gauge-label">${element.content.label}</div>
+                    <div class="gauge-bar">
+                        <div class="gauge-fill" style="width: ${percent}%; background: ${element.content.color};"></div>
+                    </div>
+                </div>
+            `;
+            
+        case 'progress':
+            return `
+                <div class="progress-component">
+                    ${(element.content.items || []).map(item => `
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <span class="progress-label">${item.label}</span>
+                                <span class="progress-percent" style="color: ${element.content.color};">${item.value}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${item.value}%; background: ${element.content.color};"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+        case 'sparkline':
+            const sparkData = element.content.data || [];
+            const sparkLabels = element.content.labels || [];
+            const max = Math.max(...sparkData);
+            const min = Math.min(...sparkData);
+            const range = max - min || 1;
+            const width = 100;
+            const height = 50;
+            
+            const points = sparkData.map((val, i) => {
+                const x = (i / (sparkData.length - 1)) * width;
+                const y = height - ((val - min) / range) * height;
+                return `${x},${y}`;
+            }).join(' ');
+            
+            const areaPoints = points + ` ${width},${height} 0,${height}`;
+            
+            return `
+                <div class="sparkline-component">
+                    <svg viewBox="0 0 ${width} ${height}" class="sparkline-svg">
+                        ${element.content.showArea ? 
+                            `<polygon points="${areaPoints}" class="sparkline-area" fill="${element.content.color}20" />` : ''
+                        }
+                        <polyline points="${points}" class="sparkline-line" stroke="${element.content.color}" />
+                    </svg>
+                    <div class="sparkline-values">
+                        ${sparkLabels.map((label, i) => 
+                            `<span>${label}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+        case 'slicer':
+            return `
+                <div class="slicer-component">
+                    <div class="slicer-buttons">
+                        ${(element.content.values || []).map(val => 
+                            `<button class="slicer-btn ${val === element.content.activeValue ? 'active' : ''}" 
+                                     onclick="applySlicer(${element.id}, '${val}')">${val}</button>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+        case 'matrix':
+            const matrixData = element.content.data || [];
+            return `
+                <div class="matrix-component">
+                    <div class="matrix-brackets">
+                        <span class="matrix-left-bracket">[</span>
+                        <table class="matrix-table">
+                            ${matrixData.map((row, i) => `
+                                <tr>
+                                    ${row.map((cell, j) => `
+                                        <td>
+                                            <input type="text" value="${cell}" 
+                                                   onchange="updateMatrixCell(${element.id}, ${i}, ${j}, this.value)">
+                                        </td>
+                                    `).join('')}
+                                </tr>
+                            `).join('')}
+                        </table>
+                        <span class="matrix-right-bracket">]</span>
+                    </div>
+                    <div class="matrix-controls">
+                        <button class="matrix-btn" onclick="addMatrixRow(${element.id})"><i class="fas fa-plus"></i> Строку</button>
+                        <button class="matrix-btn" onclick="addMatrixCol(${element.id})"><i class="fas fa-plus"></i> Столбец</button>
+                    </div>
+                </div>
+            `;
+            
+        case 'formula':
+            const vars = element.content.variables || [];
+            const varHtml = vars.map(v => `<span class="variable-item">${v}</span>`).join('');
+            return `
+                <div class="formula-component">
+                    <div class="formula-display" style="font-size: ${element.content.size}px; color: ${element.content.color};">
+                        ${element.content.expression}
+                    </div>
+                    <div class="formula-variables">
+                        ${varHtml}
+                    </div>
+                </div>
+            `;
+            
+        case 'statistics':
+            const data = (element.content.data || "").split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+            const stats = element.content.stats || {};
+            const statsColor = element.content.color || '#60a5fa';
+            
+            let statsHtml = '<div class="statistics-component">';
+            statsHtml += `<div class="stats-input">${data.join(', ')}</div>`;
+            statsHtml += '<div class="stats-results">';
+            
+            if (stats.mean) {
+                const mean = data.reduce((a, b) => a + b, 0) / data.length;
+                statsHtml += `<div class="stat-item"><div class="stat-label">Среднее</div><div class="stat-value" style="color: ${statsColor};">${mean.toFixed(2)}</div></div>`;
+            }
+            
+            if (stats.median) {
+                const sorted = [...data].sort((a, b) => a - b);
+                const median = sorted.length % 2 === 0 
+                    ? (sorted[sorted.length/2 - 1] + sorted[sorted.length/2]) / 2 
+                    : sorted[Math.floor(sorted.length/2)];
+                statsHtml += `<div class="stat-item"><div class="stat-label">Медиана</div><div class="stat-value" style="color: ${statsColor};">${median.toFixed(2)}</div></div>`;
+            }
+            
+            if (stats.mode) {
+                const freq = {};
+                let maxFreq = 0;
+                let modes = [];
+                data.forEach(n => {
+                    freq[n] = (freq[n] || 0) + 1;
+                    if (freq[n] > maxFreq) maxFreq = freq[n];
+                });
+                Object.keys(freq).forEach(n => {
+                    if (freq[n] === maxFreq) modes.push(n);
+                });
+                statsHtml += `<div class="stat-item"><div class="stat-label">Мода</div><div class="stat-value" style="color: ${statsColor};">${modes.join(', ')}</div></div>`;
+            }
+            
+            if (stats.min) {
+                const min = Math.min(...data);
+                statsHtml += `<div class="stat-item"><div class="stat-label">Минимум</div><div class="stat-value" style="color: ${statsColor};">${min}</div></div>`;
+            }
+            
+            if (stats.max) {
+                const max = Math.max(...data);
+                statsHtml += `<div class="stat-item"><div class="stat-label">Максимум</div><div class="stat-value" style="color: ${statsColor};">${max}</div></div>`;
+            }
+            
+            if (stats.range) {
+                const range = Math.max(...data) - Math.min(...data);
+                statsHtml += `<div class="stat-item"><div class="stat-label">Размах</div><div class="stat-value" style="color: ${statsColor};">${range}</div></div>`;
+            }
+            
+            if (stats.sum) {
+                const sum = data.reduce((a, b) => a + b, 0);
+                statsHtml += `<div class="stat-item"><div class="stat-label">Сумма</div><div class="stat-value" style="color: ${statsColor};">${sum}</div></div>`;
+            }
+            
+            if (stats.count) {
+                statsHtml += `<div class="stat-item"><div class="stat-label">Количество</div><div class="stat-value" style="color: ${statsColor};">${data.length}</div></div>`;
+            }
+            
+            if (stats.stdDev) {
+                const mean = data.reduce((a, b) => a + b, 0) / data.length;
+                const variance = data.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / data.length;
+                const stdDev = Math.sqrt(variance);
+                statsHtml += `<div class="stat-item"><div class="stat-label">Стд откл</div><div class="stat-value" style="color: ${statsColor};">${stdDev.toFixed(2)}</div></div>`;
+            }
+            
+            if (stats.variance) {
+                const mean = data.reduce((a, b) => a + b, 0) / data.length;
+                const variance = data.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / data.length;
+                statsHtml += `<div class="stat-item"><div class="stat-label">Дисперсия</div><div class="stat-value" style="color: ${statsColor};">${variance.toFixed(2)}</div></div>`;
+            }
+            
+            statsHtml += '</div></div>';
+            return statsHtml;
+            
+        case 'percentage':
+            const percColor = element.content.color || '#60a5fa';
+            return `
+                <div class="percentage-component">
+                    <div class="percentage-calculator">
+                        <div class="percentage-row">
+                            <span class="percentage-label">Число:</span>
+                            <input type="number" class="percentage-input" id="perc-num-${element.id}" value="100" oninput="updatePercentage(${element.id})">
+                        </div>
+                        <div class="percentage-row">
+                            <span class="percentage-label">Процент:</span>
+                            <input type="number" class="percentage-input" id="perc-perc-${element.id}" value="15" oninput="updatePercentage(${element.id})">
+                        </div>
+                        <div class="percentage-display" id="perc-result-${element.id}" style="color: ${percColor};">
+                            15
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+        case 'ratio':
+            const ratioColor = element.content.color || '#60a5fa';
+            return `
+                <div class="ratio-component">
+                    <div class="ratio-inputs">
+                        <div class="ratio-field">
+                            <input type="number" id="ratio-a-${element.id}" value="2" oninput="updateRatio(${element.id})">
+                            <label>A</label>
+                        </div>
+                        <span class="ratio-equals">:</span>
+                        <div class="ratio-field">
+                            <input type="number" id="ratio-b-${element.id}" value="3" oninput="updateRatio(${element.id})">
+                            <label>B</label>
+                        </div>
+                        <span class="ratio-equals">=</span>
+                        <div class="ratio-field">
+                            <input type="number" id="ratio-c-${element.id}" value="4" oninput="updateRatio(${element.id})">
+                            <label>C</label>
+                        </div>
+                        <span class="ratio-equals">:</span>
+                        <div class="ratio-field">
+                            <input type="number" id="ratio-d-${element.id}" value="6" oninput="updateRatio(${element.id})">
+                            <label>D</label>
+                        </div>
+                    </div>
+                    <div class="ratio-result" id="ratio-result-${element.id}" style="color: ${ratioColor};">
+                        Пропорция верна
+                    </div>
+                </div>
+            `;
+            
+        case 'function':
+            return `
+                <div class="function-plot-component">
+                    <canvas class="function-canvas" id="function-${element.id}" width="400" height="150"></canvas>
+                </div>
+            `;
+            
+        case 'comparison':
+            const compItems = element.content.items || [];
+            const maxVal = Math.max(...compItems.flatMap(item => [item.value1 || 0, item.value2 || 0]));
+            
+            return `
+                <div class="comparison-component">
+                    ${compItems.map(item => {
+                        const width1 = ((item.value1 || 0) / maxVal) * 100;
+                        const width2 = ((item.value2 || 0) / maxVal) * 100;
+                        return `
+                            <div class="comparison-item">
+                                <span class="comparison-label">${item.label}</span>
+                                <div class="comparison-bars">
+                                    <div class="comparison-bar" style="width: ${width1}%; background: ${element.content.color1};"></div>
+                                    <div class="comparison-bar secondary" style="width: ${width2}%; background: ${element.content.color2};"></div>
+                                </div>
+                                <span class="comparison-value">${item.value1}/${item.value2}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+        case 'timeline':
+            const timelineItems = element.content.items || [];
+            const maxTimeline = Math.max(...timelineItems.map(item => item.value || 0));
+            
+            return `
+                <div class="timeline-component">
+                    ${timelineItems.map(item => {
+                        const width = ((item.value || 0) / maxTimeline) * 100;
+                        return `
+                            <div class="timeline-item">
+                                <span class="timeline-label">${item.label}</span>
+                                <div class="timeline-dot" style="background: ${element.content.color};"></div>
+                                <div class="timeline-line" style="width: ${width}%; background: linear-gradient(90deg, ${element.content.color}, #818cf8);"></div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+        case 'icon':
+            return `
+                <div class="icon-component">
+                    <i class="fas ${element.content.name}" style="font-size: ${element.content.size}px; color: ${element.content.color};"></i>
+                </div>
+            `;
+            
+        case 'badge':
+            return `
+                <div class="badge-component">
+                    <span class="badge ${element.content.type}" style="font-size: ${element.content.size}px;">${element.content.text}</span>
+                </div>
+            `;
+            
+        case 'chart':
+            return `
+                <div class="chart-container">
+                    <canvas id="chart-${element.id}"></canvas>
+                </div>
+            `;
+            
+        default:
+            return '';
+    }
+}
+
+function initChart(elementId, element) {
+    const canvas = document.getElementById(`chart-${elementId}`);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (charts[elementId]) {
+        charts[elementId].destroy();
+    }
+    
+    try {
+        const data = element.content || { labels: [], datasets: [] };
+        const isPieOrDoughnut = element.chartType === 'pie' || element.chartType === 'doughnut';
+        
+        // Проверяем, есть ли активный фильтр от среза
+        let filteredData = JSON.parse(JSON.stringify(data));
+        const activeFilter = getActiveFilterForChart(elementId);
+        
+        if (activeFilter && activeFilter !== 'Все') {
+            const index = data.labels.indexOf(activeFilter);
+            if (index !== -1) {
+                filteredData = {
+                    labels: [data.labels[index]],
+                    datasets: [{
+                        ...data.datasets[0],
+                        data: [data.datasets[0].data[index]],
+                        backgroundColor: Array.isArray(data.datasets[0].backgroundColor) 
+                            ? [data.datasets[0].backgroundColor[index]] 
+                            : [data.datasets[0].backgroundColor],
+                        borderColor: Array.isArray(data.datasets[0].borderColor)
+                            ? [data.datasets[0].borderColor[index]]
+                            : [data.datasets[0].borderColor]
+                    }]
+                };
+            }
+        }
+        
+        const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: { size: 11 }
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleFont: { size: 12 },
+                    bodyFont: { size: 11 }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 25
+                }
+            }
+        };
+        
+        // Добавляем подписи данных, если включено
+        if (element.options?.showDataLabels) {
+            options.plugins.datalabels = {
+                display: true,
+                color: element.options?.dataLabelsColor || '#334155',
+                anchor: element.options?.dataLabelsPosition || 'end',
+                align: element.options?.dataLabelsPosition === 'center' ? 'center' : 
+                       element.options?.dataLabelsPosition === 'bottom' ? 'end' : 'start',
+                offset: 8,
+                font: { size: 11, weight: '500' },
+                formatter: (value, context) => {
+                    if (isPieOrDoughnut) {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        return ((value / total) * 100).toFixed(1) + '%';
+                    }
+                    return value;
+                }
+            };
+        }
+        
+        // Подготовка данных для круговых диаграмм
+        if (isPieOrDoughnut && filteredData.datasets[0]) {
+            if (!Array.isArray(filteredData.datasets[0].backgroundColor)) {
+                filteredData.datasets[0].backgroundColor = [filteredData.datasets[0].backgroundColor];
+            }
+            if (!Array.isArray(filteredData.datasets[0].borderColor)) {
+                filteredData.datasets[0].borderColor = [filteredData.datasets[0].borderColor];
+            }
+        }
+        
+        charts[elementId] = new Chart(ctx, {
+            type: element.chartType || 'bar',
+            data: filteredData,
+            options: options
+        });
+    } catch (e) {
+        console.error('Error creating chart:', e);
+    }
+}
+
+function getActiveFilterForChart(chartId) {
+    // Ищем срез, который подключен к этой диаграмме
+    const slicers = elements.filter(el => 
+        el.type === 'slicer' && 
+        el.content.connections && 
+        el.content.connections.includes(chartId)
+    );
+    
+    // Если несколько срезов подключено, берем первый активный
+    for (const slicer of slicers) {
+        if (slicer.content.activeValue && slicer.content.activeValue !== 'Все') {
+            return slicer.content.activeValue;
+        }
+    }
+    
+    return null;
+}
+
+function applySlicer(slicerId, value) {
+    const slicer = elements.find(el => el.id === slicerId);
+    if (!slicer) return;
+    
+    slicer.content.activeValue = value;
+    
+    // Обновляем отображение кнопок
+    const container = document.getElementById(`content-${slicerId}`);
+    if (container) {
+        container.querySelectorAll('.slicer-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.innerText === value);
+        });
+    }
+    
+    // Обновляем все подключенные диаграммы
+    if (slicer.content.connections && slicer.content.connections.length > 0) {
+        slicer.content.connections.forEach(chartId => {
+            const chart = elements.find(el => el.id === chartId);
+            if (chart && chart.type === 'chart') {
+                initChart(chartId, chart);
+            }
+        });
+    }
+    
+    showNotification(`Фильтр: ${value}`, 'info');
+}
+
+function addTableRow(elementId) {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || element.type !== 'table') return;
+    
+    const colCount = element.content.headers.length;
+    const newRow = Array(colCount).fill('Новая ячейка');
+    element.content.rows.push(newRow);
+    
+    rerenderElement(elementId);
+    saveToHistory();
+}
+
+function addTableColumn(elementId) {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || element.type !== 'table') return;
+    
+    element.content.headers.push('Новый столбец');
+    element.content.rows.forEach(row => row.push('Новая ячейка'));
+    
+    rerenderElement(elementId);
+    saveToHistory();
+}
+
+function removeTableRow(elementId, rowIndex) {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || element.type !== 'table' || element.content.rows.length <= 1) return;
+    
+    element.content.rows.splice(rowIndex, 1);
+    rerenderElement(elementId);
+    saveToHistory();
+}
+
+function removeTableColumn(elementId, colIndex) {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || element.type !== 'table' || element.content.headers.length <= 1) return;
+    
+    element.content.headers.splice(colIndex, 1);
+    element.content.rows.forEach(row => row.splice(colIndex, 1));
+    
+    rerenderElement(elementId);
+    saveToHistory();
+}
+
+function updateTableCell(elementId, rowIndex, colIndex, value) {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || element.type !== 'table') return;
+    
+    element.content.rows[rowIndex][colIndex] = value;
+    saveToHistory();
+}
+
+function updateMatrixCell(elementId, row, col, value) {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || element.type !== 'matrix') return;
+    
+    if (!element.content.data[row]) element.content.data[row] = [];
+    element.content.data[row][col] = parseFloat(value) || 0;
+    saveToHistory();
+}
+
+function addMatrixRow(elementId) {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || element.type !== 'matrix') return;
+    
+    const cols = element.content.data[0]?.length || 3;
+    element.content.data.push(Array(cols).fill(0));
+    rerenderElement(elementId);
+    saveToHistory();
+}
+
+function addMatrixCol(elementId) {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || element.type !== 'matrix') return;
+    
+    element.content.data.forEach(row => row.push(0));
+    rerenderElement(elementId);
+    saveToHistory();
+}
+
+function updatePercentage(elementId) {
+    const num = parseFloat(document.getElementById(`perc-num-${elementId}`).value) || 0;
+    const perc = parseFloat(document.getElementById(`perc-perc-${elementId}`).value) || 0;
+    const result = (num * perc) / 100;
+    document.getElementById(`perc-result-${elementId}`).textContent = result.toFixed(2);
+}
+
+function updateRatio(elementId) {
+    const a = parseFloat(document.getElementById(`ratio-a-${elementId}`).value) || 0;
+    const b = parseFloat(document.getElementById(`ratio-b-${elementId}`).value) || 0;
+    const c = parseFloat(document.getElementById(`ratio-c-${elementId}`).value) || 0;
+    const d = parseFloat(document.getElementById(`ratio-d-${elementId}`).value) || 0;
+    
+    const result = document.getElementById(`ratio-result-${elementId}`);
+    if (Math.abs(a*d - b*c) < 0.0001) {
+        result.textContent = "Пропорция верна ✓";
+        result.style.color = "#10b981";
+    } else {
+        result.textContent = "Пропорция не верна ✗";
+        result.style.color = "#ef4444";
+    }
+}
+
+function selectElement(id) {
+    selectedElement = id;
+    
+    document.querySelectorAll('.grid-item').forEach(el => {
+        el.classList.remove('selected');
+    });
+    const element = document.querySelector(`[data-id="${id}"]`);
+    if (element) {
+        element.classList.add('selected');
+    }
+    
+    showProperties(id);
+}
+
+function deleteElement(id) {
+    showConfirm('Удаление виджета', 'Вы уверены?', () => {
+        // Удаляем из массива
+        elements = elements.filter(el => el.id !== id);
+        
+        // Удаляем DOM элемент
+        const elementDiv = document.querySelector(`[data-id="${id}"]`);
+        if (elementDiv) {
+            elementDiv.remove();
+        }
+        
+        // Уничтожаем график если есть
+        if (charts[id]) {
+            charts[id].destroy();
+            delete charts[id];
+        }
+        
+        // Удаляем связи из срезов
+        elements.forEach(el => {
+            if (el.type === 'slicer' && el.content.connections) {
+                el.content.connections = el.content.connections.filter(c => c !== id);
+            }
+        });
+        
+        // Закрываем редактор если нужно
+        if (selectedElement === id) {
+            selectedElement = null;
+            closeEditor();
+        }
+        
+        saveToHistory();
+        showNotification('Виджет удалён', 'success');
+    });
+}
+
+function showProperties(id) {
+    const element = elements.find(el => el.id === id);
+    if (!element) return;
+    
+    document.getElementById('editorTitle').textContent = `Редактор: ${element.title}`;
+    
+    let templateId = '';
+    switch(element.type) {
+        case 'text': templateId = 'template-text-editor'; break;
+        case 'list': templateId = 'template-list-editor'; break;
+        case 'table': templateId = 'template-table-editor'; break;
+        case 'chart': templateId = 'template-chart-editor'; break;
+        case 'gauge': templateId = 'template-gauge-editor'; break;
+        case 'progress': templateId = 'template-progress-editor'; break;
+        case 'sparkline': templateId = 'template-sparkline-editor'; break;
+        case 'slicer': templateId = 'template-slicer-editor'; break;
+        case 'matrix': templateId = 'template-matrix-editor'; break;
+        case 'formula': templateId = 'template-formula-editor'; break;
+        case 'statistics': templateId = 'template-statistics-editor'; break;
+        case 'percentage': templateId = 'template-percentage-editor'; break;
+        case 'ratio': templateId = 'template-ratio-editor'; break;
+        case 'function': templateId = 'template-function-editor'; break;
+        case 'comparison': templateId = 'template-comparison-editor'; break;
+        case 'timeline': templateId = 'template-timeline-editor'; break;
+        case 'icon': templateId = 'template-icon-editor'; break;
+        case 'badge': templateId = 'template-badge-editor'; break;
+    }
+    
+    if (templateId) {
+        document.getElementById('editorContent').innerHTML = document.getElementById(templateId).innerHTML;
+        document.getElementById('editorPanel').classList.add('show');
+        loadWidgetData(element);
+    }
+}
+
+function loadWidgetData(element) {
+    switch(element.type) {
+        case 'text':
+            document.getElementById('textContent').value = element.content.text || '';
+            document.getElementById('textSize').value = parseInt(element.settings.textSize) || 16;
+            document.getElementById('textColor').value = element.settings.textColor || '#334155';
+            document.getElementById('textAlign').value = element.settings.textAlign || 'left';
+            break;
+            
+        case 'list':
+            const items = (element.content.items || []).map(item => item.text).join('\n');
+            document.getElementById('listItems').value = items;
+            document.getElementById('listStyle').value = element.content.listStyle || 'disc';
+            document.getElementById('listSize').value = parseInt(element.settings.textSize) || 14;
+            document.getElementById('listColor').value = element.settings.textColor || '#334155';
+            break;
+            
+        case 'table':
+            loadTableEditor(element);
+            document.getElementById('tableStyle').value = element.content.tableStyle || 'default';
+            break;
+            
+        case 'chart':
+            document.getElementById('chartType').value = element.chartType || 'bar';
+            document.getElementById('chartTitle').value = element.content.datasets?.[0]?.label || '';
+            document.getElementById('chartLabels').value = (element.content.labels || []).join(', ');
+            document.getElementById('chartData').value = (element.content.datasets?.[0]?.data || []).join(', ');
+            
+            // Загружаем цвета
+            const colors = element.content.datasets?.[0]?.backgroundColor;
+            if (Array.isArray(colors)) {
+                loadChartColors(colors);
+            } else {
+                loadChartColors([colors || '#60a5fa']);
+            }
+            
+            document.getElementById('showDataLabels').checked = element.options?.showDataLabels || false;
+            document.getElementById('dataLabelsColor').value = element.options?.dataLabelsColor || '#334155';
+            document.getElementById('dataLabelsPosition').value = element.options?.dataLabelsPosition || 'top';
+            break;
+            
+        case 'gauge':
+            document.getElementById('gaugeValue').value = element.content.value || 75;
+            document.getElementById('gaugeLabel').value = element.content.label || 'Прогресс';
+            document.getElementById('gaugeColor').value = element.content.color || '#60a5fa';
+            document.getElementById('gaugeMax').value = element.content.max || 100;
+            break;
+            
+        case 'progress':
+            const progressData = (element.content.items || []).map(item => `${item.label}:${item.value}`).join('\n');
+            document.getElementById('progressData').value = progressData;
+            document.getElementById('progressColor').value = element.content.color || '#60a5fa';
+            break;
+            
+        case 'sparkline':
+            document.getElementById('sparklineData').value = (element.content.data || []).join(', ');
+            document.getElementById('sparklineLabels').value = (element.content.labels || []).join(', ');
+            document.getElementById('sparklineColor').value = element.content.color || '#60a5fa';
+            document.getElementById('sparklineArea').checked = element.content.showArea !== false;
+            break;
+            
+        case 'slicer':
+            document.getElementById('slicerName').value = element.content.name || 'Фильтр';
+            document.getElementById('slicerValues').value = (element.content.values || []).join('\n');
+            
+            // Заполняем список доступных диаграмм
+            const connectionsDiv = document.getElementById('slicerConnections');
+            const charts = elements.filter(el => el.type === 'chart');
+            
+            if (charts.length > 0) {
+                let html = '';
+                charts.forEach(chart => {
+                    const isConnected = element.content.connections && element.content.connections.includes(chart.id);
+                    html += `
+                        <div class="slicer-connection">
+                            <input type="checkbox" id="conn-${chart.id}" ${isConnected ? 'checked' : ''} 
+                                   onchange="toggleSlicerConnection(${element.id}, ${chart.id}, this.checked)">
+                            <label for="conn-${chart.id}">${chart.title}</label>
+                        </div>
+                    `;
+                });
+                connectionsDiv.innerHTML = html;
+            } else {
+                connectionsDiv.innerHTML = '<p style="color: var(--slate-400);">Нет доступных диаграмм</p>';
+            }
+            break;
+            
+        case 'matrix':
+            loadMatrixEditor(element);
+            break;
+            
+        case 'formula':
+            document.getElementById('formulaExpression').value = element.content.expression || '';
+            const varsDiv = document.getElementById('formulaVariables');
+            varsDiv.innerHTML = '';
+            (element.content.variables || []).forEach(v => {
+                const div = document.createElement('div');
+                div.className = 'formula-variable';
+                div.innerHTML = `<input type="text" value="${v}">`;
+                varsDiv.appendChild(div);
+            });
+            document.getElementById('formulaSize').value = element.content.size || 24;
+            document.getElementById('formulaColor').value = element.content.color || '#334155';
+            break;
+            
+        case 'statistics':
+            document.getElementById('statsData').value = element.content.data || '';
+            const stats = element.content.stats || {};
+            document.getElementById('showMean').checked = stats.mean !== false;
+            document.getElementById('showMedian').checked = stats.median !== false;
+            document.getElementById('showMode').checked = stats.mode !== false;
+            document.getElementById('showStdDev').checked = stats.stdDev !== false;
+            document.getElementById('showVariance').checked = stats.variance !== false;
+            document.getElementById('showMin').checked = stats.min !== false;
+            document.getElementById('showMax').checked = stats.max !== false;
+            document.getElementById('showRange').checked = stats.range !== false;
+            document.getElementById('showSum').checked = stats.sum !== false;
+            document.getElementById('showCount').checked = stats.count !== false;
+            document.getElementById('statsColor').value = element.content.color || '#60a5fa';
+            break;
+            
+        case 'percentage':
+            document.getElementById('percentageType').value = element.content.type || 'basic';
+            document.getElementById('percentageColor').value = element.content.color || '#60a5fa';
+            break;
+            
+        case 'ratio':
+            document.getElementById('ratioType').value = element.content.type || 'simple';
+            document.getElementById('ratioColor').value = element.content.color || '#60a5fa';
+            break;
+            
+        case 'function':
+            document.getElementById('functionExpression').value = element.content.expression || 'sin(x)';
+            document.getElementById('functionXMin').value = element.content.xMin || -5;
+            document.getElementById('functionXMax').value = element.content.xMax || 5;
+            document.getElementById('functionColor').value = element.content.color || '#60a5fa';
+            break;
+            
+        case 'comparison':
+            document.getElementById('comparisonCount').value = (element.content.items || []).length || 4;
+            const compData = (element.content.items || []).map(item => `${item.label}:${item.value1}:${item.value2}`).join('\n');
+            document.getElementById('comparisonData').value = compData;
+            document.getElementById('comparisonColor1').value = element.content.color1 || '#60a5fa';
+            document.getElementById('comparisonColor2').value = element.content.color2 || '#f59e0b';
+            break;
+            
+        case 'timeline':
+            document.getElementById('timelineCount').value = (element.content.items || []).length || 5;
+            const timelineData = (element.content.items || []).map(item => `${item.label}:${item.value}`).join('\n');
+            document.getElementById('timelineData').value = timelineData;
+            document.getElementById('timelineColor').value = element.content.color || '#60a5fa';
+            break;
+            
+        case 'icon':
+            document.getElementById('iconName').value = element.content.name || 'fa-star';
+            document.getElementById('iconSize').value = element.content.size || 48;
+            document.getElementById('iconColor').value = element.content.color || '#60a5fa';
+            break;
+            
+        case 'badge':
+            document.getElementById('badgeText').value = element.content.text || 'Новинка';
+            document.getElementById('badgeType').value = element.content.type || 'primary';
+            document.getElementById('badgeSize').value = element.content.size || 14;
+            break;
+    }
+    
+    // Добавляем обработчики для кнопок сохранения
+    setupEditorButtons(element);
+}
+
+function loadTableEditor(element) {
+    const container = document.getElementById('tableEditor');
+    const headers = element.content.headers || [];
+    const rows = element.content.rows || [];
+    
+    let html = '<table><thead><tr>';
+    headers.forEach((header, i) => {
+        html += `<th><input type="text" value="${header}" onchange="updateTableHeaderEditor(${i}, this.value)"></th>`;
+    });
+    html += '</tr></thead><tbody>';
+    
+    rows.forEach((row, r) => {
+        html += '<tr>';
+        row.forEach((cell, c) => {
+            html += `<td><input type="text" value="${cell}" onchange="updateTableCellEditor(${r}, ${c}, this.value)"></td>`;
+        });
+        html += '</tr>';
+    });
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function loadMatrixEditor(element) {
+    const container = document.getElementById('matrixEditor');
+    const rows = element.content.rows || 3;
+    const cols = element.content.cols || 3;
+    const data = element.content.data || Array(rows).fill().map(() => Array(cols).fill(0));
+    
+    let html = '<table><tbody>';
+    for (let i = 0; i < rows; i++) {
+        html += '<tr>';
+        for (let j = 0; j < cols; j++) {
+            const val = data[i]?.[j] || 0;
+            html += `<td><input type="text" value="${val}" onchange="updateMatrixCellEditor(${i}, ${j}, this.value)"></td>`;
+        }
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function updateMatrixCellEditor(row, col, value) {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'matrix') {
+        if (!element.content.data[row]) element.content.data[row] = [];
+        element.content.data[row][col] = parseFloat(value) || 0;
+    }
+}
+
+function updateTableHeaderEditor(colIndex, value) {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'table') {
+        element.content.headers[colIndex] = value;
+    }
+}
+
+function updateTableCellEditor(rowIndex, colIndex, value) {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'table') {
+        element.content.rows[rowIndex][colIndex] = value;
+    }
+}
+
+function addTableRowEditor() {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'table') {
+        const colCount = element.content.headers.length;
+        element.content.rows.push(Array(colCount).fill('Новая ячейка'));
+        loadTableEditor(element);
+    }
+}
+
+function addTableColEditor() {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'table') {
+        element.content.headers.push('Новый столбец');
+        element.content.rows.forEach(row => row.push('Новая ячейка'));
+        loadTableEditor(element);
+    }
+}
+
+function addMatrixRow() {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'matrix') {
+        element.content.rows++;
+        const cols = element.content.cols || 3;
+        if (!element.content.data) element.content.data = [];
+        element.content.data.push(Array(cols).fill(0));
+        loadMatrixEditor(element);
+    }
+}
+
+function addMatrixCol() {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'matrix') {
+        element.content.cols++;
+        element.content.data.forEach(row => row.push(0));
+        loadMatrixEditor(element);
+    }
+}
+
+function loadChartColors(colors) {
+    const container = document.getElementById('chartColorsContainer');
+    container.innerHTML = '';
+    
+    colors.forEach((color, index) => {
+        const colorDiv = document.createElement('div');
+        colorDiv.className = 'color-item';
+        colorDiv.innerHTML = `
+            <input type="color" value="${color}" onchange="updateChartColor(${index}, this.value)">
+            <input type="text" value="${color}" onchange="updateChartColor(${index}, this.value)">
+        `;
+        container.appendChild(colorDiv);
+    });
+}
+
+function updateChartColor(index, color) {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'chart') {
+        if (!Array.isArray(element.content.datasets[0].backgroundColor)) {
+            element.content.datasets[0].backgroundColor = [];
+        }
+        if (!Array.isArray(element.content.datasets[0].borderColor)) {
+            element.content.datasets[0].borderColor = [];
+        }
+        element.content.datasets[0].backgroundColor[index] = color;
+        element.content.datasets[0].borderColor[index] = color;
+    }
+}
+
+function addChartColor() {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'chart') {
+        if (!Array.isArray(element.content.datasets[0].backgroundColor)) {
+            element.content.datasets[0].backgroundColor = [];
+        }
+        if (!Array.isArray(element.content.datasets[0].borderColor)) {
+            element.content.datasets[0].borderColor = [];
+        }
+        element.content.datasets[0].backgroundColor.push('#60a5fa');
+        element.content.datasets[0].borderColor.push('#60a5fa');
+        
+        // Обновляем отображение
+        loadChartColors(element.content.datasets[0].backgroundColor);
+    }
+}
+
+function toggleChartColors() {
+    const element = elements.find(el => el.id === selectedElement);
+    if (element && element.type === 'chart') {
+        const chartType = document.getElementById('chartType').value;
+        if (chartType === 'pie' || chartType === 'doughnut') {
+            if (!Array.isArray(element.content.datasets[0].backgroundColor)) {
+                const color = element.content.datasets[0].backgroundColor;
+                element.content.datasets[0].backgroundColor = Array(element.content.labels.length).fill(color);
+                element.content.datasets[0].borderColor = Array(element.content.labels.length).fill(color);
+            }
+        }
+    }
+}
+
+function toggleSlicerConnection(slicerId, chartId, connect) {
+    const slicer = elements.find(el => el.id === slicerId);
+    if (!slicer) return;
+    
+    if (!slicer.content.connections) {
+        slicer.content.connections = [];
+    }
+    
+    if (connect) {
+        if (!slicer.content.connections.includes(chartId)) {
+            slicer.content.connections.push(chartId);
+        }
+    } else {
+        slicer.content.connections = slicer.content.connections.filter(id => id !== chartId);
+    }
+}
+
+function applyTextCase(type) {
+    const textarea = document.getElementById('textContent');
+    const text = textarea.value;
+    
+    switch(type) {
+        case 'lower':
+            textarea.value = text.toLowerCase();
+            break;
+        case 'upper':
+            textarea.value = text.toUpperCase();
+            break;
+        case 'capitalize':
+            textarea.value = text.split(' ').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
+            break;
+    }
+}
+
+function addFormulaVariable() {
+    const varsDiv = document.getElementById('formulaVariables');
+    const newDiv = document.createElement('div');
+    newDiv.className = 'formula-variable';
+    newDiv.innerHTML = '<input type="text" value="var = 0">';
+    varsDiv.appendChild(newDiv);
+}
+
+function setupEditorButtons(element) {
+    const saveBtn = document.querySelector('.btn-save');
+    const cancelBtn = document.querySelector('.btn-cancel');
+    
+    if (saveBtn) {
+        saveBtn.onclick = () => saveWidget(element.id);
+    }
+    if (cancelBtn) {
+        cancelBtn.onclick = closeEditor;
+    }
+}
+
+function saveWidget(id) {
+    const element = elements.find(el => el.id === id);
+    if (!element) return;
+    
+    try {
+        switch(element.type) {
+            case 'text':
+                element.content.text = document.getElementById('textContent').value;
+                element.settings.textSize = document.getElementById('textSize').value + 'px';
+                element.settings.textColor = document.getElementById('textColor').value;
+                element.settings.textAlign = document.getElementById('textAlign').value;
+                break;
+                
+            case 'list':
+                const items = document.getElementById('listItems').value.split('\n').filter(i => i.trim());
+                const listStyle = document.getElementById('listStyle').value;
+                element.content.items = items.map(text => ({ text }));
+                element.content.listStyle = listStyle;
+                element.settings.textSize = document.getElementById('listSize').value + 'px';
+                element.settings.textColor = document.getElementById('listColor').value;
+                break;
+                
+            case 'table':
+                element.content.tableStyle = document.getElementById('tableStyle').value;
+                break;
+                
+            case 'chart':
+                const chartType = document.getElementById('chartType').value;
+                const labels = document.getElementById('chartLabels').value.split(',').map(l => l.trim()).filter(l => l);
+                const data = document.getElementById('chartData').value.split(',').map(d => parseFloat(d.trim()) || 0);
+                
+                // Собираем цвета
+                const colorInputs = document.querySelectorAll('#chartColorsContainer .color-item input[type="color"]');
+                const colors = Array.from(colorInputs).map(input => input.value);
+                
+                element.chartType = chartType;
+                element.content.labels = labels;
+                element.content.datasets = [{
+                    label: document.getElementById('chartTitle').value || 'Значения',
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: colors,
+                    borderWidth: 2
+                }];
+                element.options.showDataLabels = document.getElementById('showDataLabels').checked;
+                element.options.dataLabelsColor = document.getElementById('dataLabelsColor').value;
+                element.options.dataLabelsPosition = document.getElementById('dataLabelsPosition').value;
+                break;
+                
+            case 'gauge':
+                element.content.value = parseInt(document.getElementById('gaugeValue').value);
+                element.content.label = document.getElementById('gaugeLabel').value;
+                element.content.color = document.getElementById('gaugeColor').value;
+                element.content.max = parseInt(document.getElementById('gaugeMax').value);
+                break;
+                
+            case 'progress':
+                const progressData = document.getElementById('progressData').value.split('\n').filter(l => l.trim());
+                element.content.items = progressData.map(line => {
+                    const [label, value] = line.split(':').map(s => s.trim());
+                    return { label, value: parseInt(value) || 0 };
+                });
+                element.content.color = document.getElementById('progressColor').value;
+                break;
+                
+            case 'sparkline':
+                const sparkData = document.getElementById('sparklineData').value.split(',').map(d => parseFloat(d.trim()) || 0);
+                const sparkLabels = document.getElementById('sparklineLabels').value.split(',').map(l => l.trim());
+                element.content.data = sparkData;
+                element.content.labels = sparkLabels;
+                element.content.color = document.getElementById('sparklineColor').value;
+                element.content.showArea = document.getElementById('sparklineArea').checked;
+                break;
+                
+            case 'slicer':
+                element.content.name = document.getElementById('slicerName').value;
+                element.content.values = document.getElementById('slicerValues').value.split('\n').filter(v => v.trim());
+                if (!element.content.activeValue || !element.content.values.includes(element.content.activeValue)) {
+                    element.content.activeValue = element.content.values[0] || 'Все';
+                }
+                break;
+                
+            case 'matrix':
+                element.content.rows = parseInt(document.getElementById('matrixRows').value);
+                element.content.cols = parseInt(document.getElementById('matrixCols').value);
+                // Данные уже обновляются через редактор
+                break;
+                
+            case 'formula':
+                element.content.expression = document.getElementById('formulaExpression').value;
+                const varInputs = document.querySelectorAll('#formulaVariables input');
+                element.content.variables = Array.from(varInputs).map(input => input.value);
+                element.content.size = parseInt(document.getElementById('formulaSize').value);
+                element.content.color = document.getElementById('formulaColor').value;
+                break;
+                
+            case 'statistics':
+                element.content.data = document.getElementById('statsData').value;
+                element.content.stats = {
+                    mean: document.getElementById('showMean').checked,
+                    median: document.getElementById('showMedian').checked,
+                    mode: document.getElementById('showMode').checked,
+                    stdDev: document.getElementById('showStdDev').checked,
+                    variance: document.getElementById('showVariance').checked,
+                    min: document.getElementById('showMin').checked,
+                    max: document.getElementById('showMax').checked,
+                    range: document.getElementById('showRange').checked,
+                    sum: document.getElementById('showSum').checked,
+                    count: document.getElementById('showCount').checked
+                };
+                element.content.color = document.getElementById('statsColor').value;
+                break;
+                
+            case 'percentage':
+                element.content.type = document.getElementById('percentageType').value;
+                element.content.color = document.getElementById('percentageColor').value;
+                break;
+                
+            case 'ratio':
+                element.content.type = document.getElementById('ratioType').value;
+                element.content.color = document.getElementById('ratioColor').value;
+                break;
+                
+            case 'function':
+                element.content.expression = document.getElementById('functionExpression').value;
+                element.content.xMin = parseFloat(document.getElementById('functionXMin').value);
+                element.content.xMax = parseFloat(document.getElementById('functionXMax').value);
+                element.content.color = document.getElementById('functionColor').value;
+                break;
+                
+            case 'comparison':
+                const compLines = document.getElementById('comparisonData').value.split('\n').filter(l => l.trim());
+                element.content.items = compLines.map(line => {
+                    const [label, value1, value2] = line.split(':').map(s => s.trim());
+                    return {
+                        label,
+                        value1: parseInt(value1) || 0,
+                        value2: parseInt(value2) || 0
+                    };
+                });
+                element.content.color1 = document.getElementById('comparisonColor1').value;
+                element.content.color2 = document.getElementById('comparisonColor2').value;
+                break;
+                
+            case 'timeline':
+                const timelineLines = document.getElementById('timelineData').value.split('\n').filter(l => l.trim());
+                element.content.items = timelineLines.map(line => {
+                    const [label, value] = line.split(':').map(s => s.trim());
+                    return {
+                        label,
+                        value: parseInt(value) || 0
+                    };
+                });
+                element.content.color = document.getElementById('timelineColor').value;
+                break;
+                
+            case 'icon':
+                element.content.name = document.getElementById('iconName').value;
+                element.content.size = parseInt(document.getElementById('iconSize').value);
+                element.content.color = document.getElementById('iconColor').value;
+                break;
+                
+            case 'badge':
+                element.content.text = document.getElementById('badgeText').value;
+                element.content.type = document.getElementById('badgeType').value;
+                element.content.size = parseInt(document.getElementById('badgeSize').value);
+                break;
+        }
+        
+        // Обновляем отображение
+        rerenderElement(id);
+        if (element.type === 'chart') {
+            setTimeout(() => initChart(id, element), 100);
+        }
+        
+        showNotification('Виджет обновлён', 'success');
+        saveToHistory();
+        closeEditor();
+        
+    } catch(e) {
+        console.error('Ошибка при сохранении:', e);
+        showNotification('Ошибка: ' + e.message, 'error');
+    }
+}
+
+function closeEditor() {
+    document.getElementById('editorPanel').classList.remove('show');
+    document.getElementById('editorContent').innerHTML = `
+        <div class="no-selection">
+            <i class="fas fa-arrow-up" style="font-size: 2rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+            <p>Выберите виджет для настройки</p>
+        </div>
+    `;
+    selectedElement = null;
+}
+
+function rerenderElement(id) {
+    const element = elements.find(el => el.id === id);
+    if (!element) return;
+    
+    const elementDiv = document.querySelector(`[data-id="${id}"]`);
+    if (elementDiv) {
+        const contentDiv = document.getElementById(`content-${id}`);
+        if (contentDiv) {
+            contentDiv.innerHTML = renderElementContent(element);
+        }
+    }
+}
+
+function saveDashboard() {
+    const title = document.getElementById('dashboardTitle').value;
+    if (!title) {
+        showNotification('Введите название дашборда', 'error');
+        return;
+    }
+    
+    const elementsToSave = elements.map(el => ({
+        id: el.id,
+        type: el.type,
+        chartType: el.chartType,
+        title: el.title,
+        content: el.content,
+        settings: el.settings,
+        size: el.size,
+        position: el.position,
+        options: el.options
+    }));
+    
+    const dashboardData = {
+        {% if dashboard and dashboard.id %}
+        id: {{ dashboard.id }},
+        {% else %}
+        id: null,
+        {% endif %}
+        title: title,
+        description: document.getElementById('dashboardDescription')?.value || '',
+        elements: elementsToSave
+    };
+    
+    fetch('/dashboard-admin/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dashboardData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            dashboardId = data.id;
+            showNotification('Дашборд сохранён и опубликован!', 'success');
+            // Перенаправляем на страницу со списком дашбордов
+            setTimeout(() => {
+                window.location.href = '/dashboards';
+            }, 1000);
+        } else {
+            showNotification('Ошибка при сохранении', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Ошибка при сохранении', 'error');
+    });
+}
+
+function publishDashboard() {
+    const url = window.location.origin + '/dashboard/' + (dashboardId || 'demo-' + Date.now());
+    document.getElementById('publicUrl').value = url;
+    document.getElementById('publishModal').style.display = 'flex';
+    showNotification('Дашборд опубликован', 'success');
+}
+
+function saveToHistory() {
+    const state = {
+        elements: JSON.parse(JSON.stringify(elements)),
+        layout: elements.map(el => ({
+            id: el.id,
+            position: el.position,
+            size: el.size
+        }))
+    };
+    
+    if (historyIndex < history.length - 1) {
+        history = history.slice(0, historyIndex + 1);
+    }
+    
+    history.push(state);
+    historyIndex = history.length - 1;
+    updateHistoryButtons();
+}
+
+function undo() {
+    if (historyIndex > 0) {
+        historyIndex--;
+        loadHistory(history[historyIndex]);
+    }
+}
+
+function redo() {
+    if (historyIndex < history.length - 1) {
+        historyIndex++;
+        loadHistory(history[historyIndex]);
+    }
+}
+
+function loadHistory(state) {
+    // Очищаем текущее состояние
+    document.getElementById('dashboardGrid').innerHTML = '';
+    elements = [];
+    charts = {};
+    
+    // Восстанавливаем элементы
+    state.elements.forEach(element => {
+        elements.push(element);
+        renderElement(element);
+        if (element.type === 'chart') {
+            setTimeout(() => initChart(element.id, element), 100);
+        }
+    });
+    
+    updateHistoryButtons();
+}
+
+function updateHistoryButtons() {
+    document.getElementById('undoBtn').disabled = historyIndex <= 0;
+    document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+}
+
+function clearDashboard() {
+    showConfirm('Очистка дашборда', 'Удалить все виджеты?', () => {
+        document.getElementById('dashboardGrid').innerHTML = '';
+        elements = [];
+        charts = {};
+        saveToHistory();
+        closeEditor();
+        showNotification('Дашборд очищен', 'success');
+    });
+}
+
+// Модальное окно подтверждения
+function showConfirm(title, msg, onOk) {
+    const modal = document.getElementById('confirmModal');
+    document.getElementById('confirmTitle').innerText = title;
+    document.getElementById('confirmMessage').innerText = msg;
+    
+    const ok = document.getElementById('confirmOk');
+    const cancel = document.getElementById('confirmCancel');
+    
+    const close = () => {
+        modal.style.display = 'none';
+        ok.removeEventListener('click', handleOk);
+        cancel.removeEventListener('click', close);
+    };
+    
+    const handleOk = () => { onOk(); close(); };
+    
+    ok.addEventListener('click', handleOk);
+    cancel.addEventListener('click', close);
+    modal.style.display = 'flex';
+}
+
+// Уведомления
+let notificationTimeout;
+function showNotification(msg, type = 'success') {
+    const n = document.getElementById('notification');
+    n.className = 'notification ' + type;
+    document.getElementById('notificationMessage').innerText = msg;
+    n.classList.add('show');
+    
+    if (notificationTimeout) clearTimeout(notificationTimeout);
+    notificationTimeout = setTimeout(() => {
+        n.classList.remove('show');
+    }, 2000);
+}
+
+// Инициализация обработчиков
+function initEventListeners() {
+    document.getElementById('saveDashboardBtn').addEventListener('click', saveDashboard);
+    document.getElementById('publishDashboardBtn').addEventListener('click', publishDashboard);
+    document.getElementById('undoBtn').addEventListener('click', undo);
+    document.getElementById('redoBtn').addEventListener('click', redo);
+    document.getElementById('clearDashboardBtn').addEventListener('click', clearDashboard);
+    document.getElementById('closeEditor').addEventListener('click', closeEditor);
+    
+    // Модальные окна
+    document.getElementById('closePublishModal').addEventListener('click', () => {
+        document.getElementById('publishModal').style.display = 'none';
+    });
+    
+    document.getElementById('copyPublicUrl').addEventListener('click', () => {
+        const url = document.getElementById('publicUrl');
+        url.select();
+        document.execCommand('copy');
+        showNotification('Ссылка скопирована', 'success');
+        document.getElementById('publishModal').style.display = 'none';
+    });
+    
+    // Закрытие модалок по клику на фон
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', e => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+    
+    // Горячие клавиши
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            saveDashboard();
+        }
+        if (e.key === 'Escape') {
+            closeEditor();
+        }
+    });
+}
+</script>
+{% endblock %}

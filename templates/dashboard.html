@@ -1,718 +1,1086 @@
 {% extends "layout.html" %}
 {% block content %}
 <style>
+/* ----------  LIGHT-GLASS SCHOOL DASHBOARD — С ПРОФИЛЕМ ШКОЛЫ ---------- */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 :root {
-  --indigo:#4f46e5;
-  --indigo-dark:#3730a3;
-  --slate-50:#f8fafc;
-  --slate-100:#f1f5f9;
-  --slate-200:#e2e8f0;
-  --slate-400:#94a3b8;
-  --slate-700:#334155;
-  --slate-800:#1e293b;
+  /* ——— ЦВЕТА ——— */
+  --indigo: #4f7ee6;
+  --indigo-dark: #3a68d0;
+  --indigo-light: #7fa9f2;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-700: #1e293b;
+  --slate-800: #0f172a;
+  --text-primary: #1e293b;
+  --text-secondary: #5e6e85;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  
+  /* ——— ФОНЫ ——— */
+  --bg-main: linear-gradient(135deg, #d0e9ff 0%, #f8faff 100%);
+  --bg-card: #ffffff;
+  --border: #c0d4ff;
+  
+  /* ——— ТЕНИ ——— */
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.06);
+  --shadow-input: 0 0 0 2px rgba(79, 126, 230, 0.2);
+}
+
+/* Тёмная тема */
+[data-theme='dark'] {
+  --indigo: #60a5fa;
+  --indigo-dark: #3b82f6;
+  --indigo-light: #93c5fd;
+  --slate-50: #0f172a;
+  --slate-100: #1e293b;
+  --slate-200: #334155;
+  --slate-700: #e2e8f0;
+  --slate-800: #f1f5f9;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --success: #6ee7b7;
+  --warning: #fcd34d;
+  --error: #fca5a5;
+  
+  --bg-main: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --bg-card: #1e293b;
+  --border: #334155;
+  
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.3);
+  --shadow-input: 0 0 0 2px rgba(96, 165, 250, 0.3);
 }
 
 body {
-  font-family:"Inter",system-ui,sans-serif;
-  background:#eef2ff;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg-main);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .container {
-  max-width:1100px;
-  margin:auto;
-  padding:1.5rem;
-  display:flex;
-  flex-direction:column;
-  gap:2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
+/* === КАРТОЧКИ === */
 .card {
-  background:#fff;
-  border-radius:1.5rem;
-  padding:2rem;
-  box-shadow:0 5px 20px rgba(0,0,0,.05);
+  background: var(--bg-card);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  animation: fadeInUp 0.5s ease-out forwards;
+  will-change: transform, opacity;
 }
 
-.btn {
-  cursor:pointer;
-  display:inline-block;
-  padding:.8rem 1.2rem;
-  border-radius:.9rem;
-  font-weight:700;
-  text-align:center;
-  text-decoration:none;
-  transition:all .25s ease;
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: none;
 }
 
-.btn-indigo {
-  background:var(--indigo);
-  color:#fff;
-}
-
-.btn-indigo:hover {
-  background:var(--indigo-dark);
-}
-
-.btn-dark {
-  background:var(--slate-800);
-  color:#fff;
-}
-
-.btn-dark:hover {
-  background:black;
-}
-
-form {
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:.8rem;
-}
-
-input, select {
-  padding:.7rem .9rem;
-  border-radius:.8rem;
-  border:1px solid var(--slate-200);
-  transition:all .25s ease;
-}
-
-input:focus, select:focus {
-  border-color:var(--indigo);
-  outline:none;
-  box-shadow:0 0 0 3px rgba(79,70,229,.2);
-}
-
-input[type="number"] {
-  width:90px;
-}
-
-.file-list {
-  max-height:500px;
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-  gap:.6rem;
-}
-
-.file-item {
-  display:flex !important;
-  justify-content:space-between !important;
-  align-items:center !important;
-  padding:.9rem 1rem;
-  background:var(--slate-50);
-  border:1px solid var(--slate-100);
-  border-radius:1rem;
-  transition:all .25s ease;
-}
-
-.file-item:hover {
-  background:#eef2ff !important;
-  border-color:#c7d2fe !important;
-  transform:translateY(-2px);
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
-}
-
-.file-name {
-  display:flex !important;
-  align-items:center !important;
-  gap:.6rem;
-  color:var(--slate-700);
-  font-weight:600;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:normal !important;
-  word-break:break-word !important;
-  flex:1 !important;
-}
-
-.file-name svg {
-  width:20px;
-  height:20px;
-  flex-shrink:0;
-  color:var(--indigo);
-}
-
-.file-actions {
-  display:flex;
-  gap:.5rem;
-}
-
-.file-actions a {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:.45rem .9rem;
-  border-radius:.6rem;
-  font-weight:600;
-  text-decoration:none;
-  transition:all .25s ease;
-}
-
-.file-actions a svg {
-  width:18px;
-  height:18px;
-  margin-right:.4rem;
-}
-
-.file-actions a.download {
-  background:var(--indigo);
-  color:#fff;
-}
-
-.file-actions a.download:hover {
-  background:var(--indigo-dark);
-  transform:translateY(-1px);
-}
-
-.file-actions a.delete {
-  background:#fee2e2;
-  color:#b91c1c;
-}
-
-.file-actions a.delete:hover {
-  background:#fca5a5;
-}
-
-.nofiles {
-  text-align:center;
-  padding:3rem 0;
-  color:var(--slate-400);
-  font-style:italic;
-}
-
-.nofiles svg {
-  width:48px;
-  height:48px;
-  margin-bottom:.5rem;
-  color:var(--slate-400);
-}
-
-/* Модальное окно */
-.modal-overlay {
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.5);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-}
-
-.modal-window {
-  background:#fff;
-  border-radius:12px;
-  padding:2rem;
-  min-width:320px;
-  box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);
-  text-align:center;
-  animation:fadeIn .2s ease-out;
-}
-
-.modal-window h3 {
-  margin:0 0 1rem;
-  color:#1f2937;
-  font-size:1.2rem;
-  font-weight:600;
-}
-
-.modal-window p {
-  font-size:.95rem;
-  margin:0 0 1.5rem;
-  color:#6b7280;
-}
-
-.modal-buttons {
-  display:flex;
-  justify-content:center;
-  gap:1rem;
-}
-
-.modal-buttons button {
-  padding:.6rem 1.5rem;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:.9rem;
-  font-weight:500;
-  transition:all 0.2s;
-}
-
-#cancelDelete {
-  background:#f3f4f6;
-  color:#374151;
-}
-
-#cancelDelete:hover {
-  background:#e5e7eb;
-}
-
-#confirmDelete {
-  background:#dc2626;
-  color:#fff;
-}
-
-#confirmDelete:hover {
-  background:#b91c1c;
-}
-
-@keyframes fadeIn {
-  from { opacity:0; transform:scale(.95) translateY(-10px); }
-  to { opacity:1; transform:scale(1) translateY(0); }
-}
-
-/* Управление файлами */
-.upload-controls {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:1.5rem;
-  padding-top:1.5rem;
-  border-top:1px solid #e2e8f0;
-}
-
-.upload-checkbox {
-  display:flex;
-  align-items:center;
-  gap:.8rem;
-}
-
-.upload-actions {
-  display:flex;
-  gap:.8rem;
-}
-
-.small-checkbox-label {
-  font-size:.9rem;
-  color:#475569;
-  font-weight:500;
-}
-
-.small-checkbox-label input[type="checkbox"] {
-  transform:scale(1.1);
-  margin-right:.4rem;
-}
-
-.small-action-btn {
-  padding:.4rem .8rem;
-  border-radius:.4rem;
-  font-size:.8rem;
-  font-weight:500;
-  display:flex;
-  align-items:center;
-  gap:.3rem;
-  transition:all .2s ease;
-  border:none;
-  cursor:pointer;
-}
-
-.small-download-btn {
-  background:#059669;
-  color:#fff;
-}
-
-.small-download-btn:hover {
-  background:#047857;
-  transform:translateY(-1px);
-  box-shadow:0 2px 6px rgba(5,150,105,0.3);
-}
-
-.small-delete-btn {
-  background:#dc2626;
-  color:#fff;
-}
-
-.small-delete-btn:hover {
-  background:#b91c1c;
-  transform:translateY(-1px);
-  box-shadow:0 2px 6px rgba(220,38,38,0.3);
-}
-
-.small-action-btn svg {
-  width:14px;
-  height:14px;
-}
-
-.copy-link {
-  cursor:pointer;
-  transition:all .2s ease;
-  position:relative;
-}
-
-.copy-link:hover {
-  color:var(--indigo-dark) !important;
-  text-decoration:underline !important;
-}
-
-.copy-link.copied {
-  color:#059669 !important;
-}
-
-.copy-tooltip {
-  position:absolute;
-  bottom:100%;
-  left:50%;
-  transform:translateX(-50%);
-  background:#1f2937;
-  color:#fff;
-  padding:.4rem .8rem;
-  border-radius:.4rem;
-  font-size:.75rem;
-  white-space:nowrap;
-  opacity:0;
-  transition:opacity .2s ease;
-  pointer-events:none;
-  margin-bottom:.5rem;
-}
-
-.copy-tooltip::after {
-  content:'';
-  position:absolute;
-  top:100%;
-  left:50%;
-  transform:translateX(-50%);
-  border:.4rem solid transparent;
-  border-top-color:#1f2937;
-}
-/* Редактируемое название школы */
-.editable-title-container {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.editable-title {
-  flex: 1;
-  position: relative;
-}
-
-.editable-title span {
-  display: block;
-  font-size: 1.8rem;
+.card h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--slate-800);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: color 0.2s ease;
+}
+
+.card h3 svg {
+  width: 24px;
+  height: 24px;
+  color: var(--indigo);
+  transition: color 0.2s ease;
+}
+
+/* === НОВЫЕ СТИЛИ ДЛЯ ПРОФИЛЯ ШКОЛЫ === */
+
+/* Шапка профиля */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Аватар школы */
+.school-avatar {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--indigo);
+  box-shadow: 0 4px 12px rgba(79, 126, 230, 0.3);
+  background: var(--bg-card);
+  transition: all 0.3s ease;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--indigo-light), var(--indigo));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid var(--indigo);
+  box-shadow: 0 4px 12px rgba(79, 126, 230, 0.3);
+}
+
+.avatar-placeholder svg {
+  width: 60px;
+  height: 60px;
+  color: white;
+}
+
+.avatar-upload-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--indigo);
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.avatar-upload-btn:hover {
+  background: var(--indigo-dark);
+  transform: scale(1.1);
+}
+
+.avatar-upload-btn svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+}
+
+.avatar-upload-input {
+  display: none;
+}
+
+/* Информация школы */
+.school-info {
+  flex: 1;
+  min-width: 300px;
+}
+
+.school-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.school-title {
+  font-size: 2rem;
   font-weight: 800;
-  padding: 0;
+  color: var(--slate-800);
+  transition: color 0.2s ease;
   margin: 0;
 }
 
-.editable-title input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  font-size: 1.8rem;
-  color: var(--slate-800);
-  font-weight: 800;
-  padding: 0;
-  border: 2px solid var(--indigo);
-  border-radius: 0.4rem;
-  background: white;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-  z-index: 10;
-}
-
 .edit-title-btn {
-  padding: 0.3rem 0.6rem;
+  padding: 0.4rem 1rem;
   background: var(--indigo);
   color: white;
   border: none;
-  border-radius: 0.4rem;
+  border-radius: 2rem;
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: opacity 0.2s ease;
+  box-shadow: none;
 }
 
 .edit-title-btn:hover {
+  opacity: 0.9;
+}
+
+.school-badges {
+  display: flex;
+  gap: 1rem;
+  margin: 0.5rem 0;
+  flex-wrap: wrap;
+}
+
+.school-badge {
+  background: rgba(79, 126, 230, 0.1);
+  color: var(--indigo-dark);
+  padding: 0.3rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .school-badge {
+  background: rgba(96, 165, 250, 0.2);
+  color: var(--indigo);
+}
+
+.school-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Блок контактов и ссылок */
+.school-links {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.school-link-card {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(79, 126, 230, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.school-link-card:hover {
+  background: rgba(79, 126, 230, 0.1);
+  border-color: var(--indigo);
+}
+
+.school-link-card h4 {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.school-link-card a {
+  color: var(--indigo);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.school-link-card a:hover {
+  text-decoration: underline;
+}
+
+.link-edit-form {
+  display: none;
+  margin-top: 0.5rem;
+}
+
+.link-edit-form input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  color: var(--slate-800);
+}
+
+.link-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.link-edit-actions button {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  font-weight: 600;
+}
+
+.link-save-btn {
+  background: var(--success);
+  color: white;
+}
+
+.link-cancel-btn {
+  background: var(--slate-100);
+  color: var(--text-secondary);
+}
+
+.edit-link-icon {
+  margin-left: auto;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+  font-size: 1rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+}
+
+.edit-link-icon:hover {
+  color: var(--indigo);
+  background: rgba(79, 126, 230, 0.1);
+}
+
+/* Форма редактирования названия */
+.school-title-edit-form {
+  display: none;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(79, 126, 230, 0.05);
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+}
+
+.school-title-edit-form input {
+  width: 100%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  color: var(--slate-800);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* === ОСТАЛЬНЫЕ СТИЛИ (БЕЗ ИЗМЕНЕНИЙ) === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  white-space: nowrap;
+}
+
+.btn-indigo {
+  background: linear-gradient(135deg, var(--indigo), var(--indigo-dark));
+  color: white;
+}
+
+.btn-indigo:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 10px rgba(79, 126, 230, 0.2);
+}
+
+.btn-dark {
+  background: var(--slate-800);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-dark:hover {
+  opacity: 0.9;
+  background: #000;
+}
+
+.btn-external {
   background: var(--indigo-dark);
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+  min-width: 200px;
 }
 
+[data-theme='dark'] .btn-external {
+  background: #3b82f6;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
 
+.btn-external:hover {
+  background: var(--indigo);
+  border-color: white;
+  transform: translateY(-1px);
+}
+
+/* === ПОЛЯ ВВОДА === */
+input, select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 0.6rem;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  color: var(--slate-800);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: none;
+}
+
+input[name="year"] {
+  width: 100px !important;
+  text-align: center;
+  font-weight: 600;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: var(--shadow-input);
+}
+
+[data-theme='dark'] input,
+[data-theme='dark'] select {
+  background: var(--slate-800);
+  color: var(--slate-200);
+  border-color: var(--border);
+}
+
+/* === СПИСОК ФАЙЛОВ === */
+.file-list {
+  max-height: 500px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  gap: 1rem;
+}
+
+.file-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--slate-800);
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.file-name svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--indigo);
+  transition: color 0.2s ease;
+}
+
+.file-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.file-actions a {
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.file-actions a svg {
+  width: 16px;
+  height: 16px;
+}
+
+.file-actions a.download {
+  background: rgba(79, 126, 230, 0.1);
+  color: var(--indigo-dark);
+  border: 1px solid rgba(79, 126, 230, 0.2);
+}
+
+.file-actions a.download:hover {
+  background: rgba(79, 126, 230, 0.2);
+  border-color: var(--indigo);
+  opacity: 1;
+}
+
+.file-actions a.delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.file-actions a.delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--error);
+}
+
+/* === МОДАЛКА === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  place-items: center;
+  z-index: 9999;
+}
+
+.modal-window {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  min-width: 320px;
+  text-align: center;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-window h3 {
+  margin: 0 0 1rem;
+  color: var(--slate-800);
+  font-size: 1.2rem;
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+
+.modal-window p {
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.modal-buttons button {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+  flex: 0 1 auto;
+  min-width: 120px;
+}
+
+#cancelDelete {
+  background: var(--slate-100);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+#cancelDelete:hover {
+  opacity: 0.8;
+}
+
+#confirmDelete {
+  background: var(--error);
+  color: white;
+}
+
+#confirmDelete:hover {
+  opacity: 0.9;
+}
+
+/* === ПУСТОЕ СОСТОЯНИЕ === */
+.nofiles {
+  text-align: center;
+  padding: 3rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+  transition: color 0.2s ease;
+}
+
+.nofiles svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0.5rem;
+  color: var(--slate-200);
+  transition: color 0.2s ease;
+}
+
+/* === ЧЕКБОКСЫ === */
+.upload-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+
+.upload-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.small-checkbox-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.small-checkbox-label input[type="checkbox"] {
+  transform: scale(1.1);
+  margin-right: 0.4rem;
+  accent-color: var(--indigo);
+}
+
+.small-action-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.small-download-btn {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.small-download-btn:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: var(--success);
+}
+
+.small-delete-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.small-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--error);
+}
+
+.small-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* === КОПИРОВАНИЕ ССЫЛКИ === */
+.copy-link {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  position: relative;
+  color: var(--indigo) !important;
+  font-weight: 700;
+}
+
+.copy-link:hover {
+  color: var(--indigo-dark) !important;
+}
+
+.copy-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--slate-800);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  margin-bottom: 0.5rem;
+}
+
+.copy-tooltip.show {
+  opacity: 1;
+}
+
+/* === МЕТА-ИНФО ФАЙЛА === */
 .file-meta {
-  font-size:.8rem;
-  color:#64748b;
-  margin-top:.3rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.3rem;
+  transition: color 0.2s ease;
 }
 
-/* Стили для области выбора файлов */
+/* === ЗОНА DRAG-AND-DROP === */
 .file-upload-area {
-  border:2px dashed #d1d5db;
-  border-radius:.75rem;
-  padding:1.5rem;
-  text-align:center;
-  margin-bottom:1rem;
-  transition:all .3s ease;
-  position:relative;
+  border: 2px dashed var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  position: relative;
+  background: var(--bg-card);
 }
 
 .file-upload-area:hover {
-  border-color:var(--indigo);
-  background-color:rgba(79,70,229,0.05);
-  box-shadow:0 0 0 3px rgba(79,70,229,0.1);
-}
-
-.file-upload-area::before {
-  content:'';
-  position:absolute;
-  top:-4px;
-  left:-4px;
-  right:-4px;
-  bottom:-4px;
-  border-radius:.85rem;
-  background:linear-gradient(45deg, var(--indigo), transparent);
-  opacity:0;
-  transition:opacity .3s ease;
-  z-index:-1;
-}
-
-.file-upload-area:hover::before {
-  opacity:0.1;
+  border-color: var(--indigo);
+  background: rgba(79, 126, 230, 0.05);
 }
 
 .file-input-wrapper {
-  position:relative;
-  width:100%;
+  position: relative;
+  width: 100%;
 }
 
 .file-input-wrapper input[type="file"] {
-  width:100%;
-  padding:.5rem;
-  opacity:0;
-  position:absolute;
-  top:0;
-  left:0;
-  z-index:2;
-  cursor:pointer;
-  height:100%;
+  width: 100%;
+  padding: 0.5rem;
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  cursor: pointer;
+  height: 100%;
 }
 
 .file-input-label {
-  display:block;
-  padding:1rem;
-  background:var(--slate-100);
-  border-radius:.5rem;
-  color:var(--slate-700);
-  font-weight:500;
-  transition:all .2s ease;
-  border:2px solid transparent;
+  display: block;
+  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+[data-theme='dark'] .file-input-label {
+  background: var(--slate-800);
+  color: var(--slate-400);
 }
 
 .file-upload-area:hover .file-input-label {
-  background:var(--indigo);
-  color:white;
-  transform:translateY(-1px);
-  box-shadow:0 4px 8px rgba(79,70,229,0.2);
+  background: var(--indigo);
+  color: white;
+  border-color: transparent;
 }
 
-/* Уведомление о копировании */
+/* === УВЕДОМЛЕНИЕ КОПИРОВАНИЯ === */
 .copy-notification {
-  position:fixed;
-  top:20px;
-  right:20px;
-  background:var(--slate-800);
-  color:white;
-  padding:.8rem 1.2rem;
-  border-radius:.5rem;
-  font-weight:500;
-  z-index:10000;
-  opacity:0;
-  transform:translateY(-10px);
-  transition:all .3s ease;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--bg-card);
+  color: var(--slate-800);
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  z-index: 10000;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border);
+  pointer-events: none;
 }
 
 .copy-notification.show {
-  opacity:1;
-  transform:translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
+
+.copy-notification.success {
+  color: var(--success);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* === АНИМАЦИИ === */
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(15px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.98);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+}
+
 </style>
 
 <div class="container">
-  <!-- Заголовок учреждения -->
-  <div class="card" style="border-left: 6px solid var(--indigo); width: 100%; display: flex; flex-direction: column; align-items: flex-start;">
-    <div style="width: 100%; display: flex; justify-content: flex-start; align-items: center;">
-      <div style="flex: 1;">
-        <div class="editable-title-container">
-  <div class="editable-title" id="schoolTitleContainer">
-    <span id="schoolTitleDisplay">{{ user.unit_name }}</span>
-    <input
-      type="text"
-      id="schoolTitleInput"
-      value="{{ user.unit_name }}"
-      placeholder="Введите название школы"
-      style="display: none;"
-    >
-  </div>
-  <button type="button" id="editTitleBtn" class="edit-title-btn">Изменить</button>
-</div>
-
-        <p style="color: var(--indigo); font-size: 0.75rem; letter-spacing: 0.05em; font-weight: 600; text-transform: uppercase;">
-          {{ user.district }} | {{ user.food_type }}
-        </p>
-
-        <div style="margin-top: 1rem;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <strong style="color: var(--slate-700);">Директор:</strong>
-            <span id="directorNameDisplay" style="color: var(--slate-800);">{{ user.director_name or 'Не указано' }}</span>
-            <button type="button" id="editDirectorBtn" style="background: none; border: none; color: var(--indigo); cursor: pointer; font-size: 0.8rem; font-weight: 600;">
-              (Изменить)
-            </button>
+  <!-- Заголовок учреждения с профилем -->
+  <div class="card" style="border-left: 6px solid var(--indigo);">
+    <!-- Верхняя часть с аватаром и основной информацией -->
+    <div class="profile-header">
+      <!-- Аватар школы -->
+      <div class="school-avatar">
+        {% if profile and profile.avatar %}
+          <img src="/{{ user.id }}/avatar/{{ profile.avatar }}" alt="Логотип школы" class="avatar-image" id="schoolAvatar">
+        {% else %}
+          <div class="avatar-placeholder" id="avatarPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.586a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 7.586 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
           </div>
+        {% endif %}
+        
+        <!-- Кнопка загрузки аватара -->
+        <form id="avatarUploadForm" action="/profile/upload-avatar" method="post" enctype="multipart/form-data" style="position: absolute; bottom: 5px; right: 5px;">
+          <input type="hidden" name="uid" value="{{ user.id }}">
+          <label for="avatarInput" class="avatar-upload-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </label>
+          <input type="file" id="avatarInput" name="avatar" class="avatar-upload-input" accept="image/*" onchange="this.form.submit()">
+        </form>
+      </div>
 
-          <!-- Форма изменения ФИО директора (скрыта по умолчанию) -->
-          <form id="directorForm" action="/profile/update" method="post" style="display: none; margin-top: 0.5rem; gap: 0.5rem; align-items: center;">
+      <!-- Информация школы -->
+      <div class="school-info">
+        <div class="school-title-wrapper">
+          <h1 class="school-title" id="schoolTitle">{{ user.unit_name }}</h1>
+          <button class="edit-title-btn" id="editSchoolTitleBtn">✎ Изменить</button>
+        </div>
+
+        <div class="school-badges">
+          <span class="school-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            {{ user.district }}
+          </span>
+          <span class="school-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"></path>
+            </svg>
+            {{ user.food_type }}
+          </span>
+        </div>
+
+        <!-- Форма редактирования названия школы -->
+        <div class="school-title-edit-form" id="schoolTitleEditForm">
+          <form action="/profile/update" method="post">
             <input type="hidden" name="uid" value="{{ user.id }}">
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <input  
-                type="text"
-                name="director_name"
-                value="{{ user.director_name }}"
-                placeholder="Введите ФИО директора"
-                required  
-                style="padding: 0.5rem 0.8rem; border: 1px solid var(--slate-200); border-radius: 0.4rem; font-size: 0.9rem;"
-              >
-              <button type="submit" style="padding: 0.5rem 0.8rem; background: var(--indigo); color: white; border: none; border-radius: 0.4rem; cursor: pointer; font-weight: 600;">
-                Сохранить  
-              </button>
-              <button type="button" id="cancelBtn" style="padding: 0.5rem 0.8rem; background: #e2e8f0; color: var(--slate-700); border: none; border-radius: 0.4rem; cursor: pointer; font-weight: 600;">
-                Отмена  
-              </button>
+            <input type="text" name="unit_name" value="{{ user.unit_name }}" placeholder="Название школы" required>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-indigo" style="padding: 0.5rem 1rem;">Сохранить</button>
+              <button type="button" class="btn" id="cancelSchoolTitleBtn" style="background: var(--slate-100); color: var(--text-secondary); padding: 0.5rem 1rem;">Отмена</button>
             </div>
           </form>
         </div>
 
-        <div style="margin-top: 0.6rem; padding: 0.5rem 0.8rem; background: #eef2ff; border-radius: 0.6rem; font-family: monospace; font-size: 0.8rem;">
-          Внешний путь:
-          <span id="monitoringUrl" class="copy-link" style="color: var(--indigo); font-weight: 700;">
-            {{ monitoring_url.rstrip('/') }}
-          </span>
-          <div class="copy-tooltip" id="copyTooltip">Ссылка скопирована!</div>
+        <!-- Директор -->
+        <div style="margin: 1rem 0;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <strong style="color: var(--slate-700);">Директор:</strong>
+            <span id="directorNameDisplay" style="color: var(--slate-800);">{{ user.director_name or 'Не указано' }}</span>
+            <button type="button" id="editDirectorBtn" style="background: none; border: none; color: var(--indigo); cursor: pointer; font-size: 0.8rem; font-weight: 600;">✎</button>
+          </div>
+
+          <!-- Форма изменения ФИО директора -->
+          <form id="directorForm" action="/profile/update" method="post" style="display: none; margin-top: 0.5rem;">
+            <input type="hidden" name="uid" value="{{ user.id }}">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="text" name="director_name" value="{{ user.director_name }}" placeholder="ФИО директора" style="flex: 1;">
+              <button type="submit" class="btn btn-indigo" style="padding: 0.5rem 0.8rem;">✓</button>
+              <button type="button" id="cancelBtn" class="btn" style="padding: 0.5rem 0.8rem; background: var(--slate-100); color: var(--text-secondary);">✕</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Внешний путь -->
+        <div style="margin: 1rem 0; padding: 0.5rem 1rem; background: rgba(79, 126, 230, 0.1); border-radius: 2rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          <span style="color: var(--text-secondary);">Внешний путь:</span>
+          <span id="monitoringUrl" class="copy-link">{{ monitoring_url.rstrip('/') }}</span>
+          <span class="copy-tooltip" id="copyTooltip">Ссылка скопирована!</span>
         </div>
       </div>
-      <a href="https://мониторингпитание.рф/#/home" target="_blank" class="btn btn-dark" style="margin-left: auto;">мониторингпитания.рф</a>
+
+      <!-- Кнопка внешнего ресурса -->
+      <a href="https://мониторингпитание.рф/#/home" target="_blank" class="btn btn-external">
+        мониторингпитания.рф
+      </a>
+    </div>
+
+    <!-- Блок ссылок на сайт школы и горячее питание -->
+    <div class="school-links">
+      <!-- Ссылка на сайт школы -->
+      <div class="school-link-card">
+        <h4>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          Сайт школы
+        </h4>
+        <div id="schoolWebsiteDisplay">
+          {% if profile and profile.website_url %}
+            <a href="{{ profile.website_url }}" target="_blank">{{ profile.website_url }}</a>
+          {% else %}
+            <span style="color: var(--text-secondary);">Не указан</span>
+          {% endif %}
+          <span class="edit-link-icon" id="editWebsiteBtn" title="Редактировать">✎</span>
+        </div>
+        <div class="link-edit-form" id="websiteEditForm">
+          <form action="/profile/update-links" method="post">
+            <input type="hidden" name="uid" value="{{ user.id }}">
+            <input type="url" name="website_url" value="{{ profile.website_url or '' }}" placeholder="https://...">
+            <div class="link-edit-actions">
+              <button type="submit" class="link-save-btn">Сохранить</button>
+              <button type="button" class="link-cancel-btn" id="cancelWebsiteBtn">Отмена</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Ссылка на раздел горячее питание -->
+      <div class="school-link-card">
+        <h4>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v5a5 5 0 0 0 5 5h8a5 5 0 0 0 5-5V3"></path>
+            <path d="M3 16h18v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"></path>
+          </svg>
+          Горячее питание
+        </h4>
+        <div id="hotMealDisplay">
+          {% if profile and profile.hot_meal_url %}
+            <a href="{{ profile.hot_meal_url }}" target="_blank">{{ profile.hot_meal_url }}</a>
+          {% else %}
+            <span style="color: var(--text-secondary);">Не указан</span>
+          {% endif %}
+          <span class="edit-link-icon" id="editHotMealBtn" title="Редактировать">✎</span>
+        </div>
+        <div class="link-edit-form" id="hotMealEditForm">
+          <form action="/profile/update-links" method="post">
+            <input type="hidden" name="uid" value="{{ user.id }}">
+            <input type="url" name="hot_meal_url" value="{{ profile.hot_meal_url or '' }}" placeholder="https://...">
+            <div class="link-edit-actions">
+              <button type="submit" class="link-save-btn">Сохранить</button>
+              <button type="button" class="link-cancel-btn" id="cancelHotMealBtn">Отмена</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-  <script>
-// Логика переключения между просмотром и редактированием ФИО директора
-document.addEventListener('DOMContentLoaded', function() {
-  const display = document.getElementById('directorNameDisplay');
-  const editBtn = document.getElementById('editDirectorBtn');
-  const form = document.getElementById('directorForm');
-  const cancelBtn = document.getElementById('cancelBtn');
-
-  // Открыть форму редактирования
-  editBtn.addEventListener('click', function() {
-    display.style.display = 'none';
-    editBtn.style.display = 'none';
-    form.style.display = 'flex';
-  });
-
-  // Закрыть форму редактирования
-  cancelBtn.addEventListener('click', function() {
-    form.style.display = 'none';
-    display.style.display = 'inline';
-    editBtn.style.display = 'inline';
-  });
-});
-
-// Логика редактирования названия школы
-const titleDisplay = document.getElementById('schoolTitleDisplay');
-const titleInput = document.getElementById('schoolTitleInput');
-const editTitleBtn = document.getElementById('editTitleBtn');
-
-// Открыть форму редактирования
-editTitleBtn.addEventListener('click', function() {
-    titleDisplay.style.display = 'none';
-    titleInput.style.display = 'block';
-    titleInput.value = titleDisplay.textContent; // Синхронизируем значение
-    titleInput.focus();
-    editTitleBtn.style.display = 'none';
-});
-
-// Сохранить при потере фокуса
-titleInput.addEventListener('blur', async function() {
-    const newValue = titleInput.value.trim();
-    
-    // Если значение не изменилось или пустое — не отправляем
-    if (!newValue || newValue === titleDisplay.textContent) {
-        titleInput.style.display = 'none';
-        titleDisplay.style.display = 'block';
-        editTitleBtn.style.display = 'inline-block';
-        return;
-    }
-
-    try {
-        const formData = new FormData();
-        formData.append('uid', '{{ user.id }}');
-        formData.append('director_name', ''); // Отправляем пустую строку
-        formData.append('unit_name', newValue);
-
-        const response = await fetch('/profile/update', {
-            method: 'POST',
-            body: formData,
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        // FastAPI возвращает Redirect, а не JSON → response.json() вызовет ошибку
-        // Поэтому просто проверяем статус и обновляем интерфейс
-        titleDisplay.textContent = newValue;
-
-        const notification = document.createElement('div');
-        notification.className = 'copy-notification';
-        notification.textContent = 'Название сохранено!';
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 2000);
-
-    } catch (err) {
-        console.error('Ошибка:', err);
-        alert('Не удалось сохранить. Проверьте консоль.');
-    }
-
-    titleInput.style.display = 'none';
-    titleDisplay.style.display = 'block';
-    editTitleBtn.style.display = 'inline-block';
-});
-
-// Сохранить при нажатии Enter
-titleInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        titleInput.blur();
-    }
-});
-
-
-</script>
 
   <!-- Настройка периода -->
   <div style="display:grid;grid-template-columns:1fr;gap:2rem;">
     <div class="card">
-      <h3 style="font-size:1.1rem;color:var(--slate-800);font-weight:800;margin-bottom:1rem;">Настройка периода</h3>
+      <h3 style="font-size:1.1rem; margin-bottom:1rem;">Настройка периода</h3>
       <form action="/dashboard" method="get" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
         <input type="hidden" name="uid" value="{{ user.id }}">
         <div style="display:flex;align-items:center;gap:.5rem;">
-          <label style="font-weight:500;color:var(--slate-700);">Год:</label>
-          <input type="number" name="year" value="{{ year }}" style="padding:.5rem .8rem;border:1px solid #d1d5db;border-radius:.375rem;width:80px;">
+          <label style="font-weight:600; color: var(--slate-700);">Год:</label>
+          <input type="number" name="year" value="{{ year }}" style="width: 100px; text-align: center; font-weight: 600;">
         </div>
         <div style="display:flex;align-items:center;gap:.5rem;">
-          <label style="font-weight:500;color:var(--slate-700);">Месяц:</label>
-          <select name="month" style="padding:.5rem .8rem;border:1px solid #d1d5db;border-radius:.375rem;">
+          <label style="font-weight:600; color: var(--slate-700);">Месяц:</label>
+          <select name="month" style="min-width: 120px;">
             {% for m_id, m_name in months.items() %}
             <option value="{{ m_id }}" {% if m_id == month %}selected{% endif %}>{{ m_name }}</option>
             {% endfor %}
           </select>
         </div>
-        <button class="btn btn-indigo" type="submit">ОК</button>
+        <button class="btn btn-indigo" type="submit" style="padding: 0.8rem 2rem;">Применить</button>
       </form>
-
-      <h3 style="font-size:1rem;color:var(--slate-700);font-weight:700;margin-top:1.8rem;">Загрузить файлы в этот период</h3>
+      
+      <h3 style="font-size:1rem; margin-top:1.8rem;">Загрузить файлы в этот период</h3>
       <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="hidden" name="uid" value="{{ user.id }}">
         <input type="hidden" name="year" value="{{ year }}">
@@ -730,12 +1098,11 @@ titleInput.addEventListener('keydown', function(e) {
         </button>
       </form>
 
-      <!-- Кнопки управления -->
       {% if files_grouped and files_grouped.get(year) and files_grouped[year].get(months[month]) %}
       <div class="upload-controls">
         <div class="upload-checkbox">
           <label class="small-checkbox-label">
-            <input type="checkbox" id="checkAll"> 
+            <input type="checkbox" id="checkAll">
             Отметить все файлы месяца
           </label>
         </div>
@@ -753,9 +1120,9 @@ titleInput.addEventListener('keydown', function(e) {
 
     <!-- Файлы месяца -->
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-        <h3 style="font-size:1.1rem;color:var(--slate-800);font-weight:800;">Файлы месяца</h3>
-        <span style="font-size:.8rem;background:#e0e7ff;color:var(--indigo-dark);padding:.3rem .8rem;border-radius:9999px;text-transform:uppercase;font-weight:700;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem; flex-wrap: wrap; gap: 1rem;">
+        <h3 style="font-size:1.1rem;">Файлы месяца</h3>
+        <span style="font-size:.8rem;background:rgba(79, 126, 230, 0.1);color:var(--indigo-dark);padding:.3rem .8rem;border-radius:9999px;text-transform:uppercase;font-weight:700;transition:background 0.2s ease, color 0.2s ease;">
           {{ months[month] }} {{ year }}
         </span>
       </div>
@@ -764,14 +1131,14 @@ titleInput.addEventListener('keydown', function(e) {
       <div class="file-list" id="fileList">
         {% for file_info in files_grouped[year][months[month]] %}
         <div class="file-item">
-          <div style="display:flex;flex-direction:column;flex:1;">
+          <div style="display:flex;flex-direction:column;flex:1; min-width: 0;">
             <div class="file-name">
               <input type="checkbox" class="file-checkbox" data-filename="{{ file_info.filename }}">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
               </svg>
-              <span>{{ file_info.filename }}</span>
+              <span style="overflow: hidden; text-overflow: ellipsis;">{{ file_info.filename }}</span>
             </div>
             <div class="file-meta">
               Загружено: {{ file_info.date }} | {{ file_info.uploader }}
@@ -825,181 +1192,240 @@ titleInput.addEventListener('keydown', function(e) {
 <div class="copy-notification" id="copyNotification">Ссылка скопирована!</div>
 
 <script>
-// Функция показа уведомления
-function showCopyNotification() {
-  const notification = document.getElementById('copyNotification');
-  notification.classList.add('show');
-  setTimeout(() => {
-    notification.classList.remove('show');
-  }, 2000);
-}
+document.addEventListener('DOMContentLoaded', function() {
+  let copyTimeout, notificationTimeout;
+  
+  // === ЛОГИКА РЕДАКТИРОВАНИЯ ФИО ДИРЕКТОРА ===
+  const display = document.getElementById('directorNameDisplay');
+  const editBtn = document.getElementById('editDirectorBtn');
+  const form = document.getElementById('directorForm');
+  const cancelBtn = document.getElementById('cancelBtn');
 
-// Копирование ссылки
-document.getElementById('monitoringUrl').addEventListener('click', function() {
-  const text = this.textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    showCopyNotification();
+  if (editBtn && form && cancelBtn && display) {
+    editBtn.addEventListener('click', function() {
+      display.style.display = 'none';
+      editBtn.style.display = 'none';
+      form.style.display = 'flex';
+    });
+
+    cancelBtn.addEventListener('click', function() {
+      form.style.display = 'none';
+      display.style.display = 'inline';
+      editBtn.style.display = 'inline';
+    });
+  }
+
+  // === ЛОГИКА РЕДАКТИРОВАНИЯ НАЗВАНИЯ ШКОЛЫ ===
+  const schoolTitle = document.getElementById('schoolTitle');
+  const editSchoolTitleBtn = document.getElementById('editSchoolTitleBtn');
+  const schoolTitleEditForm = document.getElementById('schoolTitleEditForm');
+  const cancelSchoolTitleBtn = document.getElementById('cancelSchoolTitleBtn');
+
+  if (editSchoolTitleBtn && schoolTitleEditForm && cancelSchoolTitleBtn && schoolTitle) {
+    editSchoolTitleBtn.addEventListener('click', function() {
+      schoolTitle.style.display = 'none';
+      editSchoolTitleBtn.style.display = 'none';
+      schoolTitleEditForm.style.display = 'block';
+    });
+
+    cancelSchoolTitleBtn.addEventListener('click', function() {
+      schoolTitleEditForm.style.display = 'none';
+      schoolTitle.style.display = 'block';
+      editSchoolTitleBtn.style.display = 'inline-block';
+    });
+  }
+
+  // === ЛОГИКА РЕДАКТИРОВАНИЯ ССЫЛКИ НА САЙТ ===
+  const editWebsiteBtn = document.getElementById('editWebsiteBtn');
+  const websiteEditForm = document.getElementById('websiteEditForm');
+  const cancelWebsiteBtn = document.getElementById('cancelWebsiteBtn');
+  const websiteDisplay = document.getElementById('schoolWebsiteDisplay');
+
+  if (editWebsiteBtn && websiteEditForm && cancelWebsiteBtn) {
+    editWebsiteBtn.addEventListener('click', function() {
+      websiteDisplay.style.display = 'none';
+      websiteEditForm.style.display = 'block';
+    });
+
+    cancelWebsiteBtn.addEventListener('click', function() {
+      websiteEditForm.style.display = 'none';
+      websiteDisplay.style.display = 'block';
+    });
+  }
+
+  // === ЛОГИКА РЕДАКТИРОВАНИЯ ССЫЛКИ НА ГОРЯЧЕЕ ПИТАНИЕ ===
+  const editHotMealBtn = document.getElementById('editHotMealBtn');
+  const hotMealEditForm = document.getElementById('hotMealEditForm');
+  const cancelHotMealBtn = document.getElementById('cancelHotMealBtn');
+  const hotMealDisplay = document.getElementById('hotMealDisplay');
+
+  if (editHotMealBtn && hotMealEditForm && cancelHotMealBtn) {
+    editHotMealBtn.addEventListener('click', function() {
+      hotMealDisplay.style.display = 'none';
+      hotMealEditForm.style.display = 'block';
+    });
+
+    cancelHotMealBtn.addEventListener('click', function() {
+      hotMealEditForm.style.display = 'none';
+      hotMealDisplay.style.display = 'block';
+    });
+  }
+
+  // === ФУНКЦИЯ ПОКАЗА УВЕДОМЛЕНИЯ ===
+  function showCopyNotification() {
+    const notification = document.getElementById('copyNotification');
+    if (!notification) return;
     
-    // Также показываем тултип (на всякий случай)
-    const tooltip = document.getElementById('copyTooltip');
-    tooltip.style.opacity = '1';
-    setTimeout(() => {
-      tooltip.style.opacity = '0';
-    }, 2000);
-  }).catch(err => {
-    // Fallback для старых браузеров
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    showCopyNotification();
-  });
-});
+    notification.classList.add('show');
+    
+    if (notificationTimeout) clearTimeout(notificationTimeout);
+    notificationTimeout = setTimeout(() => {
+      notification.classList.remove('show');
+    }, 1500);
+  }
 
-// Управление checkbox'ами
-const checkAll = document.getElementById('checkAll');
-const fileCheckboxes = document.querySelectorAll('.file-checkbox');
+  // === КОПИРОВАНИЕ ССЫЛКИ ===
+  const monitoringUrl = document.getElementById('monitoringUrl');
+  const copyTooltip = document.getElementById('copyTooltip');
 
-if (checkAll) {
-  checkAll.addEventListener('change', function() {
+  if (monitoringUrl) {
+    monitoringUrl.addEventListener('click', function() {
+      const text = this.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        showCopyNotification();
+        
+        if (copyTooltip) {
+          copyTooltip.classList.add('show');
+          
+          if (copyTimeout) clearTimeout(copyTimeout);
+          copyTimeout = setTimeout(() => {
+            copyTooltip.classList.remove('show');
+          }, 1500);
+        }
+      }).catch(() => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showCopyNotification();
+      });
+    });
+  }
+
+  // === УПРАВЛЕНИЕ CHECKBOX'АМИ ===
+  const checkAll = document.getElementById('checkAll');
+  const fileCheckboxes = document.querySelectorAll('.file-checkbox');
+
+  if (checkAll && fileCheckboxes.length > 0) {
+    checkAll.addEventListener('change', function() {
+      fileCheckboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+      });
+    });
+
     fileCheckboxes.forEach(checkbox => {
-      checkbox.checked = this.checked;
+      checkbox.addEventListener('change', function() {
+        const allChecked = Array.from(fileCheckboxes).every(cb => cb.checked);
+        checkAll.checked = allChecked;
+      });
     });
-  });
-}
-
-if (fileCheckboxes.length > 0) {
-  fileCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-      const allChecked = Array.from(fileCheckboxes).every(cb => cb.checked);
-      checkAll.checked = allChecked;
-    });
-  });
-}
-
-// Скачивание выделенных файлов
-document.getElementById('downloadSelected')?.addEventListener('click', function() {
-  const selectedFiles = Array.from(document.querySelectorAll('.file-checkbox:checked'))
-    .map(checkbox => checkbox.dataset.filename);
-  
-  if (selectedFiles.length === 0) {
-    alert('Выберите файлы для скачивания');
-    return;
   }
 
-  // Скачиваем каждый файл по отдельности
-  selectedFiles.forEach(filename => {
-    window.open(`/{{ user.id }}/food/${filename}`, '_blank');
-  });
-});
+  // === СКАЧИВАНИЕ ВЫДЕЛЕННЫХ ФАЙЛОВ ===
+  const downloadSelected = document.getElementById('downloadSelected');
+  if (downloadSelected) {
+    downloadSelected.addEventListener('click', function() {
+      const selectedFiles = Array.from(document.querySelectorAll('.file-checkbox:checked'))
+        .map(checkbox => checkbox.dataset.filename);
+      
+      if (selectedFiles.length === 0) {
+        alert('Выберите файлы для скачивания');
+        return;
+      }
 
-// Удаление выделенных файлов
-const deleteModal = document.getElementById('deleteModal');
-const openConfirmBtn = document.getElementById('openConfirm');
-const cancelDeleteBtn = document.getElementById('cancelDelete');
-const confirmDeleteBtn = document.getElementById('confirmDelete');
-
-openConfirmBtn?.addEventListener('click', function() {
-  const selectedFiles = Array.from(document.querySelectorAll('.file-checkbox:checked'))
-    .map(checkbox => checkbox.dataset.filename);
-  
-  if (selectedFiles.length === 0) {
-    alert('Выберите файлы для удаления');
-    return;
+      selectedFiles.forEach(filename => {
+        window.open(`/{{ user.id }}/food/${filename}`, '_blank');
+      });
+    });
   }
 
-  deleteModal.style.display = 'flex';
-});
+  // === УДАЛЕНИЕ ВЫДЕЛЕННЫХ ФАЙЛОВ ===
+  const deleteModal = document.getElementById('deleteModal');
+  const openConfirmBtn = document.getElementById('openConfirm');
+  const cancelDeleteBtn = document.getElementById('cancelDelete');
+  const confirmDeleteBtn = document.getElementById('confirmDelete');
 
-cancelDeleteBtn?.addEventListener('click', function() {
-  deleteModal.style.display = 'none';
-});
+  if (openConfirmBtn && deleteModal) {
+    openConfirmBtn.addEventListener('click', function() {
+      const selectedFiles = Array.from(document.querySelectorAll('.file-checkbox:checked'))
+        .map(checkbox => checkbox.dataset.filename);
 
-confirmDeleteBtn?.addEventListener('click', function() {
-  const selectedFiles = Array.from(document.querySelectorAll('.file-checkbox:checked'))
-    .map(checkbox => checkbox.dataset.filename);
-  
-  // Создаем форму для массового удаления
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '/delete-files';
-  
-  // Добавляем скрытые поля
-  const uidInput = document.createElement('input');
-  uidInput.type = 'hidden';
-  uidInput.name = 'uid';
-  uidInput.value = '{{ user.id }}';
-  form.appendChild(uidInput);
-  
-  const yearInput = document.createElement('input');
-  yearInput.type = 'hidden';
-  yearInput.name = 'year';
-  yearInput.value = '{{ year }}';
-  form.appendChild(yearInput);
-  
-  const monthInput = document.createElement('input');
-  monthInput.type = 'hidden';
-  monthInput.name = 'month';
-  monthInput.value = '{{ month }}';
-  form.appendChild(monthInput);
-  
-  // Добавляем файлы для удаления
-  selectedFiles.forEach(filename => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'hidden';
-    fileInput.name = 'files';
-    fileInput.value = filename;
-    form.appendChild(fileInput);
-  });
-  
-  // Отправляем форму
-  document.body.appendChild(form);
-  form.submit();
-});
+      if (selectedFiles.length === 0) {
+        alert('Выберите файлы для удаления');
+        return;
+      }
 
-// Закрытие модального окна по клику вне его
-deleteModal?.addEventListener('click', function(e) {
-  if (e.target === deleteModal) {
-    deleteModal.style.display = 'none';
+      deleteModal.style.display = 'flex';
+    });
+  }
+
+  if (cancelDeleteBtn && deleteModal) {
+    cancelDeleteBtn.addEventListener('click', function() {
+      deleteModal.style.display = 'none';
+    });
+  }
+
+  if (confirmDeleteBtn && deleteModal) {
+    confirmDeleteBtn.addEventListener('click', function() {
+      const selectedFiles = Array.from(document.querySelectorAll('.file-checkbox:checked'))
+        .map(checkbox => checkbox.dataset.filename);
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/delete-files';
+      form.style.display = 'none';
+
+      const uidInput = document.createElement('input');
+      uidInput.type = 'hidden';
+      uidInput.name = 'uid';
+      uidInput.value = '{{ user.id }}';
+      form.appendChild(uidInput);
+
+      const yearInput = document.createElement('input');
+      yearInput.type = 'hidden';
+      yearInput.name = 'year';
+      yearInput.value = '{{ year }}';
+      form.appendChild(yearInput);
+
+      const monthInput = document.createElement('input');
+      monthInput.type = 'hidden';
+      monthInput.name = 'month';
+      monthInput.value = '{{ month }}';
+      form.appendChild(monthInput);
+
+      selectedFiles.forEach(filename => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'hidden';
+        fileInput.name = 'files';
+        fileInput.value = filename;
+        form.appendChild(fileInput);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    });
+  }
+
+  if (deleteModal) {
+    deleteModal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+      }
+    });
   }
 });
-
-// Drag and drop функциональность для области загрузки файлов
-const fileUploadArea = document.querySelector('.file-upload-area');
-const fileInput = document.getElementById('fileInput');
-
-if (fileUploadArea && fileInput) {
-  // Подсветка при перетаскивании
-  ['dragenter', 'dragover'].forEach(eventName => {
-    fileUploadArea.addEventListener(eventName, function(e) {
-      e.preventDefault();
-      this.style.borderColor = 'var(--indigo)';
-      this.style.backgroundColor = 'rgba(79,70,229,0.1)';
-    });
-  });
-
-  ['dragleave', 'drop'].forEach(eventName => {
-    fileUploadArea.addEventListener(eventName, function(e) {
-      e.preventDefault();
-      this.style.borderColor = '#d1d5db';
-      this.style.backgroundColor = '';
-    });
-  });
-
-  // Обработка drop
-  fileUploadArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    fileInput.files = e.dataTransfer.files;
-    
-    // Обновляем текст лейбла
-    const label = document.querySelector('.file-input-label');
-    if (e.dataTransfer.files.length > 0) {
-      label.textContent = `Выбрано файлов: ${e.dataTransfer.files.length}`;
-    }
-  });
-}
 </script>
 {% endblock %}
-

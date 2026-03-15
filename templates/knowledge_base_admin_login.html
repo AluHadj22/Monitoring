@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    .login-container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 40px;
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border);
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .login-header h1 {
+        font-size: 2em;
+        color: var(--slate-800);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .login-header p {
+        color: var(--slate-500);
+        font-size: 1.1em;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--slate-700);
+        font-size: 0.95em;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--slate-700);
+        font-size: 1em;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+    
+    .login-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 1.1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+    
+    .error-message {
+        background: #fee2e2;
+        border: 1px solid #f87171;
+        color: #b91c1c;
+        padding: 15px;
+        border-radius: var(--radius-md);
+        margin-bottom: 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: var(--slate-500);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .back-link:hover {
+        color: #10b981;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-header">
+        <h1>
+            <span>📚</span>
+            Вход для администратора
+        </h1>
+        <p>Введите код доступа для управления документами</p>
+    </div>
+    
+    {% if error %}
+    <div class="error-message">
+        <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <circle cx="12" cy="16" r="1" fill="currentColor"/>
+        </svg>
+        {{ error }}
+    </div>
+    {% endif %}
+    
+    <form method="POST" action="/knowledge-base/admin/login">
+        <div class="form-group">
+            <label>📧 Ваш email</label>
+            <input type="email" name="email" placeholder="example@email.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label>👤 Ваше имя (необязательно)</label>
+            <input type="text" name="name" placeholder="Как к вам обращаться">
+        </div>
+        
+        <div class="form-group">
+            <label>🔐 Код доступа</label>
+            <input type="password" name="access_code" placeholder="Введите код доступа" required>
+        </div>
+        
+        <button type="submit" class="login-btn">
+            Войти в панель управления
+        </button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/knowledge-base" class="back-link">← Вернуться в библиотеку</a>
+    </div>
+</div>
+{% endblock %}

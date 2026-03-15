@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border);
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-header h2 {
+        color: var(--slate-700);
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+        color: var(--slate-500);
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--slate-600);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--slate-700);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+
+    .login-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(96, 165, 250, 0.4);
+    }
+
+    .error-message {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .info-box {
+        background: var(--blue-light);
+        border: 1px solid var(--blue);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-top: 1.5rem;
+        color: var(--slate-600);
+        font-size: 0.85rem;
+    }
+
+    .info-box strong {
+        color: var(--blue-dark);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container fade-in">
+    <div class="login-header">
+        <h2>🔐 Вход в панель дашбордов</h2>
+        <p>Введите код доступа для управления дашбордами</p>
+    </div>
+
+    {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/dashboard-admin/login">
+        <div class="form-group">
+            <label>Код доступа</label>
+            <input type="password" name="access_code" placeholder="Введите код" required>
+        </div>
+
+        <button type="submit" class="login-button">Войти в панель управления</button>
+    </form>
+
+    <div class="info-box">
+        <strong>ℹ️ Для просмотра дашбордов</strong><br>
+        Перейдите в раздел <a href="/dashboards" style="color: var(--blue-dark);">Все дашборды</a>
+    </div>
+</div>
+{% endblock %}

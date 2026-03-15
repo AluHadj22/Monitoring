@@ -1,0 +1,418 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    .edit-container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+    
+    .edit-header {
+        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+        color: white;
+        padding: 40px;
+        border-radius: var(--radius-lg);
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-xl);
+        text-align: center;
+    }
+    
+    .edit-header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+    
+    .edit-header p {
+        font-size: 1.2em;
+        opacity: 0.95;
+    }
+    
+    .edit-card {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 40px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: var(--slate-800);
+        font-size: 1.1em;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--slate-700);
+        font-size: 1em;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-item:hover {
+        border-color: #8b5cf6;
+        background: var(--blue-light);
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 1.1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex: 1;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+    }
+    
+    .btn-secondary {
+        background: var(--surface);
+        border: 2px solid var(--border);
+        color: var(--slate-700);
+    }
+    
+    .btn-secondary:hover {
+        border-color: #8b5cf6;
+        color: #8b5cf6;
+    }
+    
+    .btn-danger {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+    }
+    
+    .preview-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        border: 1px dashed var(--border);
+    }
+    
+    .preview-section h3 {
+        font-size: 1.2em;
+        color: var(--slate-800);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .current-file {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: var(--card);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+    }
+    
+    .file-icon {
+        font-size: 2.5em;
+    }
+    
+    .file-info {
+        flex: 1;
+    }
+    
+    .file-name {
+        font-weight: 700;
+        color: var(--slate-800);
+        margin-bottom: 5px;
+    }
+    
+    .file-meta {
+        font-size: 0.9em;
+        color: var(--slate-500);
+    }
+    
+    .tags-input {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        min-height: 50px;
+    }
+    
+    .tag {
+        background: var(--blue-light);
+        color: var(--blue-dark);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .tag-remove {
+        cursor: pointer;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+    
+    .tag-remove:hover {
+        color: #ef4444;
+    }
+    
+    .tags-input input {
+        border: none;
+        background: transparent;
+        padding: 5px;
+        flex: 1;
+        min-width: 100px;
+    }
+    
+    .tags-input input:focus {
+        outline: none;
+    }
+    
+    @media (max-width: 768px) {
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .checkbox-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+
+<div class="edit-container">
+    <div class="edit-header">
+        <h1>✏️ Редактирование документа</h1>
+        <p>Измените информацию о документе</p>
+    </div>
+    
+    <div class="edit-card">
+        <form method="POST" action="/knowledge-base/admin/edit/{{ document.id }}">
+            <div class="form-group">
+                <label>Название документа</label>
+                <input type="text" name="title" class="form-control" value="{{ document.title }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea name="description" class="form-control" rows="5">{{ document.description or '' }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Категория</label>
+                <select name="category_id" class="form-control">
+                    <option value="">-- Без категории --</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if document.category_id == category.id %}selected{% endif %}>
+                        {{ category.icon }} {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Тип документа</label>
+                <select name="document_type" class="form-control">
+                    {% for key, value in document_types.items() %}
+                    <option value="{{ key }}" {% if document.document_type == key %}selected{% endif %}>
+                        {{ value }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Теги</label>
+                <div class="tags-input" id="tagsContainer">
+                    <div id="tagsList"></div>
+                    <input type="text" id="tagInput" placeholder="Введите тег и нажмите Enter">
+                </div>
+                <input type="hidden" name="tags" id="tagsHidden" value="{{ document.tags or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="is_published" value="true" {% if document.is_published %}checked{% endif %}>
+                        <span>📢 Опубликован (виден всем пользователям)</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="is_featured" value="true" {% if document.is_featured %}checked{% endif %}>
+                        <span>⭐ Рекомендуемый документ</span>
+                    </div>
+                </label>
+            </div>
+            
+            {% if document.file_path %}
+            <div class="preview-section">
+                <h3>📎 Текущий файл</h3>
+                <div class="current-file">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                        <div class="file-name">{{ document.title }}{{ document.file_extension }}</div>
+                        <div class="file-meta">
+                            Размер: {{ (document.file_size / 1024)|round(1) }} KB • 
+                            Загружен: {{ document.created_at.strftime('%d.%m.%Y') }}
+                        </div>
+                    </div>
+                    <a href="/knowledge-base/download/{{ document.id }}" class="btn btn-secondary" style="padding: 10px 20px;">
+                        Скачать
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">
+                    💾 Сохранить изменения
+                </button>
+                <a href="/knowledge-base/document/{{ document.id }}" class="btn btn-secondary">
+                    ← Отмена
+                </a>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    🗑️ Удалить
+                </button>
+            </div>
+        </form>
+        
+        <form method="POST" action="/knowledge-base/admin/delete/{{ document.id }}" id="deleteForm" style="display: none;">
+        </form>
+    </div>
+</div>
+
+<script>
+// Теги
+const tagsContainer = document.getElementById('tagsContainer');
+const tagsList = document.getElementById('tagsList');
+const tagInput = document.getElementById('tagInput');
+const tagsHidden = document.getElementById('tagsHidden');
+let tags = [];
+
+// Загружаем существующие теги
+if (tagsHidden.value) {
+    tags = tagsHidden.value.split(',').map(t => t.trim()).filter(t => t);
+    renderTags();
+}
+
+tagInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const tag = this.value.trim();
+        if (tag && !tags.includes(tag)) {
+            tags.push(tag);
+            renderTags();
+            this.value = '';
+        }
+    }
+});
+
+function renderTags() {
+    tagsList.innerHTML = '';
+    tags.forEach(tag => {
+        const tagEl = document.createElement('span');
+        tagEl.className = 'tag';
+        tagEl.innerHTML = `${tag} <span class="tag-remove" onclick="removeTag('${tag}')">&times;</span>`;
+        tagsList.appendChild(tagEl);
+    });
+    tagsHidden.value = tags.join(',');
+}
+
+function removeTag(tag) {
+    tags = tags.filter(t => t !== tag);
+    renderTags();
+}
+
+// Подтверждение удаления
+function confirmDelete() {
+    if (confirm('Вы уверены, что хотите удалить этот документ? Это действие нельзя отменить.')) {
+        document.getElementById('deleteForm').submit();
+    }
+}
+
+// Предпросмотр изменений (опционально)
+const form = document.querySelector('form');
+form.addEventListener('submit', function(e) {
+    const title = document.querySelector('input[name="title"]').value;
+    if (!title.trim()) {
+        e.preventDefault();
+        alert('Название документа не может быть пустым');
+    }
+});
+</script>
+{% endblock %}

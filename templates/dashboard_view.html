@@ -1,0 +1,1229 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css">
+<style>
+    .dashboard-view {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        color: var(--slate-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-header p {
+        color: var(--slate-500);
+        font-size: 1.1rem;
+    }
+
+    .dashboard-meta {
+        display: flex;
+        gap: 1rem;
+        color: var(--slate-400);
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .grid-item {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        transition: transform 0.2s ease;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .grid-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .element-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--slate-600);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+    }
+
+    .element-content {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+    }
+
+    .chart-container {
+        width: 100%;
+        height: 100%;
+        min-height: 250px;
+        position: relative;
+    }
+
+    .text-element {
+        font-size: 1rem;
+        color: var(--slate-700);
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        padding: 0.5rem;
+    }
+
+    .list-element {
+        padding-left: 0.5rem;
+    }
+
+    .list-element ul,
+    .list-element ol {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .list-element li {
+        color: var(--slate-700);
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+
+    .table-element {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+    }
+
+    .table-element table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .table-element th {
+        background: var(--blue-light);
+        color: var(--slate-700);
+        font-weight: 600;
+        padding: 0.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .table-element td {
+        padding: 0.5rem;
+        border: 1px solid var(--border);
+        color: var(--slate-600);
+    }
+
+    .table-element tr:hover {
+        background: var(--surface);
+    }
+
+    .gauge-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gauge-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--blue);
+        line-height: 1.2;
+    }
+
+    .gauge-label {
+        font-size: 0.9rem;
+        color: var(--slate-500);
+        margin-bottom: 10px;
+    }
+
+    .gauge-bar {
+        width: 100%;
+        height: 20px;
+        background: var(--surface);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .gauge-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), #818cf8);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        overflow-y: auto;
+    }
+
+    .progress-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+    }
+
+    .progress-label {
+        color: var(--slate-600);
+        font-weight: 500;
+    }
+
+    .progress-percent {
+        color: var(--blue);
+        font-weight: 600;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--surface);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), #818cf8);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .sparkline-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sparkline-svg {
+        width: 100%;
+        height: 70%;
+        min-height: 60px;
+    }
+
+    .sparkline-line {
+        fill: none;
+        stroke: var(--blue);
+        stroke-width: 2;
+    }
+
+    .sparkline-area {
+        fill: rgba(96, 165, 250, 0.1);
+    }
+
+    .sparkline-values {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--slate-500);
+        margin-top: 5px;
+    }
+
+    .slicer-component {
+        padding: 0.5rem;
+    }
+
+    .slicer-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .slicer-btn {
+        padding: 4px 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: default;
+        font-size: 0.8rem;
+        color: var(--slate-600);
+    }
+
+    .slicer-btn.active {
+        background: var(--blue);
+        color: white;
+        border-color: var(--blue);
+    }
+
+    /* Математические компоненты */
+    .matrix-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+    }
+
+    .matrix-brackets {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .matrix-left-bracket,
+    .matrix-right-bracket {
+        font-size: 2rem;
+        font-weight: 300;
+        color: var(--slate-500);
+        line-height: 1;
+    }
+
+    .matrix-table {
+        border-collapse: collapse;
+        margin: 0 auto;
+    }
+
+    .matrix-table td {
+        padding: 6px;
+        text-align: center;
+        border: 1px solid var(--border);
+        min-width: 50px;
+        color: var(--slate-700);
+    }
+
+    .formula-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .formula-display {
+        font-size: 1.2rem;
+        text-align: center;
+        padding: 10px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        color: var(--slate-800);
+        overflow-x: auto;
+        white-space: nowrap;
+        font-family: 'Courier New', monospace;
+    }
+
+    .formula-variables {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 5px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+    }
+
+    .variable-item {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+        background: var(--card);
+        border-radius: var(--radius-sm);
+        color: var(--blue);
+        font-family: monospace;
+    }
+
+    .statistics-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow: auto;
+    }
+
+    .stats-input {
+        font-size: 0.8rem;
+        padding: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--slate-600);
+        font-family: monospace;
+    }
+
+    .stats-results {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .stat-item {
+        padding: 6px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        color: var(--slate-500);
+        margin-bottom: 2px;
+    }
+
+    .stat-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--blue);
+    }
+
+    .percentage-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .percentage-calculator {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .percentage-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .percentage-label {
+        min-width: 60px;
+        font-size: 0.8rem;
+        color: var(--slate-600);
+    }
+
+    .percentage-value {
+        flex: 1;
+        padding: 4px 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--blue);
+        font-weight: 600;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .percentage-result {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--blue);
+        text-align: center;
+        padding: 10px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+    }
+
+    .ratio-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .ratio-inputs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .ratio-field {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .ratio-field span {
+        font-size: 1rem;
+        color: var(--slate-700);
+    }
+
+    .ratio-field label {
+        font-size: 0.7rem;
+        color: var(--slate-500);
+    }
+
+    .ratio-equals {
+        font-size: 1rem;
+        color: var(--slate-400);
+    }
+
+    .ratio-result {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--blue);
+        text-align: center;
+        padding: 8px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+    }
+
+    .function-plot-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .function-expression {
+        font-size: 0.9rem;
+        padding: 4px 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--slate-700);
+        font-family: monospace;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .function-canvas {
+        width: 100%;
+        height: 120px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+    }
+
+    .comparison-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow-y: auto;
+    }
+
+    .comparison-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .comparison-label {
+        width: 60px;
+        font-size: 0.8rem;
+        color: var(--slate-600);
+    }
+
+    .comparison-bars {
+        flex: 1;
+        display: flex;
+        gap: 2px;
+        height: 20px;
+    }
+
+    .comparison-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), #818cf8);
+        border-radius: 3px;
+    }
+
+    .comparison-bar.secondary {
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .comparison-value {
+        width: 50px;
+        font-size: 0.8rem;
+        color: var(--slate-600);
+        text-align: right;
+    }
+
+    .timeline-component {
+        padding: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .timeline-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--blue);
+    }
+
+    .timeline-line {
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(90deg, var(--blue), #818cf8);
+        border-radius: 1px;
+    }
+
+    .timeline-label {
+        font-size: 0.8rem;
+        color: var(--slate-600);
+        min-width: 50px;
+    }
+
+    .icon-component {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--blue);
+    }
+
+    .badge-component {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .badge {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge.primary {
+        background: var(--blue);
+        color: white;
+    }
+
+    .badge.success {
+        background: #10b981;
+        color: white;
+    }
+
+    .badge.warning {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .badge.danger {
+        background: #ef4444;
+        color: white;
+    }
+
+    .badge.info {
+        background: #8b5cf6;
+        color: white;
+    }
+
+    .share-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .share-button {
+        padding: 0.75rem 1.5rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--slate-600);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .share-button:hover {
+        background: var(--blue);
+        color: white;
+        border-color: var(--blue);
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-view fade-in">
+    <div class="dashboard-header">
+        <h1>{{ dashboard.title }}</h1>
+        {% if dashboard.description %}
+        <p>{{ dashboard.description }}</p>
+        {% endif %}
+        <div class="dashboard-meta">
+            <span>📅 {{ dashboard.updated_at.strftime('%d.%m.%Y %H:%M') if dashboard.updated_at else '—' }}</span>
+            <span>📊 {{ dashboard.elements|length }} элементов</span>
+        </div>
+    </div>
+
+    <div class="dashboard-grid" id="dashboardGrid">
+        {% for element in dashboard.elements %}
+        <div class="grid-item" style="grid-column: span {{ element.width }}; grid-row: span {{ element.height }};">
+            {% if element.title %}
+            <div class="element-title">{{ element.title }}</div>
+            {% endif %}
+            
+            <div class="element-content">
+                {% if element.element_type == 'chart' %}
+                <div class="chart-container">
+                    <canvas id="chart-{{ element.id }}"></canvas>
+                </div>
+                
+                {% elif element.element_type == 'text' %}
+                <div class="text-element" style="font-size: {{ element.settings.textSize }}; color: {{ element.settings.textColor }};">
+                    {{ element.content.text | default('') | replace('\n', '<br>') | safe }}
+                </div>
+                
+                {% elif element.element_type == 'list' %}
+                <div class="list-element">
+                    {% set items = element.content.get('items', []) %}
+                    {% if items %}
+                        {% set list_style = element.content.get('listStyle', 'disc') %}
+                        {% if list_style.startswith('decimal') or list_style.startswith('lower') or list_style.startswith('upper') %}
+                        <ol style="list-style-type: {{ list_style }}; font-size: {{ element.settings.textSize }}; color: {{ element.settings.textColor }};">
+                        {% else %}
+                        <ul style="list-style-type: {{ list_style }}; font-size: {{ element.settings.textSize }}; color: {{ element.settings.textColor }};">
+                        {% endif %}
+                            {% for item in items %}
+                            <li>{{ item.text | default('') }}</li>
+                            {% endfor %}
+                        {% if list_style.startswith('decimal') or list_style.startswith('lower') or list_style.startswith('upper') %}
+                        </ol>
+                        {% else %}
+                        </ul>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
+                {% elif element.element_type == 'table' %}
+                <div class="table-element">
+                    <table>
+                        <thead>
+                            <tr>
+                                {% for header in element.content.get('headers', []) %}
+                                <th>{{ header | default('') }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in element.content.get('rows', []) %}
+                            <tr>
+                                {% for cell in row %}
+                                <td>{{ cell | default('') }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% elif element.element_type == 'gauge' %}
+                <div class="gauge-component">
+                    <div class="gauge-value" style="color: {{ element.content.get('color', '#60a5fa') }};">
+                        {{ element.content.get('value', 0) }}
+                    </div>
+                    <div class="gauge-label">{{ element.content.get('label', 'Прогресс') }}</div>
+                    <div class="gauge-bar">
+                        {% set value = element.content.get('value', 0) | float %}
+                        {% set max_val = element.content.get('max', 100) | float %}
+                        {% set percent = (value / max_val * 100) if max_val > 0 else 0 %}
+                        <div class="gauge-fill" style="width: {{ percent }}%; background: {{ element.content.get('color', '#60a5fa') }};"></div>
+                    </div>
+                </div>
+
+                {% elif element.element_type == 'progress' %}
+                <div class="progress-component">
+                    {% set items = element.content.get('items', []) %}
+                    {% if items %}
+                        {% for item in items %}
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <span class="progress-label">{{ item.get('label', '') }}</span>
+                                <span class="progress-percent" style="color: {{ element.content.get('color', '#60a5fa') }};">
+                                    {{ item.get('value', 0) }}%
+                                </span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ item.get('value', 0) }}%; background: {{ element.content.get('color', '#60a5fa') }};"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {% elif element.element_type == 'sparkline' %}
+                <div class="sparkline-component">
+                    <svg viewBox="0 0 100 50" class="sparkline-svg">
+                        {% set data = element.content.get('data', []) %}
+                        {% if data and data|length > 0 %}
+                            {% set max_val = data|max %}
+                            {% set min_val = data|min %}
+                            {% set range = max_val - min_val if max_val != min_val else 1 %}
+                            {% set points = [] %}
+                            {% for val in data %}
+                                {% set x = (loop.index0 / (data|length - 1)) * 100 %}
+                                {% set y = 50 - ((val - min_val) / range) * 45 %}
+                                {% set _ = points.append(x ~ ',' ~ y) %}
+                            {% endfor %}
+                            {% set points_str = points|join(' ') %}
+                            {% if element.content.get('showArea', false) %}
+                            <polygon points="{{ points_str }} 100,50 0,50" class="sparkline-area" fill="{{ element.content.get('color', '#60a5fa') }}20" />
+                            {% endif %}
+                            <polyline points="{{ points_str }}" class="sparkline-line" stroke="{{ element.content.get('color', '#60a5fa') }}" fill="none" />
+                        {% endif %}
+                    </svg>
+                    {% set labels = element.content.get('labels', []) %}
+                    {% if labels %}
+                    <div class="sparkline-values">
+                        {% for label in labels %}
+                        <span>{{ label }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% elif element.element_type == 'slicer' %}
+                <div class="slicer-component">
+                    <div class="slicer-buttons">
+                        {% for val in element.content.get('values', []) %}
+                        <span class="slicer-btn {% if val == element.content.get('activeValue') %}active{% endif %}">{{ val }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% elif element.element_type == 'matrix' %}
+                <div class="matrix-component">
+                    <div class="matrix-brackets">
+                        <span class="matrix-left-bracket">[</span>
+                        <table class="matrix-table">
+                            {% set matrix_data = element.content.get('data', []) %}
+                            {% for row in matrix_data %}
+                            <tr>
+                                {% for cell in row %}
+                                <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                        <span class="matrix-right-bracket">]</span>
+                    </div>
+                </div>
+
+                {% elif element.element_type == 'formula' %}
+                <div class="formula-component">
+                    <div class="formula-display" style="font-size: {{ element.content.get('size', 24) }}px; color: {{ element.content.get('color', '#334155') }};">
+                        {{ element.content.get('expression', '') }}
+                    </div>
+                    <div class="formula-variables">
+                        {% for var in element.content.get('variables', []) %}
+                        <span class="variable-item">{{ var }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% elif element.element_type == 'statistics' %}
+                <div class="statistics-component">
+                    {% set data_str = element.content.get('data', '') %}
+                    {% set data = data_str.split(',') | map('trim') | map('float') | select('defined') | list %}
+                    {% set stats = element.content.get('stats', {}) %}
+                    {% set stats_color = element.content.get('color', '#60a5fa') %}
+                    
+                    <div class="stats-input">{{ data_str }}</div>
+                    <div class="stats-results">
+                        {% if stats.get('mean', true) and data|length > 0 %}
+                            {% set mean = data | sum / data | length %}
+                            <div class="stat-item">
+                                <div class="stat-label">Среднее</div>
+                                <div class="stat-value" style="color: {{ stats_color }};">{{ "%.2f"|format(mean) }}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if stats.get('median', true) and data|length > 0 %}
+                            {% set sorted = data | sort %}
+                            {% if sorted|length % 2 == 0 %}
+                                {% set median = (sorted[sorted|length//2 - 1] + sorted[sorted|length//2]) / 2 %}
+                            {% else %}
+                                {% set median = sorted[sorted|length//2] %}
+                            {% endif %}
+                            <div class="stat-item">
+                                <div class="stat-label">Медиана</div>
+                                <div class="stat-value" style="color: {{ stats_color }};">{{ "%.2f"|format(median) }}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if stats.get('min', true) and data|length > 0 %}
+                            <div class="stat-item">
+                                <div class="stat-label">Минимум</div>
+                                <div class="stat-value" style="color: {{ stats_color }};">{{ data | min }}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if stats.get('max', true) and data|length > 0 %}
+                            <div class="stat-item">
+                                <div class="stat-label">Максимум</div>
+                                <div class="stat-value" style="color: {{ stats_color }};">{{ data | max }}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if stats.get('sum', true) and data|length > 0 %}
+                            <div class="stat-item">
+                                <div class="stat-label">Сумма</div>
+                                <div class="stat-value" style="color: {{ stats_color }};">{{ data | sum }}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if stats.get('count', true) %}
+                            <div class="stat-item">
+                                <div class="stat-label">Количество</div>
+                                <div class="stat-value" style="color: {{ stats_color }};">{{ data | length }}</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% elif element.element_type == 'percentage' %}
+                <div class="percentage-component">
+                    <div class="percentage-calculator">
+                        <div class="percentage-row">
+                            <span class="percentage-label">Число:</span>
+                            <span class="percentage-value">{{ element.content.get('num', 100) }}</span>
+                        </div>
+                        <div class="percentage-row">
+                            <span class="percentage-label">Процент:</span>
+                            <span class="percentage-value">{{ element.content.get('perc', 15) }}%</span>
+                        </div>
+                        <div class="percentage-result" style="color: {{ element.content.get('color', '#60a5fa') }};">
+                            {{ (element.content.get('num', 100) * element.content.get('perc', 15) / 100) | round(2) }}
+                        </div>
+                    </div>
+                </div>
+
+                {% elif element.element_type == 'ratio' %}
+                <div class="ratio-component">
+                    <div class="ratio-inputs">
+                        <div class="ratio-field">
+                            <span>{{ element.content.get('a', 2) }}</span>
+                            <label>A</label>
+                        </div>
+                        <span class="ratio-equals">:</span>
+                        <div class="ratio-field">
+                            <span>{{ element.content.get('b', 3) }}</span>
+                            <label>B</label>
+                        </div>
+                        <span class="ratio-equals">=</span>
+                        <div class="ratio-field">
+                            <span>{{ element.content.get('c', 4) }}</span>
+                            <label>C</label>
+                        </div>
+                        <span class="ratio-equals">:</span>
+                        <div class="ratio-field">
+                            <span>{{ element.content.get('d', 6) }}</span>
+                            <label>D</label>
+                        </div>
+                    </div>
+                    <div class="ratio-result" style="color: {% if element.content.get('a',2)*element.content.get('d',6) == element.content.get('b',3)*element.content.get('c',4) %}#10b981{% else %}#ef4444{% endif %};">
+                        {% if element.content.get('a',2)*element.content.get('d',6) == element.content.get('b',3)*element.content.get('c',4) %}
+                            Пропорция верна ✓
+                        {% else %}
+                            Пропорция не верна ✗
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% elif element.element_type == 'function' %}
+                <div class="function-plot-component">
+                    <div class="function-expression">{{ element.content.get('expression', 'sin(x)') }}</div>
+                    <canvas class="function-canvas" id="function-{{ element.id }}"></canvas>
+                </div>
+
+                {% elif element.element_type == 'comparison' %}
+                <div class="comparison-component">
+                    {% set comp_items = element.content.get('items', []) %}
+                    {% set max_val = 0 %}
+                    {% for item in comp_items %}
+                        {% set max_val = [max_val, item.value1|default(0), item.value2|default(0)] | max %}
+                    {% endfor %}
+                    
+                    {% for item in comp_items %}
+                    <div class="comparison-item">
+                        <span class="comparison-label">{{ item.label }}</span>
+                        <div class="comparison-bars">
+                            <div class="comparison-bar" style="width: {{ (item.value1|default(0) / max_val * 100) if max_val > 0 else 0 }}%; background: {{ element.content.get('color1', '#60a5fa') }};"></div>
+                            <div class="comparison-bar secondary" style="width: {{ (item.value2|default(0) / max_val * 100) if max_val > 0 else 0 }}%; background: {{ element.content.get('color2', '#f59e0b') }};"></div>
+                        </div>
+                        <span class="comparison-value">{{ item.value1 }}/{{ item.value2 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% elif element.element_type == 'timeline' %}
+                <div class="timeline-component">
+                    {% set timeline_items = element.content.get('items', []) %}
+                    {% set max_timeline = 0 %}
+                    {% for item in timeline_items %}
+                        {% set max_timeline = [max_timeline, item.value|default(0)] | max %}
+                    {% endfor %}
+                    
+                    {% for item in timeline_items %}
+                    <div class="timeline-item">
+                        <span class="timeline-label">{{ item.label }}</span>
+                        <div class="timeline-dot" style="background: {{ element.content.get('color', '#60a5fa') }};"></div>
+                        <div class="timeline-line" style="width: {{ (item.value|default(0) / max_timeline * 100) if max_timeline > 0 else 0 }}%; background: linear-gradient(90deg, {{ element.content.get('color', '#60a5fa') }}, #818cf8);"></div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% elif element.element_type == 'icon' %}
+                <div class="icon-component">
+                    <i class="fas {{ element.content.get('name', 'fa-star') }}" style="font-size: {{ element.content.get('size', 48) }}px; color: {{ element.content.get('color', '#60a5fa') }};"></i>
+                </div>
+
+                {% elif element.element_type == 'badge' %}
+                <div class="badge-component">
+                    <span class="badge {{ element.content.get('type', 'primary') }}" style="font-size: {{ element.content.get('size', 14) }}px;">
+                        {{ element.content.get('text', 'Новинка') }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="share-buttons">
+        <button class="share-button" onclick="copyLink()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            Скопировать ссылку
+        </button>
+        <a href="/dashboards" class="share-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h2l3-9 4 18 3-9h2"/>
+            </svg>
+            Все дашборды
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Создаем объект для хранения графиков
+const charts = {};
+
+// Функция для инициализации графиков
+function initCharts() {
+    {% for element in dashboard.elements if element.element_type == 'chart' %}
+    (function() {
+        const canvas = document.getElementById('chart-{{ element.id }}');
+        if (!canvas) return;
+        
+        try {
+            const ctx = canvas.getContext('2d');
+            
+            // Данные для графика
+            const chartData = {{ element.content|tojson }};
+            
+            // Определяем тип диаграммы
+            const chartType = '{{ element.chart_type }}';
+            
+            // Проверяем, нужно ли показывать подписи
+            const showDataLabels = {% if element.options and element.options.showDataLabels %}true{% else %}false{% endif %};
+            const dataLabelsColor = '{{ element.options.dataLabelsColor if element.options and element.options.dataLabelsColor else "#334155" }}';
+            
+            // Базовые опции
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                    }
+                },
+                // Добавляем отступ сверху для названия
+                layout: {
+                    padding: {
+                        top: 25
+                    }
+                }
+            };
+            
+            // Добавляем подписи данных, если нужно
+            if (showDataLabels) {
+                if (chartType === 'pie' || chartType === 'doughnut') {
+                    options.plugins.datalabels = {
+                        display: true,
+                        color: dataLabelsColor,
+                        formatter: (value) => value,
+                        font: { size: 11, weight: '500' }
+                    };
+                } else {
+                    options.plugins.datalabels = {
+                        display: true,
+                        color: dataLabelsColor,
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 4,
+                        font: { size: 10, weight: '500' }
+                    };
+                }
+            }
+            
+            // Создаем график
+            charts['{{ element.id }}'] = new Chart(ctx, {
+                type: chartType,
+                data: chartData,
+                options: options
+            });
+        } catch (e) {
+            console.error('Error creating chart {{ element.id }}:', e);
+        }
+    })();
+    {% endfor %}
+    
+    // Инициализация графиков функций
+    {% for element in dashboard.elements if element.element_type == 'function' %}
+    (function() {
+        const canvas = document.getElementById('function-{{ element.id }}');
+        if (!canvas) return;
+        
+        try {
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            const expr = '{{ element.content.expression|default("sin(x)") }}';
+            const xMin = {{ element.content.xMin|default(-5) }};
+            const xMax = {{ element.content.xMax|default(5) }};
+            const color = '{{ element.content.color|default("#60a5fa") }}';
+            
+            // Очищаем canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Рисуем оси
+            ctx.beginPath();
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            
+            // Ось X
+            ctx.moveTo(0, height/2);
+            ctx.lineTo(width, height/2);
+            
+            // Ось Y
+            ctx.moveTo(width/2, 0);
+            ctx.lineTo(width/2, height);
+            ctx.stroke();
+            
+            // Рисуем функцию
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            
+            const steps = 100;
+            let first = true;
+            
+            for (let i = 0; i <= steps; i++) {
+                const x = xMin + (xMax - xMin) * i / steps;
+                let y;
+                
+                // Простой парсер выражений
+                try {
+                    // Заменяем ^ на ** для возведения в степень
+                    let func = expr.replace(/\^/g, '**');
+                    // Заменяем математические функции
+                    func = func.replace(/sin\(/g, 'Math.sin(')
+                               .replace(/cos\(/g, 'Math.cos(')
+                               .replace(/tan\(/g, 'Math.tan(')
+                               .replace(/sqrt\(/g, 'Math.sqrt(')
+                               .replace(/log\(/g, 'Math.log(')
+                               .replace(/abs\(/g, 'Math.abs(');
+                    
+                    // Вычисляем значение
+                    y = eval(func);
+                } catch(e) {
+                    console.error('Error evaluating function:', e);
+                    return;
+                }
+                
+                const screenX = (x - xMin) / (xMax - xMin) * width;
+                const screenY = height/2 - y * height/10; // Масштабируем
+                
+                if (first) {
+                    ctx.moveTo(screenX, screenY);
+                    first = false;
+                } else {
+                    ctx.lineTo(screenX, screenY);
+                }
+            }
+            
+            ctx.stroke();
+        } catch (e) {
+            console.error('Error creating function plot:', e);
+        }
+    })();
+    {% endfor %}
+}
+
+// Инициализация после загрузки страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initCharts();
+});
+
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Ссылка скопирована в буфер обмена');
+}
+</script>
+{% endblock %}

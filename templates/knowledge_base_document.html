@@ -1,0 +1,572 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    .document-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+    
+    .document-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 40px;
+        border-radius: var(--radius-lg);
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .document-header::before {
+        content: '📄';
+        position: absolute;
+        right: 30px;
+        bottom: 20px;
+        font-size: 100px;
+        opacity: 0.1;
+        transform: rotate(10deg);
+    }
+    
+    .document-header h1 {
+        font-size: 2.5em;
+        margin-bottom: 15px;
+        line-height: 1.3;
+    }
+    
+    .document-meta-header {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        background: rgba(255,255,255,0.2);
+        padding: 8px 15px;
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .document-content {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 25px;
+    }
+    
+    .document-main {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 35px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+    }
+    
+    .document-section {
+        margin-bottom: 30px;
+    }
+    
+    .document-section h2 {
+        font-size: 1.5em;
+        color: var(--slate-800);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--border);
+    }
+    
+    .document-description {
+        font-size: 1.1em;
+        line-height: 1.8;
+        color: var(--slate-600);
+        white-space: pre-wrap;
+    }
+    
+    .document-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .tag {
+        background: var(--blue-light);
+        color: var(--blue-dark);
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+    
+    .document-sidebar {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 25px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .info-card {
+        margin-bottom: 25px;
+    }
+    
+    .info-card h3 {
+        font-size: 1.2em;
+        color: var(--slate-800);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .info-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .info-list li {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .info-list li:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: var(--slate-500);
+        font-weight: 600;
+    }
+    
+    .info-value {
+        color: var(--slate-800);
+        font-weight: 700;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 25px;
+    }
+    
+    .download-btn {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        text-decoration: none;
+        padding: 18px;
+        border-radius: var(--radius-md);
+        font-weight: 700;
+        font-size: 1.2em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+    
+    .favorite-btn-large {
+        background: var(--surface);
+        border: 2px solid var(--border);
+        color: var(--slate-700);
+        text-decoration: none;
+        padding: 15px;
+        border-radius: var(--radius-md);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .favorite-btn-large:hover {
+        border-color: #fbbf24;
+        color: #fbbf24;
+    }
+    
+    .favorite-btn-large.active {
+        background: #fbbf24;
+        color: white;
+        border-color: #fbbf24;
+    }
+    
+    .admin-actions {
+        margin-top: 25px;
+        padding: 20px;
+        background: var(--blue-light);
+        border-radius: var(--radius-md);
+    }
+    
+    .admin-actions h4 {
+        color: var(--blue-dark);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .admin-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .admin-btn {
+        padding: 12px;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .admin-btn.edit {
+        background: var(--blue-dark);
+        color: white;
+    }
+    
+    .admin-btn.edit:hover {
+        background: #1e40af;
+    }
+    
+    .admin-btn.delete {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .admin-btn.delete:hover {
+        background: #dc2626;
+    }
+    
+    .similar-docs {
+        margin-top: 40px;
+    }
+    
+    .similar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .similar-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .similar-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        border-color: #10b981;
+    }
+    
+    .similar-title {
+        font-weight: 700;
+        color: var(--slate-800);
+        margin-bottom: 10px;
+    }
+    
+    .similar-meta {
+        font-size: 0.9em;
+        color: var(--slate-500);
+        display: flex;
+        gap: 10px;
+    }
+    
+    .comments-section {
+        margin-top: 40px;
+    }
+    
+    .comment-form {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .comment-form textarea {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--card);
+        color: var(--slate-700);
+        margin-bottom: 15px;
+        resize: vertical;
+    }
+    
+    .comment-form button {
+        padding: 12px 25px;
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .comment-form button:hover {
+        background: #059669;
+    }
+    
+    .comment {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .comment-author {
+        font-weight: 700;
+        color: var(--slate-800);
+    }
+    
+    .comment-date {
+        color: var(--slate-500);
+        font-size: 0.9em;
+    }
+    
+    .comment-content {
+        color: var(--slate-600);
+        line-height: 1.6;
+    }
+    
+    @media (max-width: 768px) {
+        .document-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .document-sidebar {
+            position: static;
+        }
+        
+        .admin-buttons {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="document-container">
+    <div class="document-header">
+        <h1>{{ document.title }}</h1>
+        <div class="document-meta-header">
+            <span class="meta-item">{{ document_types[document.document_type] }}</span>
+            <span class="meta-item">📅 {{ document.created_at.strftime('%d.%m.%Y') }}</span>
+            <span class="meta-item">📥 {{ document.downloads_count }} скачиваний</span>
+            <span class="meta-item">👁️ {{ document.views_count }} просмотров</span>
+        </div>
+    </div>
+    
+    <div class="document-content">
+        <div class="document-main">
+            {% if document.description %}
+            <div class="document-section">
+                <h2>📝 Описание</h2>
+                <div class="document-description">{{ document.description }}</div>
+            </div>
+            {% endif %}
+            
+            {% if document.tags %}
+            <div class="document-section">
+                <h2>🏷️ Теги</h2>
+                <div class="document-tags">
+                    {% for tag in document.tags.split(',') %}
+                    <span class="tag">{{ tag.strip() }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="document-section">
+                <h2>💬 Комментарии</h2>
+                
+                {% if user_email %}
+                <form class="comment-form" method="POST" action="/knowledge-base/comment/{{ document.id }}">
+                    <textarea name="content" rows="3" placeholder="Оставьте комментарий..." required></textarea>
+                    <input type="hidden" name="user_name" value="{{ user_name or 'Пользователь' }}">
+                    <button type="submit">Отправить комментарий</button>
+                </form>
+                {% else %}
+                <p style="text-align: center; padding: 20px; color: var(--slate-500);">
+                    <a href="/login" style="color: #10b981;">Войдите</a>, чтобы оставить комментарий
+                </p>
+                {% endif %}
+                
+                {% if comments %}
+                    {% for comment in comments %}
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">{{ comment.user_name or 'Гость' }}</span>
+                            <span class="comment-date">{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                        </div>
+                        <div class="comment-content">{{ comment.content }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; padding: 20px; color: var(--slate-500);">
+                        Пока нет комментариев
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="document-sidebar">
+            <div class="info-card">
+                <h3>📊 Информация</h3>
+                <ul class="info-list">
+                    <li>
+                        <span class="info-label">Тип:</span>
+                        <span class="info-value">{{ document_types[document.document_type] }}</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Категория:</span>
+                        <span class="info-value">
+                            {% if category %}
+                                {{ category.icon }} {{ category.name }}
+                            {% else %}
+                                Без категории
+                            {% endif %}
+                        </span>
+                    </li>
+                    <li>
+                        <span class="info-label">Загрузил:</span>
+                        <span class="info-value">{{ document.uploaded_by or 'Администратор' }}</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Размер:</span>
+                        <span class="info-value">{{ (document.file_size / 1024)|round(1) }} KB</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/knowledge-base/download/{{ document.id }}" class="download-btn">
+                    <span>📥</span>
+                    Скачать документ
+                </a>
+                
+                {% if user_email %}
+                <button class="favorite-btn-large {% if is_favorite %}active{% endif %}" 
+                        onclick="toggleFavorite({{ document.id }})"
+                        id="fav-large-{{ document.id }}">
+                    <span>{% if is_favorite %}★{% else %}☆{% endif %}</span>
+                    <span>{% if is_favorite %}В избранном{% else %}В избранное{% endif %}</span>
+                </button>
+                {% endif %}
+            </div>
+            
+            {% if is_admin %}
+            <div class="admin-actions">
+                <h4>⚙️ Администрирование</h4>
+                <div class="admin-buttons">
+                    <a href="/knowledge-base/admin/edit/{{ document.id }}" class="admin-btn edit">
+                        ✏️ Редактировать
+                    </a>
+                    <form method="POST" action="/knowledge-base/admin/delete/{{ document.id }}" 
+                          onsubmit="return confirm('Удалить документ? Это действие нельзя отменить.');">
+                        <button type="submit" class="admin-btn delete">
+                            🗑️ Удалить
+                        </button>
+                    </form>
+                </div>
+                <a href="/knowledge-base/admin" style="display: block; text-align: center; margin-top: 15px; color: var(--blue-dark);">
+                    ← Вернуться в панель управления
+                </a>
+            </div>
+            {% endif %}
+            
+            <a href="/knowledge-base" style="display: block; text-align: center; margin-top: 20px; color: var(--slate-500);">
+                ← Все документы
+            </a>
+        </div>
+    </div>
+    
+    {% if similar_docs %}
+    <div class="similar-docs">
+        <h2 style="font-size: 1.8em; color: var(--slate-800); margin-bottom: 20px;">📌 Похожие документы</h2>
+        <div class="similar-grid">
+            {% for doc in similar_docs %}
+            <a href="/knowledge-base/document/{{ doc.id }}" class="similar-card">
+                <div class="similar-title">{{ doc.title }}</div>
+                <div class="similar-meta">
+                    <span>{{ document_types[doc.document_type] }}</span>
+                    <span>📥 {{ doc.downloads_count }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleFavorite(docId) {
+    fetch(`/knowledge-base/favorite/${docId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const btnLarge = document.getElementById(`fav-large-${docId}`);
+        const btnSmall = document.getElementById(`fav-${docId}`);
+        
+        if (data.action === 'added') {
+            if (btnLarge) {
+                btnLarge.innerHTML = '<span>★</span><span>В избранном</span>';
+                btnLarge.classList.add('active');
+            }
+            if (btnSmall) {
+                btnSmall.innerHTML = '★';
+                btnSmall.classList.add('active');
+            }
+        } else {
+            if (btnLarge) {
+                btnLarge.innerHTML = '<span>☆</span><span>В избранное</span>';
+                btnLarge.classList.remove('active');
+            }
+            if (btnSmall) {
+                btnSmall.innerHTML = '☆';
+                btnSmall.classList.remove('active');
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

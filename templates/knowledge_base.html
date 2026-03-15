@@ -1,0 +1,994 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    .kb-container {
+        max-width: 1400px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+    
+    .kb-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 50px 40px;
+        border-radius: var(--radius-lg);
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+        animation: slideInDown 0.8s ease-out;
+    }
+    
+    @keyframes slideInDown {
+        from {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .kb-header::before {
+        content: '📚';
+        position: absolute;
+        right: 30px;
+        bottom: 20px;
+        font-size: 120px;
+        opacity: 0.1;
+        transform: rotate(-10deg);
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: rotate(-10deg) translateY(0); }
+        50% { transform: rotate(-10deg) translateY(-10px); }
+    }
+    
+    .kb-header h1 {
+        font-size: 2.8em;
+        margin-bottom: 15px;
+        font-weight: 800;
+        position: relative;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .kb-header p {
+        font-size: 1.2em;
+        opacity: 0.95;
+        max-width: 600px;
+        line-height: 1.6;
+        position: relative;
+    }
+    
+    .admin-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        padding: 12px 25px;
+        border-radius: 50px;
+        border: 1px solid rgba(255,255,255,0.3);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: fadeInRight 0.8s ease-out;
+    }
+    
+    .admin-badge:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    @keyframes fadeInRight {
+        from {
+            transform: translateX(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    .admin-menu {
+        position: absolute;
+        top: 80px;
+        right: 20px;
+        background: var(--card);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border);
+        overflow: hidden;
+        min-width: 250px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .admin-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .admin-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 20px;
+        color: var(--slate-700);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .admin-menu-item:last-child {
+        border-bottom: none;
+    }
+    
+    .admin-menu-item:hover {
+        background: var(--blue-light);
+        transform: translateX(5px);
+    }
+    
+    .admin-menu-item.logout {
+        color: #ef4444;
+    }
+    
+    .admin-menu-item.logout:hover {
+        background: #fee2e2;
+    }
+    
+    .kb-stats {
+        display: flex;
+        gap: 20px;
+        margin-top: 30px;
+        position: relative;
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .kb-stat-item {
+        background: rgba(255,255,255,0.2);
+        padding: 15px 25px;
+        border-radius: var(--radius-md);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .kb-stat-item:hover {
+        transform: translateY(-5px);
+        background: rgba(255,255,255,0.3);
+    }
+    
+    .kb-stat-item span {
+        font-size: 2em;
+        font-weight: 800;
+        display: block;
+    }
+    
+    .search-section {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        animation: fadeInUp 0.8s ease-out 0.3s both;
+    }
+    
+    .search-form {
+        display: flex;
+        gap: 15px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 18px 25px;
+        border: 2px solid var(--border);
+        border-radius: 50px;
+        background: var(--surface);
+        color: var(--slate-700);
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+    
+    .search-btn {
+        padding: 18px 40px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .search-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+    
+    .search-btn:hover::before {
+        left: 100%;
+    }
+    
+    .kb-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 25px;
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+    
+    .categories-sidebar {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 25px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .categories-sidebar h3 {
+        font-size: 1.3em;
+        margin-bottom: 20px;
+        color: var(--slate-800);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border);
+    }
+    
+    .category-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .category-item {
+        margin-bottom: 8px;
+    }
+    
+    .category-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: var(--slate-600);
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        transition: all 0.3s ease;
+        gap: 10px;
+        font-weight: 600;
+    }
+    
+    .category-link:hover {
+        background: var(--blue-light);
+        transform: translateX(5px);
+    }
+    
+    .category-link.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .category-count {
+        margin-left: auto;
+        background: var(--border);
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.85em;
+    }
+    
+    .category-link.active .category-count {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+    
+    .main-content {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 30px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+    }
+    
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--border);
+    }
+    
+    .content-header h2 {
+        font-size: 1.8em;
+        color: var(--slate-800);
+    }
+    
+    .sort-select {
+        padding: 10px 20px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--slate-700);
+        font-size: 1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .sort-select:hover {
+        border-color: #10b981;
+    }
+    
+    .documents-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+    
+    .document-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 25px;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        animation: cardAppear 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    @keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    {% for i in range(20) %}
+    .document-card:nth-child({{ i+1 }}) {
+        animation-delay: {{ i*0.05 }}s;
+    }
+    {% endfor %}
+    
+    .document-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+        border-color: #10b981;
+    }
+    
+    .document-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 0;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        transition: height 0.3s ease;
+    }
+    
+    .document-card:hover::after {
+        height: 100%;
+    }
+    
+    .document-type {
+        display: inline-block;
+        padding: 5px 12px;
+        background: var(--blue-light);
+        border-radius: 20px;
+        font-size: 0.85em;
+        color: var(--blue-dark);
+        margin-bottom: 15px;
+    }
+    
+    .document-title {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: var(--slate-800);
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    
+    .document-description {
+        color: var(--slate-500);
+        font-size: 0.95em;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+    
+    .document-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 0.9em;
+        color: var(--slate-400);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .document-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .view-btn {
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .view-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .view-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .view-btn:hover::before {
+        left: 100%;
+    }
+    
+    .favorite-btn {
+        background: none;
+        border: none;
+        font-size: 1.8em;
+        cursor: pointer;
+        color: var(--slate-300);
+        transition: all 0.3s ease;
+        padding: 5px;
+    }
+    
+    .favorite-btn:hover {
+        transform: scale(1.2);
+        color: #fbbf24;
+    }
+    
+    .favorite-btn.active {
+        color: #fbbf24;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 40px;
+        flex-wrap: wrap;
+    }
+    
+    .page-link {
+        padding: 12px 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--slate-600);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .page-link:hover,
+    .page-link.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--slate-400);
+    }
+    
+    .empty-state svg {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 20px;
+        fill: none;
+        stroke: currentColor;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+        animation: fadeInUp 0.8s ease-out 0.35s both;
+    }
+    
+    .stat-card {
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        text-align: center;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        cursor: default;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+        border-color: #10b981;
+    }
+    
+    .stat-card .stat-value {
+        font-size: 2em;
+        font-weight: 800;
+        color: #10b981;
+        margin-bottom: 5px;
+    }
+    
+    .stat-card .stat-label {
+        color: var(--slate-500);
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+    
+    .admin-quick-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid var(--border);
+    }
+    
+    .admin-quick-btn {
+        flex: 1;
+        padding: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--slate-600);
+        text-decoration: none;
+        font-size: 0.9em;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .admin-quick-btn:hover {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+        transform: translateY(-2px);
+    }
+    
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 768px) {
+        .kb-header {
+            padding: 30px 20px;
+        }
+        
+        .kb-header h1 {
+            font-size: 2em;
+        }
+        
+        .admin-badge {
+            position: static;
+            margin-top: 20px;
+            display: inline-flex;
+        }
+        
+        .admin-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 300px;
+        }
+        
+        .admin-menu.show {
+            transform: translate(-50%, -50%);
+        }
+        
+        .search-form {
+            flex-direction: column;
+        }
+        
+        .search-btn {
+            width: 100%;
+        }
+        
+        .kb-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .categories-sidebar {
+            position: static;
+        }
+        
+        .content-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .sort-select {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="kb-container">
+    <div class="kb-header">
+        <h1>📚 Библиотека знаний по питанию</h1>
+        <p>Нормативные документы, методические рекомендации, инструкции и полезные материалы для организации качественного питания</p>
+        
+        <!-- Кнопка администратора -->
+        <div class="admin-badge" id="adminMenuToggle">
+            <span>👤</span>
+            {% if request.session.get('knowledge_base_admin') %}
+                <span>{{ request.session.get('admin_name', 'Администратор') }}</span>
+                <span>⚡</span>
+            {% else %}
+                <span>Вход для администратора</span>
+                <span>🔐</span>
+            {% endif %}
+        </div>
+        
+        <!-- Выпадающее меню администратора -->
+        <div class="admin-menu" id="adminMenu">
+            {% if request.session.get('knowledge_base_admin') %}
+                <div class="admin-menu-item">
+                    <span>👋</span>
+                    <span>Вы вошли как:</span>
+                    <strong>{{ request.session.get('admin_name', 'Администратор') }}</strong>
+                </div>
+                <a href="/knowledge-base/admin" class="admin-menu-item">
+                    <span>⚙️</span>
+                    <span>Панель управления</span>
+                </a>
+                <a href="/knowledge-base/admin/upload" class="admin-menu-item">
+                    <span>📤</span>
+                    <span>Загрузить документ</span>
+                </a>
+                <a href="/knowledge-base/admin/categories" class="admin-menu-item">
+                    <span>📁</span>
+                    <span>Управление категориями</span>
+                </a>
+                <a href="/knowledge-base/admin/logout" class="admin-menu-item logout">
+                    <span>🚪</span>
+                    <span>Выйти</span>
+                </a>
+            {% else %}
+                <a href="/knowledge-base/admin/login" class="admin-menu-item">
+                    <span>🔐</span>
+                    <span>Войти как администратор</span>
+                </a>
+                
+            {% endif %}
+        </div>
+        
+        <div class="kb-stats">
+            <div class="kb-stat-item">
+                <span>{{ total }}</span>
+                <span>документов</span>
+            </div>
+            <div class="kb-stat-item">
+                <span>{{ categories|length }}</span>
+                <span>категорий</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="search-section">
+        <form class="search-form" method="get" action="/knowledge-base">
+            <input type="text" 
+                   class="search-input" 
+                   name="search" 
+                   placeholder="🔍 Поиск документов, инструкций, методичек..." 
+                   value="{{ search }}">
+            <button type="submit" class="search-btn">Найти</button>
+        </form>
+    </div>
+    
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_downloads if total_downloads else popular_docs[0].downloads_count if popular_docs else 0 }}</div>
+            <div class="stat-label">всего скачиваний</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ recent_docs|length }}</div>
+            <div class="stat-label">новых за месяц</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ categories|length }}</div>
+            <div class="stat-label">категорий</div>
+        </div>
+    </div>
+    
+    {% if request.session.get('knowledge_base_admin') %}
+    <div class="admin-quick-actions">
+        <a href="/knowledge-base/admin" class="admin-quick-btn">
+            <span>⚙️</span> Панель управления
+        </a>
+        <a href="/knowledge-base/admin/upload" class="admin-quick-btn">
+            <span>📤</span> Загрузить документ
+        </a>
+        <a href="/knowledge-base/admin/categories" class="admin-quick-btn">
+            <span>📁</span> Категории
+        </a>
+    </div>
+    {% endif %}
+    
+    <div class="kb-grid">
+        <div class="categories-sidebar">
+            <h3>
+                <span>📂</span>
+                Категории
+            </h3>
+            
+            <ul class="category-list">
+                <li class="category-item">
+                    <a href="/knowledge-base" class="category-link {% if not current_category %}active{% endif %}">
+                        <span>📋</span>
+                        Все документы
+                        <span class="category-count">{{ total }}</span>
+                    </a>
+                </li>
+                {% for cat in categories %}
+                <li class="category-item">
+                    <a href="/knowledge-base?category={{ cat.id }}" 
+                       class="category-link {% if current_category and current_category.id == cat.id %}active{% endif %}">
+                        <span>{{ cat.icon }}</span>
+                        {{ cat.name }}
+                        <span class="category-count">{{ cat.documents|length }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            
+            {% if not user_email %}
+            <div style="margin-top: 30px; padding: 20px; background: var(--blue-light); border-radius: var(--radius-md);">
+                <p style="margin-bottom: 15px; font-weight: 600;">👤 Чтобы добавлять в избранное, войдите в систему</p>
+                <a href="/login" style="color: var(--blue-dark); text-decoration: none; font-weight: 700;">Войти →</a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="main-content">
+            <div class="content-header">
+                <h2>
+                    {% if current_category %}
+                        {{ current_category.icon }} {{ current_category.name }}
+                    {% elif search %}
+                        🔍 Результаты поиска: "{{ search }}"
+                    {% else %}
+                        📋 Все документы
+                    {% endif %}
+                </h2>
+                
+                <select class="sort-select" onchange="window.location.href=this.value">
+                    <option value="?sort=newest{% if category %}&category={{ category }}{% endif %}{% if search %}&search={{ search }}{% endif %}" 
+                            {% if sort == 'newest' %}selected{% endif %}>
+                        📅 Сначала новые
+                    </option>
+                    <option value="?sort=popular{% if category %}&category={{ category }}{% endif %}{% if search %}&search={{ search }}{% endif %}"
+                            {% if sort == 'popular' %}selected{% endif %}>
+                        ⭐ Популярные
+                    </option>
+                    <option value="?sort=title{% if category %}&category={{ category }}{% endif %}{% if search %}&search={{ search }}{% endif %}"
+                            {% if sort == 'title' %}selected{% endif %}>
+                        🔤 По алфавиту
+                    </option>
+                </select>
+            </div>
+            
+            {% if documents %}
+            <div class="documents-grid">
+                {% for doc in documents %}
+                <div class="document-card">
+                    <div class="document-type">{{ document_types[doc.document_type] }}</div>
+                    <div class="document-title">{{ doc.title }}</div>
+                    <div class="document-description">{{ doc.description[:120] }}{% if doc.description|length > 120 %}...{% endif %}</div>
+                    <div class="document-meta">
+                        <span title="Дата добавления">📅 {{ doc.created_at.strftime('%d.%m.%Y') }}</span>
+                        <span title="Скачиваний">📥 {{ doc.downloads_count }}</span>
+                        <span title="Просмотров">👁️ {{ doc.views_count }}</span>
+                    </div>
+                    <div class="document-footer">
+                        <a href="/knowledge-base/document/{{ doc.id }}" class="view-btn">
+                            <svg style="width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            Подробнее
+                        </a>
+                        {% if user_email %}
+                        <button class="favorite-btn {% if doc.id in favorites %}active{% endif %}" 
+                                onclick="toggleFavorite({{ doc.id }})"
+                                id="fav-{{ doc.id }}"
+                                title="{% if doc.id in favorites %}Убрать из избранного{% else %}Добавить в избранное{% endif %}">
+                            {% if doc.id in favorites %}★{% else %}☆{% endif %}
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if total > per_page %}
+            <div class="pagination">
+                {% for p in range(1, total_pages + 1) %}
+                <a href="?page={{ p }}{% if category %}&category={{ category }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+                   class="page-link {% if p == page %}active{% endif %}">{{ p }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path d="M4 4h16v16H4z"/>
+                    <path d="M8 8h8v8H8z"/>
+                </svg>
+                <h3>Документы не найдены</h3>
+                <p>Попробуйте изменить параметры поиска</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Функция для избранного
+function toggleFavorite(docId) {
+    fetch(`/knowledge-base/favorite/${docId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const btn = document.getElementById(`fav-${docId}`);
+        if (data.action === 'added') {
+            btn.innerHTML = '★';
+            btn.classList.add('active');
+            btn.title = 'Убрать из избранного';
+        } else {
+            btn.innerHTML = '☆';
+            btn.classList.remove('active');
+            btn.title = 'Добавить в избранное';
+        }
+    });
+}
+
+// Меню администратора
+document.addEventListener('DOMContentLoaded', function() {
+    const adminToggle = document.getElementById('adminMenuToggle');
+    const adminMenu = document.getElementById('adminMenu');
+    
+    if (adminToggle && adminMenu) {
+        adminToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            adminMenu.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (!adminToggle.contains(e.target) && !adminMenu.contains(e.target)) {
+                adminMenu.classList.remove('show');
+            }
+        });
+        
+        adminMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function() {
+                adminMenu.classList.remove('show');
+            });
+        });
+    }
+    
+    // Анимация появления карточек при скролле
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'scale(1)';
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.document-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.9)';
+        observer.observe(card);
+    });
+    
+    // Подсказки для статистики
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 200);
+        });
+    });
+});
+</script>
+{% endblock %}
