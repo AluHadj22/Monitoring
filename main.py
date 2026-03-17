@@ -118,7 +118,7 @@ IMAGE_EXECUTOR = ThreadPoolExecutor(max_workers=4)  # НОВЫЙ: Отдельн
 CACHE_LOCK = asyncio.Lock()
 
 # Константа для доступа к админке дашбордов
-DASHBOARD_ADMIN_CODE = "Код, который вы хотите"
+DASHBOARD_ADMIN_CODE = "admin3377%"
 
 # НОВЫЕ КОНСТАНТЫ для оптимизации изображений
 THUMBNAIL_SIZES = {
@@ -414,8 +414,8 @@ MONTHS = {
 }
 
 # Секретные коды для регистрации админов
-REGIONAL_CODE = "Код регионального координатора, который вы хотите"
-MUNICIPAL_CODE = "Код муниципального админа, который вы хотите"
+REGIONAL_CODE = "alu1212993"
+MUNICIPAL_CODE = "rayonadmin3377%"
 
 # Настраиваем логирование
 logging.basicConfig(level=logging.INFO)
@@ -1471,26 +1471,33 @@ async def generate_federal_html_stream(uid: int, base_path: Path, manifest: dict
 async def cache_images_middleware(request: Request, call_next):
     """Middleware для кеширования изображений"""
     
-    # Проверяем, запрашивается ли изображение
-    if request.url.path.startswith(('/static/', '/avatar/', '/food/')):
+    # НЕ кешируем статические файлы сайта
+    if request.url.path.startswith('/static/'):
+        response = await call_next(request)
+        # Добавляем простой кеш для статики
+        if response.status_code == 200:
+            response.headers["Cache-Control"] = "public, max-age=3600"
+        return response
+    
+    # Для аватаров и файлов питания применяем кеширование
+    if request.url.path.startswith(('/avatar/', '/food/')):
         # Проверяем заголовки кеширования
         if_none_match = request.headers.get('if-none-match')
         cache_key = f"img_{request.url.path}"
         
         if cache_key in IMAGE_RESPONSE_CACHE:
             cached = IMAGE_RESPONSE_CACHE[cache_key]
-            # Проверяем ETag
             if if_none_match and if_none_match == cached.get('etag'):
                 return Response(status_code=304)
     
     response = await call_next(request)
     
-    # Кешируем ответ с изображением
-    if response.status_code == 200 and request.url.path.startswith(('/static/', '/avatar/')):
+    # Кешируем ответ с изображением (только для аватаров)
+    if response.status_code == 200 and request.url.path.startswith('/avatar/'):
         cache_key = f"img_{request.url.path}"
         etag = hashlib.md5(str(response.body).encode()).hexdigest()
         response.headers["ETag"] = etag
-        response.headers["Cache-Control"] = "public, max-age=86400"  # Кеш на сутки
+        response.headers["Cache-Control"] = "public, max-age=86400"
         
         IMAGE_RESPONSE_CACHE[cache_key] = {
             'etag': etag,
@@ -1499,38 +1506,30 @@ async def cache_images_middleware(request: Request, call_next):
     
     return response
 
-# НОВЫЙ МИДЛВАР ДЛЯ КЕШИРОВАНИЯ ИЗОБРАЖЕНИЙ
-@app.middleware("http")
-async def cache_images_middleware(request: Request, call_next):
-    """Middleware для кеширования изображений"""
+@app.get("/static/logo.jpg")
+async def get_logo():
+    """Отдача логотипа сайта"""
+    BASE_DIR = Path(__file__).resolve().parent
+    logo_path = BASE_DIR / "static" / "logo.jpg"
     
-    # Проверяем, запрашивается ли изображение (но не трогаем статические файлы сайта)
-    if request.url.path.startswith(('/avatar/', '/food/')) and not request.url.path.startswith('/static/'):
-        # Проверяем заголовки кеширования
-        if_none_match = request.headers.get('if-none-match')
-        cache_key = f"img_{request.url.path}"
-        
-        if cache_key in IMAGE_RESPONSE_CACHE:
-            cached = IMAGE_RESPONSE_CACHE[cache_key]
-            # Проверяем ETag
-            if if_none_match and if_none_match == cached.get('etag'):
-                return Response(status_code=304)
-    
-    response = await call_next(request)
-    
-    # Кешируем ответ с изображением (только для аватаров, не для статики)
-    if response.status_code == 200 and request.url.path.startswith('/avatar/'):
-        cache_key = f"img_{request.url.path}"
-        etag = hashlib.md5(str(response.body).encode()).hexdigest()
-        response.headers["ETag"] = etag
-        response.headers["Cache-Control"] = "public, max-age=86400"  # Кеш на сутки
-        
-        IMAGE_RESPONSE_CACHE[cache_key] = {
-            'etag': etag,
-            'body': response.body
+    if await run_in_threadpool(logo_path.exists):
+        headers = {
+            "Cache-Control": "public, max-age=86400",
+            "Content-Type": "image/jpeg"
         }
+        return FileResponse(logo_path, headers=headers)
     
-    return response
+    # Если нет JPG, пробуем PNG
+    logo_png = BASE_DIR / "static" / "logo.png"
+    if await run_in_threadpool(logo_png.exists):
+        headers = {
+            "Cache-Control": "public, max-age=86400",
+            "Content-Type": "image/png"
+        }
+        return FileResponse(logo_png, headers=headers)
+    
+    raise HTTPException(status_code=404, detail="Логотип не найден")
+
 
 # ОСТАВЛЯЕМ СТАРЫЙ МИДЛВАР ДЛЯ СОВМЕСТИМОСТИ
 @app.middleware("http")
