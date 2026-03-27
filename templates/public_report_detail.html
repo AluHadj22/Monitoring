@@ -1,0 +1,551 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* Дополнительные стили для публичного просмотра отчёта */
+    .report-view {
+        padding: 2rem;
+    }
+    
+    .report-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    /* Навигация */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--gray-100);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        margin-bottom: 2rem;
+    }
+    
+    [data-theme='dark'] .back-link {
+        background: var(--gray-800);
+    }
+    
+    .back-link:hover {
+        background: var(--gray-200);
+        transform: translateX(-2px);
+    }
+    
+    /* Карточка отчёта */
+    .report-card {
+        background: var(--bg-card);
+        border-radius: 1rem;
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+    
+    /* Шапка отчёта */
+    .report-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--gray-50);
+    }
+    
+    [data-theme='dark'] .report-header {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .category-badge {
+        width: 48px;
+        height: 48px;
+        background: var(--primary-bg);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .category-icon {
+        font-size: 1.5rem;
+    }
+    
+    .report-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .report-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+    
+    .report-meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .report-meta-item svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+    }
+    
+    .report-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-size: 0.9rem;
+        margin: 1rem 0 0 0;
+    }
+    
+    /* Секция данных */
+    .data-section {
+        padding: 2rem;
+    }
+    
+    .section-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-title svg {
+        width: 18px;
+        height: 18px;
+        stroke: var(--primary);
+    }
+    
+    /* Таблица */
+    .data-table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+    }
+    
+    .data-table th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        border-bottom: 2px solid var(--border);
+        background: var(--gray-50);
+    }
+    
+    [data-theme='dark'] .data-table th {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .data-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-primary);
+    }
+    
+    .data-table tr:hover {
+        background: var(--gray-50);
+    }
+    
+    [data-theme='dark'] .data-table tr:hover {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .indicator-cell {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    
+    .value-cell {
+        color: var(--text-secondary);
+    }
+    
+    /* Карточки для плоских данных */
+    .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+    
+    .data-card {
+        background: var(--gray-50);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    [data-theme='dark'] .data-card {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .data-card:hover {
+        transform: translateY(-2px);
+        background: var(--primary-bg);
+    }
+    
+    .data-card-label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .data-card-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    
+    /* Пустое состояние */
+    .empty-data {
+        text-align: center;
+        padding: 2rem;
+        background: var(--gray-50);
+        border-radius: 0.75rem;
+    }
+    
+    [data-theme='dark'] .empty-data {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .empty-data p {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+    
+    /* Секция файлов */
+    .files-section {
+        padding: 0 2rem 2rem 2rem;
+    }
+    
+    .files-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: var(--gray-50);
+        border-radius: 0.75rem;
+        transition: all 0.2s ease;
+    }
+    
+    [data-theme='dark'] .file-item {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .file-item:hover {
+        background: var(--primary-bg);
+        transform: translateX(4px);
+    }
+    
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .file-icon {
+        width: 36px;
+        height: 36px;
+        background: var(--bg-card);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .file-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .file-name {
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+    }
+    
+    .file-size {
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+        margin-top: 0.2rem;
+    }
+    
+    .btn-download {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.35rem 0.85rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-download:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+    
+    .btn-download svg {
+        width: 12px;
+        height: 12px;
+        stroke: white;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .report-view {
+            padding: 1rem;
+        }
+        
+        .report-header {
+            padding: 1rem 1.25rem;
+        }
+        
+        .report-title {
+            font-size: 1.2rem;
+        }
+        
+        .data-section {
+            padding: 1.25rem;
+        }
+        
+        .files-section {
+            padding: 0 1.25rem 1.25rem 1.25rem;
+        }
+        
+        .data-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .file-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .btn-download {
+            align-self: flex-end;
+        }
+        
+        .report-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+<div class="report-view">
+    <div class="report-container">
+        <!-- Навигация -->
+        <a href="/public-reports" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Назад к списку
+        </a>
+        
+        <!-- Карточка отчёта -->
+        <div class="report-card">
+            <!-- Шапка отчёта -->
+            <div class="report-header">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    {% if category %}
+                    <div class="category-badge">
+                        <span class="category-icon">{{ category.icon }}</span>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h1 class="report-title">{{ report.title }}</h1>
+                        <div class="report-meta">
+                            <span class="report-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                {{ report.year }}{% if report.month %} / {{ report.month }}{% endif %}
+                            </span>
+                            {% if report.quarter %}
+                            <span class="report-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                {{ report.quarter }}-й квартал
+                            </span>
+                            {% endif %}
+                            <span class="report-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                {{ report.created_at.strftime('%d.%m.%Y') if report.created_at else '—' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% if report.description %}
+                <p class="report-description">{{ report.description }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Данные отчёта -->
+            <div class="data-section">
+                <h2 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    Данные отчёта
+                </h2>
+                
+                {% if report.data and report.data is mapping and report.data|length > 0 %}
+                    {% set first_key = report.data.keys()|first %}
+                    {% set first_value = report.data[first_key] %}
+                    
+                    {% if first_value is mapping %}
+                        <!-- Табличное отображение -->
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Показатель</th>
+                                        {% for col in first_value.keys() %}
+                                        <th>{{ col }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for indicator, values in report.data.items() %}
+                                    <tr>
+                                        <td class="indicator-cell">{{ indicator }}</td>
+                                        {% for col, val in values.items() %}
+                                        <td class="value-cell">
+                                            {% if val is number %}
+                                                {{ "{:,.0f}".format(val).replace(',', ' ') if val >= 1000 else val }}
+                                            {% else %}
+                                                {{ val }}
+                                            {% endif %}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <!-- Карточки для плоских данных -->
+                        <div class="data-grid">
+                            {% for key, value in report.data.items() %}
+                            <div class="data-card">
+                                <div class="data-card-label">{{ key }}</div>
+                                <div class="data-card-value">
+                                    {% if value is number %}
+                                        {{ "{:,.0f}".format(value).replace(',', ' ') }}
+                                    {% else %}
+                                        {{ value }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                <div class="empty-data">
+                    <p>Нет данных</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Прикреплённые файлы -->
+            {% if files %}
+            <div class="files-section">
+                <h2 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                        <polyline points="13 2 13 9 20 9"></polyline>
+                    </svg>
+                    Прикреплённые файлы
+                </h2>
+                <div class="files-list">
+                    {% for file in files %}
+                    <div class="file-item">
+                        <div class="file-info">
+                            <div class="file-icon">
+                                {% if file.file_type == 'pdf' %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <path d="M9 13h6M9 17h6M12 9v8"/>
+                                </svg>
+                                {% elif file.file_type in ['xlsx', 'xls'] %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <path d="M9 13h6M9 17h6"/>
+                                </svg>
+                                {% elif file.file_type in ['doc', 'docx'] %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <path d="M9 13h6M9 17h6"/>
+                                </svg>
+                                {% else %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5">
+                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                                    <polyline points="13 2 13 9 20 9"/>
+                                </svg>
+                                {% endif %}
+                            </div>
+                            <div class="file-details">
+                                <span class="file-name">{{ file.original_name }}</span>
+                                <span class="file-size">{{ (file.file_size / 1024)|round(1) }} KB</span>
+                            </div>
+                        </div>
+                        <a href="/public-reports/download/{{ file.id }}" class="btn-download">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Скачать
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

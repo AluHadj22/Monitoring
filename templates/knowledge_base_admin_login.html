@@ -2,153 +2,330 @@
 
 {% block content %}
 <style>
+    /* Страница входа - сдержанный профессиональный стиль */
+    .login-page {
+        min-height: calc(100vh - 73px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: var(--bg-main);
+    }
+    
     .login-container {
-        max-width: 500px;
-        margin: 50px auto;
-        padding: 40px;
-        background: var(--card);
+        max-width: 440px;
+        width: 100%;
+        background: var(--bg-card);
         border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-xl);
+        box-shadow: var(--shadow-lg);
         border: 1px solid var(--border);
+        overflow: hidden;
+        animation: fadeInUp 0.3s ease-out;
     }
     
     .login-header {
         text-align: center;
-        margin-bottom: 30px;
+        padding: 2rem 2rem 1.5rem;
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--border);
+    }
+    
+    [data-theme='dark'] .login-header {
+        background: rgba(30, 41, 59, 0.4);
     }
     
     .login-header h1 {
-        font-size: 2em;
-        color: var(--slate-800);
-        margin-bottom: 10px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
+        gap: 0.5rem;
+    }
+    
+    .login-header h1 svg {
+        width: 28px;
+        height: 28px;
+        stroke: var(--primary);
     }
     
     .login-header p {
-        color: var(--slate-500);
-        font-size: 1.1em;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .login-form {
+        padding: 2rem;
     }
     
     .form-group {
-        margin-bottom: 25px;
+        margin-bottom: 1.5rem;
     }
     
     .form-group label {
         display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: var(--slate-700);
-        font-size: 0.95em;
+        margin-bottom: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+    }
+    
+    .input-wrapper {
+        position: relative;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        pointer-events: none;
+    }
+    
+    .input-icon svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
     }
     
     .form-group input {
         width: 100%;
-        padding: 15px 20px;
+        padding: 0.85rem 1rem 0.85rem 2.75rem;
         border: 2px solid var(--border);
         border-radius: var(--radius-md);
-        background: var(--surface);
-        color: var(--slate-700);
-        font-size: 1em;
-        transition: all 0.3s ease;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        font-family: inherit;
     }
     
     .form-group input:focus {
         outline: none;
-        border-color: #10b981;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-bg);
+        transform: translateY(-1px);
+    }
+    
+    .form-group input::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
     }
     
     .login-btn {
         width: 100%;
-        padding: 16px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        padding: 0.85rem;
+        background: var(--primary);
         color: white;
         border: none;
         border-radius: var(--radius-md);
-        font-size: 1.1em;
-        font-weight: 700;
+        font-size: 0.9rem;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .login-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke: white;
     }
     
     .login-btn:hover {
+        background: var(--primary-dark);
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .login-btn:active {
+        transform: translateY(0);
     }
     
     .error-message {
-        background: #fee2e2;
-        border: 1px solid #f87171;
-        color: #b91c1c;
-        padding: 15px;
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 3px solid #ef4444;
+        color: #ef4444;
+        padding: 0.85rem 1rem;
         border-radius: var(--radius-md);
-        margin-bottom: 20px;
-        font-weight: 600;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        font-weight: 500;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 0.5rem;
+    }
+    
+    .error-message svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        flex-shrink: 0;
     }
     
     .back-link {
-        display: inline-block;
-        margin-top: 20px;
-        color: var(--slate-500);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 1.5rem;
+        color: var(--text-secondary);
         text-decoration: none;
-        font-weight: 600;
-        transition: color 0.3s ease;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        width: 100%;
+        justify-content: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+    
+    .back-link svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        transition: transform 0.2s ease;
     }
     
     .back-link:hover {
-        color: #10b981;
+        color: var(--primary);
+    }
+    
+    .back-link:hover svg {
+        transform: translateX(-2px);
+    }
+    
+    /* Анимация */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 480px) {
+        .login-page {
+            padding: 1rem;
+            align-items: flex-start;
+            padding-top: 2rem;
+        }
+        
+        .login-header {
+            padding: 1.5rem;
+        }
+        
+        .login-header h1 {
+            font-size: 1.3rem;
+        }
+        
+        .login-form {
+            padding: 1.5rem;
+        }
+        
+        .form-group input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            font-size: 0.85rem;
+        }
     }
 </style>
 
-<div class="login-container">
-    <div class="login-header">
-        <h1>
-            <span>📚</span>
-            Вход для администратора
-        </h1>
-        <p>Введите код доступа для управления документами</p>
-    </div>
-    
-    {% if error %}
-    <div class="error-message">
-        <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <circle cx="12" cy="16" r="1" fill="currentColor"/>
-        </svg>
-        {{ error }}
-    </div>
-    {% endif %}
-    
-    <form method="POST" action="/knowledge-base/admin/login">
-        <div class="form-group">
-            <label>📧 Ваш email</label>
-            <input type="email" name="email" placeholder="example@email.com" required>
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <h1>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                Вход для администратора
+            </h1>
+            <p>Введите код доступа для управления документами</p>
         </div>
         
-        <div class="form-group">
-            <label>👤 Ваше имя (необязательно)</label>
-            <input type="text" name="name" placeholder="Как к вам обращаться">
+        <div class="login-form">
+            {% if error %}
+            <div class="error-message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="/knowledge-base/admin/login">
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <path d="M22 7L12 13 2 7"></path>
+                            </svg>
+                        </span>
+                        <input type="email" name="email" placeholder="example@email.com" required autofocus>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Имя (необязательно)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
+                        <input type="text" name="name" placeholder="Как к вам обращаться">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Код доступа</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </span>
+                        <input type="password" name="access_code" placeholder="Введите код доступа" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Войти в панель управления
+                </button>
+            </form>
+            
+            <a href="/knowledge-base" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                </svg>
+                Вернуться в библиотеку
+            </a>
         </div>
-        
-        <div class="form-group">
-            <label>🔐 Код доступа</label>
-            <input type="password" name="access_code" placeholder="Введите код доступа" required>
-        </div>
-        
-        <button type="submit" class="login-btn">
-            Войти в панель управления
-        </button>
-    </form>
-    
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="/knowledge-base" class="back-link">← Вернуться в библиотеку</a>
     </div>
 </div>
 {% endblock %}

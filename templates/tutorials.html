@@ -1,0 +1,689 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    .tutorials-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Hero секция */
+    .tutorials-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 32px;
+        padding: 3rem;
+        margin-bottom: 2rem;
+    }
+
+    .tutorials-hero h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .tutorials-hero p {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Админ-панель для управления видео */
+    .admin-video-panel {
+        background: var(--bg-card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .admin-header {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .admin-header h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .admin-content {
+        padding: 1.5rem;
+        display: none;
+    }
+
+    .admin-content.show {
+        display: block;
+    }
+
+    .video-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .video-form input,
+    .video-form textarea,
+    .video-form select {
+        padding: 0.75rem 1rem;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-family: inherit;
+    }
+
+    .video-form input:focus,
+    .video-form textarea:focus,
+    .video-form select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-bg);
+    }
+
+    .btn-add {
+        padding: 0.75rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border: none;
+        border-radius: 60px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-add:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Сетка видео */
+    .videos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .video-card {
+        background: var(--bg-card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .video-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .video-thumbnail {
+        position: relative;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        aspect-ratio: 16/9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .play-button {
+        width: 60px;
+        height: 60px;
+        background: rgba(16, 185, 129, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+
+    .video-thumbnail:hover .play-button {
+        transform: scale(1.1);
+        background: var(--primary);
+    }
+
+    .play-button svg {
+        width: 24px;
+        height: 24px;
+        stroke: white;
+        fill: white;
+    }
+
+    .video-info {
+        padding: 1.5rem;
+    }
+
+    .video-tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: var(--primary-bg);
+        color: var(--primary);
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .video-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .video-description {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+
+    .admin-actions {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .video-card:hover .admin-actions {
+        opacity: 1;
+    }
+
+    .admin-action-btn {
+        background: rgba(0, 0, 0, 0.7);
+        border: none;
+        border-radius: 8px;
+        padding: 0.4rem 0.6rem;
+        cursor: pointer;
+        color: white;
+        transition: var(--transition);
+    }
+
+    .admin-action-btn:hover {
+        background: var(--error);
+    }
+
+    /* Модальное окно видео */
+    .video-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+
+    .video-modal.show {
+        display: flex;
+    }
+
+    .video-modal-content {
+        position: relative;
+        width: 90%;
+        max-width: 1000px;
+        background: #000;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .video-modal-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        z-index: 10;
+    }
+
+    .video-modal-iframe {
+        width: 100%;
+        aspect-ratio: 16/9;
+        border: none;
+    }
+
+    .admin-badge {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .admin-login-form {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .admin-login-form .form-group {
+        flex: 1;
+    }
+
+    .admin-login-form .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    .admin-login-form .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--text-primary);
+    }
+
+    .admin-login-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .admin-login-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .tutorials-container {
+            padding: 1rem;
+        }
+        
+        .tutorials-hero {
+            padding: 2rem;
+        }
+        
+        .tutorials-hero h1 {
+            font-size: 1.5rem;
+        }
+        
+        .videos-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .admin-actions {
+            opacity: 1;
+        }
+        
+        .admin-login-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .admin-login-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="tutorials-container">
+    <div class="tutorials-hero">
+        <h1>Видеоинструкции</h1>
+        <p>Обучающие материалы по организации мониторинга питания</p>
+    </div>
+
+    <!-- Админ-панель (только для администраторов) -->
+    <div class="admin-video-panel">
+        <div class="admin-header" onclick="toggleAdminPanel()">
+            <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Управление видеоинструкциями
+                <span class="admin-badge" id="adminBadge" style="display: none;">Администратор</span>
+            </h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="adminToggleIcon">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
+        <div class="admin-content" id="adminContent">
+            <div id="adminLoginForm" class="admin-login-form">
+                <div class="form-group">
+                    <label>Код доступа администратора</label>
+                    <input type="password" id="adminCode" placeholder="Введите код">
+                </div>
+                <button class="admin-login-btn" onclick="adminLogin()">Войти</button>
+            </div>
+            <div id="adminVideoForm" style="display: none;">
+                <form class="video-form" id="addVideoForm" onsubmit="addVideo(event)">
+                    <input type="text" id="videoTitle" placeholder="Название видео *" required>
+                    <textarea id="videoDescription" rows="3" placeholder="Описание видео *" required></textarea>
+                    <select id="videoTag" required>
+                        <option value="">Выберите категорию *</option>
+                        <option value="Для новичков">Для новичков</option>
+                        <option value="Полная инструкция">Полная инструкция</option>
+                        <option value="Файлы">Файлы</option>
+                        <option value="Администраторам">Администраторам</option>
+                    </select>
+                    <input type="url" id="videoUrl" placeholder="Ссылка на видео (YouTube, Rutube, VK) *" required>
+                    <button type="submit" class="btn-add">+ Добавить видео</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сетка видео -->
+    <div class="videos-grid" id="videosGrid"></div>
+</div>
+
+<!-- Модальное окно видео -->
+<div class="video-modal" id="videoModal" onclick="closeVideoOnBackdrop(event)">
+    <div class="video-modal-content">
+        <button class="video-modal-close" onclick="closeVideo()">×</button>
+        <iframe id="videoIframe" class="video-modal-iframe" src="" allowfullscreen></iframe>
+    </div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<script>
+// Константы
+const ADMIN_CODE = "alu3377%";
+let isAdmin = false;
+
+// Загрузка видео с сервера
+async function loadVideos() {
+    try {
+        const response = await fetch('/api/videos');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.videos) {
+                videos = data.videos;
+            } else {
+                videos = data;
+            }
+        } else {
+            console.error('Ошибка загрузки видео');
+            videos = [];
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        videos = [];
+    }
+    renderVideos();
+}
+
+// Сохранение видео на сервер
+async function saveVideos() {
+    try {
+        const response = await fetch('/api/videos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videos: videos })
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Ошибка сохранения:', error);
+        return false;
+    }
+}
+
+// Данные видео
+let videos = [];
+
+// Отображение видео
+function renderVideos() {
+    const grid = document.getElementById('videosGrid');
+    if (!grid) return;
+    
+    if (!videos || videos.length === 0) {
+        grid.innerHTML = `
+            <div style="text-align: center; padding: 3rem; background: var(--bg-card); border-radius: 24px; border: 1px solid var(--border); grid-column: 1/-1;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1rem; color: var(--text-secondary);">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Нет видеоинструкций</h3>
+                <p style="color: var(--text-secondary);">Видео будут добавлены администратором</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = videos.map(video => `
+        <div class="video-card" data-id="${video.id}">
+            <div class="video-thumbnail" onclick="openVideo('${video.url}', '${video.title}')">
+                <div class="play-button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="video-info">
+                <div class="video-tag">${escapeHtml(video.tag)}</div>
+                <div class="video-title">${escapeHtml(video.title)}</div>
+                <div class="video-description">${escapeHtml(video.description)}</div>
+            </div>
+            ${isAdmin ? `
+            <div class="admin-actions">
+                <button class="admin-action-btn" onclick="deleteVideo(${video.id})" title="Удалить">🗑️</button>
+            </div>
+            ` : ''}
+        </div>
+    `).join('');
+}
+
+// Экранирование HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Обновление UI в зависимости от статуса админа
+function updateAdminUI() {
+    const adminBadge = document.getElementById('adminBadge');
+    const loginForm = document.getElementById('adminLoginForm');
+    const videoForm = document.getElementById('adminVideoForm');
+    
+    if (isAdmin) {
+        if (adminBadge) adminBadge.style.display = 'inline-block';
+        if (loginForm) loginForm.style.display = 'none';
+        if (videoForm) videoForm.style.display = 'block';
+    } else {
+        if (adminBadge) adminBadge.style.display = 'none';
+        if (loginForm) loginForm.style.display = 'flex';
+        if (videoForm) videoForm.style.display = 'none';
+    }
+    renderVideos();
+}
+
+// Вход в админку (только JS, без сессий)
+function adminLogin() {
+    const code = document.getElementById('adminCode').value;
+    
+    if (code === ADMIN_CODE) {
+        isAdmin = true;
+        updateAdminUI();
+        showNotification('Вход выполнен успешно');
+        document.getElementById('adminCode').value = '';
+    } else {
+        showNotification('Неверный код доступа', 'error');
+    }
+}
+
+// Выход из админки
+function adminLogout() {
+    isAdmin = false;
+    updateAdminUI();
+    showNotification('Выход выполнен');
+}
+
+// Добавление видео
+async function addVideo(event) {
+    event.preventDefault();
+    
+    if (!isAdmin) {
+        showNotification('Требуется авторизация', 'error');
+        return;
+    }
+    
+    const title = document.getElementById('videoTitle').value;
+    const description = document.getElementById('videoDescription').value;
+    const tag = document.getElementById('videoTag').value;
+    let url = document.getElementById('videoUrl').value;
+    
+    if (!title || !description || !tag || !url) {
+        showNotification('Заполните все поля', 'warning');
+        return;
+    }
+    
+    // Конвертируем ссылку в embed формат
+    let embedUrl = url;
+    if (url.includes('youtube.com/watch') || url.includes('youtu.be')) {
+        let videoId = '';
+        if (url.includes('youtu.be')) {
+            videoId = url.split('/').pop().split('?')[0];
+        } else {
+            videoId = url.split('v=')[1]?.split('&')[0];
+        }
+        embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    } else if (url.includes('rutube.ru')) {
+        let videoId = url.split('/').pop().split('?')[0];
+        embedUrl = `https://rutube.ru/play/embed/${videoId}/?autoplay=1`;
+    } else if (url.includes('vk.com')) {
+        let videoId = url.split('video')[1]?.split('?')[0];
+        if (videoId) {
+            embedUrl = `https://vk.com/video_ext.php?oid=${videoId.split('_')[0]}&id=${videoId.split('_')[1]}&autoplay=1`;
+        }
+    }
+    
+    const newVideo = {
+        id: Date.now(),
+        title: title,
+        description: description,
+        tag: tag,
+        url: embedUrl,
+        created_at: new Date().toLocaleDateString('ru-RU')
+    };
+    
+    videos.unshift(newVideo);
+    const saved = await saveVideos();
+    
+    if (saved) {
+        renderVideos();
+        
+        // Очистка формы
+        document.getElementById('videoTitle').value = '';
+        document.getElementById('videoDescription').value = '';
+        document.getElementById('videoTag').value = '';
+        document.getElementById('videoUrl').value = '';
+        
+        showNotification('Видео добавлено');
+    } else {
+        // Откат при ошибке
+        videos = videos.filter(v => v.id !== newVideo.id);
+        showNotification('Ошибка сохранения', 'error');
+    }
+}
+
+// Удаление видео
+async function deleteVideo(videoId) {
+    if (!isAdmin) {
+        showNotification('Требуется авторизация', 'error');
+        return;
+    }
+    
+    if (!confirm('Удалить это видео?')) return;
+    
+    const videoToDelete = videos.find(v => v.id === videoId);
+    videos = videos.filter(v => v.id !== videoId);
+    const saved = await saveVideos();
+    
+    if (saved) {
+        renderVideos();
+        showNotification('Видео удалено');
+    } else {
+        // Восстанавливаем при ошибке
+        if (videoToDelete) videos.push(videoToDelete);
+        showNotification('Ошибка удаления', 'error');
+    }
+}
+
+// Открыть видео
+function openVideo(url, title) {
+    const iframe = document.getElementById('videoIframe');
+    iframe.src = url;
+    document.getElementById('videoModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeVideo() {
+    const iframe = document.getElementById('videoIframe');
+    iframe.src = '';
+    document.getElementById('videoModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function closeVideoOnBackdrop(event) {
+    if (event.target === document.getElementById('videoModal')) {
+        closeVideo();
+    }
+}
+
+// Показать уведомление
+function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    if (!notification) return;
+    
+    notification.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>${message}`;
+    notification.className = `notification notification-${type} show`;
+    setTimeout(() => notification.classList.remove('show'), 3000);
+}
+
+// Переключение панели
+function toggleAdminPanel() {
+    const content = document.getElementById('adminContent');
+    const icon = document.getElementById('adminToggleIcon');
+    
+    if (content.classList.contains('show')) {
+        content.classList.remove('show');
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        content.classList.add('show');
+        icon.style.transform = 'rotate(180deg)';
+    }
+}
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', () => {
+    loadVideos();
+    updateAdminUI();
+});
+</script>
+{% endblock %}

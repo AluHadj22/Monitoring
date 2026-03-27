@@ -1,0 +1,294 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="padding: 2rem;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <!-- Шапка -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+                            <path d="M3 6h18M3 12h18M3 18h18"/>
+                            <path d="M8 3v3M16 3v3"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 style="font-size: 1.5rem; font-weight: 600; color: var(--slate-800); margin: 0;">Управление категориями</h1>
+                        <p style="color: var(--slate-500); margin-top: 0.25rem; font-size: 0.875rem;">Создание и настройка категорий для отчётов</p>
+                    </div>
+                </div>
+            </div>
+            <a href="/regional-admin/dashboard" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--slate-600); font-size: 0.875rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Назад
+            </a>
+        </div>
+        
+        <!-- Форма создания категории -->
+        <div style="background: var(--card); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 1.5rem; overflow: hidden;">
+            <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--surface);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--slate-500)" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span style="font-size: 0.75rem; font-weight: 500; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Новая категория</span>
+                </div>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form method="post" action="/regional-admin/category/create" id="categoryForm">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div>
+                            <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Название *</label>
+                            <input type="text" name="name" placeholder="Например: Горячее питание" required
+                                   style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Цвет</label>
+                            <input type="color" name="color" value="#667eea"
+                                   style="width: 100%; padding: 0.25rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); height: 38px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Порядок</label>
+                            <input type="number" name="order_index" placeholder="0" value="0"
+                                   style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Иконка</label>
+                            <select name="icon" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+                                <option value="📊">📊 График</option>
+                                <option value="📈">📈 Диаграмма</option>
+                                <option value="📋">📋 Документ</option>
+                                <option value="📁">📁 Папка</option>
+                                <option value="👥">👥 Пользователи</option>
+                                <option value="📅">📅 Календарь</option>
+                                <option value="✅">✅ Готово</option>
+                                <option value="⚠️">⚠️ Внимание</option>
+                                <option value="⚙️">⚙️ Настройки</option>
+                                <option value="🏫">🏫 Школа</option>
+                                <option value="🍽️">🍽️ Питание</option>
+                                <option value="💰">💰 Бюджет</option>
+                                <option value="🏢">🏢 Здание</option>
+                                <option value="🎖️">🎖️ Кадет</option>
+                                <option value="📚">📚 Учёба</option>
+                                <option value="🔬">🔬 Наука</option>
+                                <option value="🏥">🏥 Здоровье</option>
+                                <option value="⚖️">⚖️ Право</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Описание</label>
+                        <textarea name="description" placeholder="Описание категории..." rows="2"
+                                  style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem; resize: vertical;"></textarea>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+                        <button type="submit" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #059669; color: white; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Создать категорию
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Список категорий -->
+        <div style="background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden;">
+            <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--surface);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--slate-500)" stroke-width="2">
+                        <path d="M4 4h16v16H4z"/>
+                        <path d="M8 8h8M8 12h6M8 16h4"/>
+                    </svg>
+                    <span style="font-size: 0.75rem; font-weight: 500; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Существующие категории</span>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border); background: var(--surface);">
+                            <th style="text-align: left; padding: 0.875rem 1rem; font-size: 0.7rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Иконка</th>
+                            <th style="text-align: left; padding: 0.875rem 1rem; font-size: 0.7rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Название</th>
+                            <th style="text-align: left; padding: 0.875rem 1rem; font-size: 0.7rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Описание</th>
+                            <th style="text-align: left; padding: 0.875rem 1rem; font-size: 0.7rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Отчётов</th>
+                            <th style="text-align: left; padding: 0.875rem 1rem; font-size: 0.7rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Порядок</th>
+                            <th style="text-align: left; padding: 0.875rem 1rem; font-size: 0.7rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Статус</th>
+                            <th style="text-align: left; padding: 0.875rem 1rem; font-size: 0.7rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 0.875rem 1rem;">
+                                <div style="width: 36px; height: 36px; background: {{ cat.color }}20; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 1.25rem;">{{ cat.icon }}</span>
+                                </div>
+                            </td>
+                            <td style="padding: 0.875rem 1rem;">
+                                <div style="font-weight: 500; color: var(--slate-800);">{{ cat.name }}</div>
+                                <div style="font-size: 0.7rem; color: var(--slate-400); margin-top: 0.25rem;">{{ cat.color }}</div>
+                            </td>
+                            <td style="padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--slate-500);">
+                                {{ cat.description[:50] }}{% if cat.description|length > 50 %}...{% endif %}
+                                {% if not cat.description %}<span style="color: var(--slate-400);">—</span>{% endif %}
+                            </td>
+                            <td style="padding: 0.875rem 1rem;">
+                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; background: var(--surface); border-radius: 20px; font-size: 0.75rem; font-weight: 500;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h6M8 16h4"/></svg>
+                                    {{ cat.report_count }}
+                                </span>
+                            </td>
+                            <td style="padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--slate-500);">{{ cat.order_index }}</td>
+                            <td style="padding: 0.875rem 1rem;">
+                                {% if cat.is_active %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                    Активна
+                                </span>
+                                {% else %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; background: #f1f5f9; color: #475569; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                    Неактивна
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 0.875rem 1rem;">
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button onclick="editCategory({{ cat.id }}, '{{ cat.name }}', '{{ cat.description }}', '{{ cat.icon }}', '{{ cat.color }}', {{ cat.order_index }}, {{ cat.is_active|lower }})" 
+                                            style="padding: 0.375rem 0.75rem; background: #eef2ff; color: #1e40af; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3l4 4-7 7H10v-4l7-7z"/><path d="M14 8l-4 4"/></svg>
+                                        Изменить
+                                    </button>
+                                    <form method="post" action="/regional-admin/category/{{ cat.id }}/delete" style="display: inline;" onsubmit="return confirm('Удалить категорию? Все отчёты в ней останутся без категории.')">
+                                        <button type="submit" style="padding: 0.375rem 0.75rem; background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v5M14 11v5"/></svg>
+                                            Удалить
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not categories %}
+            <div style="text-align: center; padding: 3rem;">
+                <div style="width: 64px; height: 64px; background: var(--surface); border-radius: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--slate-400)" stroke-width="1.5">
+                        <path d="M3 6h18M3 12h18M3 18h18"/>
+                        <path d="M8 3v3M16 3v3"/>
+                    </svg>
+                </div>
+                <h3 style="font-size: 1rem; font-weight: 500; color: var(--slate-600); margin-bottom: 0.5rem;">Нет категорий</h3>
+                <p style="color: var(--slate-400); font-size: 0.875rem;">Создайте первую категорию выше</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования -->
+<div id="editModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
+    <div style="background: var(--card); border-radius: 16px; padding: 1.5rem; max-width: 500px; width: 90%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Редактирование категории</h3>
+            <button onclick="closeModal()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--slate-400);">✕</button>
+        </div>
+        <form id="editForm" method="post">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Название *</label>
+                <input type="text" name="name" id="edit_name" required
+                       style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Цвет</label>
+                <input type="color" name="color" id="edit_color"
+                       style="width: 100%; padding: 0.25rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); height: 38px;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Порядок</label>
+                <input type="number" name="order_index" id="edit_order_index"
+                       style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Иконка</label>
+                <select name="icon" id="edit_icon" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+                    <option value="📊">📊 График</option>
+                    <option value="📈">📈 Диаграмма</option>
+                    <option value="📋">📋 Документ</option>
+                    <option value="📁">📁 Папка</option>
+                    <option value="👥">👥 Пользователи</option>
+                    <option value="📅">📅 Календарь</option>
+                    <option value="✅">✅ Готово</option>
+                    <option value="⚠️">⚠️ Внимание</option>
+                    <option value="⚙️">⚙️ Настройки</option>
+                    <option value="🏫">🏫 Школа</option>
+                    <option value="🍽️">🍽️ Питание</option>
+                    <option value="💰">💰 Бюджет</option>
+                    <option value="🏢">🏢 Здание</option>
+                    <option value="🎖️">🎖️ Кадет</option>
+                    <option value="📚">📚 Учёба</option>
+                    <option value="🔬">🔬 Наука</option>
+                    <option value="🏥">🏥 Здоровье</option>
+                    <option value="⚖️">⚖️ Право</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600);">Описание</label>
+                <textarea name="description" id="edit_description" rows="2"
+                          style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem; resize: vertical;"></textarea>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="is_active" id="edit_is_active" value="true">
+                    <span style="font-size: 0.875rem;">Активна</span>
+                </label>
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button type="button" onclick="closeModal()" style="padding: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; cursor: pointer;">Отмена</button>
+                <button type="submit" style="padding: 0.5rem 1rem; background: #059669; color: white; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer;">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function editCategory(id, name, description, icon, color, orderIndex, isActive) {
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_description').value = description || '';
+        document.getElementById('edit_color').value = color || '#667eea';
+        document.getElementById('edit_order_index').value = orderIndex;
+        document.getElementById('edit_is_active').checked = isActive;
+        
+        // Устанавливаем выбранную иконку в select
+        const select = document.getElementById('edit_icon');
+        if (select) {
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === icon) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        document.getElementById('editForm').action = `/regional-admin/category/${id}/update`;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    
+    function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+    
+    // Закрытие модального окна при клике на фон
+    document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+</script>
+{% endblock %}

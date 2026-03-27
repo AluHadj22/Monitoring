@@ -2,30 +2,81 @@
 
 {% block styles %}
 <style>
-    .login-container {
-        max-width: 400px;
-        margin: 2rem auto;
+    /* Страница входа в панель дашбордов - в едином стиле с дашбордом школы */
+    .login-wrapper {
+        min-height: calc(100vh - 73px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         padding: 2rem;
-        background: var(--card);
+        background: var(--bg-main);
+    }
+
+    .login-container {
+        max-width: 440px;
+        width: 100%;
+        margin: 0 auto;
+        background: var(--bg-card);
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-xl);
         border: 1px solid var(--border);
+        overflow: hidden;
+        animation: fadeInUp 0.4s ease-out forwards;
     }
 
     .login-header {
         text-align: center;
-        margin-bottom: 2rem;
+        padding: 2rem 2rem 1.5rem;
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--bg-card) 100%);
+        border-bottom: 1px solid var(--border);
+    }
+
+    [data-theme='dark'] .login-header {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, var(--bg-card) 100%);
+    }
+
+    .login-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .login-icon svg {
+        width: 36px;
+        height: 36px;
+        stroke: white;
     }
 
     .login-header h2 {
-        color: var(--slate-700);
-        font-size: 1.8rem;
+        font-size: 1.6rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         margin-bottom: 0.5rem;
     }
 
+    [data-theme='dark'] .login-header h2 {
+        background: linear-gradient(135deg, #e2e8f0 0%, var(--primary-light) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
     .login-header p {
-        color: var(--slate-500);
-        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .login-form {
+        padding: 2rem;
     }
 
     .form-group {
@@ -35,97 +86,335 @@
     .form-group label {
         display: block;
         margin-bottom: 0.5rem;
-        color: var(--slate-600);
-        font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        pointer-events: none;
+    }
+
+    .input-icon svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
     }
 
     .form-group input {
         width: 100%;
-        padding: 0.75rem 1rem;
+        padding: 0.85rem 1rem 0.85rem 2.75rem;
         border: 2px solid var(--border);
         border-radius: var(--radius-md);
-        background: var(--surface);
-        color: var(--slate-700);
-        font-size: 1rem;
-        transition: all 0.3s ease;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        font-family: inherit;
     }
 
     .form-group input:focus {
         outline: none;
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-bg);
+        transform: translateY(-1px);
+    }
+
+    .form-group input::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
     }
 
     .login-button {
         width: 100%;
-        padding: 0.75rem;
-        background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+        padding: 0.85rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         color: white;
         border: none;
         border-radius: var(--radius-md);
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .login-button svg {
+        width: 18px;
+        height: 18px;
+        stroke: white;
     }
 
     .login-button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(96, 165, 250, 0.4);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .login-button:active {
+        transform: translateY(0);
+    }
+
+    /* Эффект пульсации при нажатии */
+    .login-button::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.4s ease, height 0.4s ease;
+    }
+
+    .login-button:active::after {
+        width: 200px;
+        height: 200px;
     }
 
     .error-message {
-        background: #fee2e2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
-        padding: 1rem;
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 4px solid var(--error);
+        color: var(--error);
+        padding: 0.85rem 1rem;
         border-radius: var(--radius-md);
         margin-bottom: 1.5rem;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .error-message svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        flex-shrink: 0;
     }
 
     .info-box {
-        background: var(--blue-light);
-        border: 1px solid var(--blue);
+        background: var(--gray-50);
+        border: 1px solid var(--border);
         border-radius: var(--radius-md);
         padding: 1rem;
         margin-top: 1.5rem;
-        color: var(--slate-600);
-        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+
+    [data-theme='dark'] .info-box {
+        background: rgba(30, 41, 59, 0.6);
+    }
+
+    .info-box:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
     }
 
     .info-box strong {
-        color: var(--blue-dark);
+        color: var(--primary);
+        font-weight: 700;
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .info-box p {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+
+    .info-box a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s ease;
+    }
+
+    .info-box a:hover {
+        text-decoration: underline;
+        color: var(--primary-dark);
+    }
+
+    .info-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-top: 0.5rem;
+    }
+
+    .info-icon svg {
+        width: 14px;
+        height: 14px;
+        stroke: var(--primary);
+    }
+
+    /* Дополнительная ссылка */
+    .back-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .back-link a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s ease;
+    }
+
+    .back-link a:hover {
+        color: var(--primary);
+        transform: translateX(-2px);
+    }
+
+    .back-link svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 480px) {
+        .login-wrapper {
+            padding: 1rem;
+            align-items: flex-start;
+            padding-top: 2rem;
+        }
+        
+        .login-header {
+            padding: 1.5rem;
+        }
+        
+        .login-form {
+            padding: 1.5rem;
+        }
+        
+        .login-icon {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .login-icon svg {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .login-header h2 {
+            font-size: 1.4rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="login-container fade-in">
-    <div class="login-header">
-        <h2>🔐 Вход в панель дашбордов</h2>
-        <p>Введите код доступа для управления дашбордами</p>
-    </div>
-
-    {% if error %}
-    <div class="error-message">
-        {{ error }}
-    </div>
-    {% endif %}
-
-    <form method="POST" action="/dashboard-admin/login">
-        <div class="form-group">
-            <label>Код доступа</label>
-            <input type="password" name="access_code" placeholder="Введите код" required>
+<div class="login-wrapper">
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h2>Панель дашбордов</h2>
+            <p>Введите код доступа для управления аналитикой</p>
         </div>
 
-        <button type="submit" class="login-button">Войти в панель управления</button>
-    </form>
+        <div class="login-form">
+            {% if error %}
+            <div class="error-message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                {{ error }}
+            </div>
+            {% endif %}
 
-    <div class="info-box">
-        <strong>ℹ️ Для просмотра дашбордов</strong><br>
-        Перейдите в раздел <a href="/dashboards" style="color: var(--blue-dark);">Все дашборды</a>
+            <form method="POST" action="/dashboard-admin/login">
+                <div class="form-group">
+                    <label>Код доступа</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </span>
+                        <input type="password" name="access_code" placeholder="Введите секретный код" required autofocus>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Войти в панель управления
+                </button>
+            </form>
+
+            <div class="info-box">
+                <strong>ℹ️ Информация</strong>
+                <p>Доступ к панели дашбордов предоставляется по специальному коду.<br>Для просмотра публичных дашбордов используйте раздел ниже.</p>
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>Обратитесь к администратору для получения кода</span>
+                </div>
+            </div>
+
+            <div class="back-link">
+                <a href="/dashboards">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                    </svg>
+                    Вернуться к публичным дашбордам
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

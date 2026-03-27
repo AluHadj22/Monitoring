@@ -1,267 +1,582 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Договор‑оферта monitoring95.ru</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    .oferta-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Hero секция */
+    .oferta-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 32px;
+        padding: 3rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .oferta-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .oferta-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .oferta-hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .oferta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16, 185, 129, 0.2);
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #10b981;
+        margin-bottom: 1rem;
+    }
+
+    .oferta-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .oferta-subtitle {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 600px;
+    }
+
+    /* Основной контент */
+    .oferta-content {
+        background: var(--bg-card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .content-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .content-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title svg {
+        width: 24px;
+        height: 24px;
+        stroke: var(--primary);
+    }
+
+    .section-text {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .subsection {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .info-list li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .info-list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.5rem;
+        width: 6px;
+        height: 6px;
+        background: var(--primary);
+        border-radius: 50%;
+    }
+
+    .numbered-list {
+        list-style: none;
+        padding: 0;
+        counter-reset: item;
+    }
+
+    .numbered-list li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        counter-increment: item;
+    }
+
+    .numbered-list li::before {
+        content: counter(item) ".";
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    /* Таблица тарифов */
+    .price-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        background: var(--bg-card);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .price-table th,
+    .price-table td {
+        padding: 1rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .price-table th {
+        background: var(--surface);
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .price-table td {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .price-table .free-row {
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .price-table .paid-row {
+        background: rgba(245, 158, 11, 0.05);
+    }
+
+    .price-table .check {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .price-table .cross {
+        color: var(--text-secondary);
+        opacity: 0.5;
+    }
+
+    .payment-card {
+        background: linear-gradient(135deg, var(--primary-bg) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border: 1px solid var(--border);
+    }
+
+    .payment-card h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .price-amount {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 1rem 0;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+    }
+
+    .feature-list li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .feature-list li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .info-block {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin: 1.25rem 0;
+        border-left: 3px solid var(--primary);
+    }
+
+    .highlight {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .contact-card {
+        background: linear-gradient(135deg, var(--primary-bg) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .contact-card p {
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .contact-card a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .contact-card a:hover {
+        text-decoration: underline;
+    }
+
+    .last-updated {
+        text-align: center;
+        padding: 1.5rem;
+        background: var(--surface);
+        border-radius: 16px;
+        margin-top: 2rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .oferta-container {
+            padding: 1rem;
         }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 20px;
+        
+        .oferta-hero {
+            padding: 2rem;
         }
-        h2 {
-            color: #34495e;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-            margin-top: 30px;
+        
+        .oferta-title {
+            font-size: 1.5rem;
         }
-        p, li {
-            margin: 10px 0;
+        
+        .content-section {
+            padding: 1.5rem;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        
+        .section-title {
+            font-size: 1.1rem;
         }
-        .section {
-            margin-bottom: 25px;
+        
+        .price-table {
+            display: block;
+            overflow-x: auto;
         }
+        
         .subsection {
-            margin-left: 20px;
+            margin-left: 1rem;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-            display: none; /* Скрываем таблицу, т.к. тарифы отменены */
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #ecf0f1;
-        }
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #7f8c8d;
-        }
-        .highlight {
-            background-color: #f8f9fa;
-            padding: 2px;
-        }
-        .important {
-            background-color: #fffae6;
-            border-left: 4px solid #f39c12;
-            padding: 10px;
-            margin: 15px 0;
-        }
-    </style>
-</head>
-<body>
-<div class="header">
-    <h1>ДОГОВОР‑ОФЕРТА<br>
-    на оказание услуг по предоставлению доступа к платформе <span class="highlight">monitoring95.ru</span></h1>
-    <p>г. Грозный, Чеченская Республика<br></p>
+    }
+</style>
+
+<div class="oferta-container">
+    <!-- Hero секция -->
+    <div class="oferta-hero">
+        <div class="oferta-hero-content">
+            <div class="oferta-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>Договор-оферта</span>
+            </div>
+            <h1 class="oferta-title">Условия предоставления доступа</h1>
+            <p class="oferta-subtitle">
+                Внимательно ознакомьтесь с условиями оказания услуг платформы monitoring95.ru
+            </p>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="oferta-content">
+        <!-- Общие положения -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                1. Общие положения
+            </h2>
+            <ul class="numbered-list">
+                <li>Настоящий договор‑оферта (далее — «Договор») размещён на сайте <span class="highlight">monitoring95.ru</span> и является официальным предложением физического лица <strong>Хаджиева Алу Ибрагимовича</strong> (далее — «Исполнитель») заключить договор на оказание услуг по предоставлению доступа к информационной платформе <span class="highlight">monitoring95.ru</span> (далее — «Платформа») на изложенных ниже условиях.</li>
+                <li>Акцептом оферты (принятием условий Договора) считается проставление Пользователем отметки в чекбоксе при регистрации на сайте <span class="highlight">monitoring95.ru</span>, а также дальнейшее использование Платформы.</li>
+                <li>Договор вступает в силу с момента акцепта и действует до полного исполнения сторонами своих обязательств.</li>
+            </ul>
+        </div>
+
+        <!-- Предмет договора -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                2. Предмет договора
+            </h2>
+            <p class="section-text"><strong>2.1.</strong> Исполнитель обязуется предоставить Пользователю доступ к Платформе <span class="highlight">monitoring95.ru</span> в соответствии с выбранным тарифным планом, а Пользователь обязуется оплатить услуги в порядке и на условиях, предусмотренных настоящим Договором.</p>
+            
+            <p class="section-text"><strong>2.2.</strong> Платформа включает следующие функциональные возможности:</p>
+            <ul class="info-list">
+                <li>создание раздела для образовательной организации;</li>
+                <li>предоставление дискового пространства для размещения файлов ежедневного меню;</li>
+                <li>личный кабинет для управления размещёнными файлами;</li>
+                <li>панели администратора (регионального и муниципального уровней);</li>
+                <li>дашборды для визуализации статистических данных;</li>
+                <li>анализ статистики питания;</li>
+                <li>систему региональных отчётов;</li>
+                <li>разработка и внедрение обновлений.</li>
+            </ul>
+            
+            <p class="section-text"><strong>2.3.</strong> Исполнитель гарантирует:</p>
+            <ul class="info-list">
+                <li>размещение серверов Платформы на территории Российской Федерации;</li>
+                <li>соблюдение требований законодательства, включая Федеральный закон от 27.07.2006 № 152‑ФЗ «О персональных данных»;</li>
+                <li>использование программного обеспечения российского происхождения;</li>
+                <li>обработку персональных данных исключительно в соответствии с Политикой конфиденциальности и целями, указанными в Договоре.</li>
+            </ul>
+        </div>
+
+        <!-- Тарифные планы -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                3. Тарифные планы и стоимость услуг
+            </h2>
+            
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th>Функционал / Тариф</th>
+                        <th>Бесплатный (Школа)</th>
+                        <th>Платный (Администратор)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="free-row">
+                        <td><strong>Регистрация аккаунта школы</strong></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="cross">—</span></td>
+                    </tr>
+                    <tr class="free-row">
+                        <td><strong>Личный кабинет школы</strong></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="cross">—</span></td>
+                    </tr>
+                    <tr class="free-row">
+                        <td><strong>Ручная загрузка файлов меню</strong></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="cross">—</span></td>
+                    </tr>
+                    <tr class="free-row">
+                        <td><strong>Хранение файлов меню</strong></td>
+                        <td><span class="check">✓ (до 500 МБ)</span></td>
+                        <td><span class="check">✓ (до 500 МБ)</span></td>
+                    </tr>
+                    <tr class="paid-row">
+                        <td><strong>Аккаунт регионального администратора</strong></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓ По подписке</span></td>
+                    </tr>
+                    <tr class="paid-row">
+                        <td><strong>Аккаунт муниципального администратора</strong></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓ По подписке</span></td>
+                    </tr>
+                    <tr class="paid-row">
+                        <td><strong>Доступ к дашбордам</strong></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓ По подписке</span></td>
+                    </tr>
+                    <tr class="paid-row">
+                        <td><strong>Анализ статистики питания</strong></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓ По подписке</span></td>
+                    </tr>
+                    <tr class="paid-row">
+                        <td><strong>Рассмотрения заявок по проблемам в базе данных ФЦМПО</strong></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓ По подписке</span></td>
+                    </tr>
+                    <tr class="paid-row">
+                        <td><strong>Массовые операции с файлами</strong></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="check">✓ По подписке</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="payment-card">
+                <h4>💰 Платный тариф «Администратор»</h4>
+                <div class="price-amount">400 ₽ / месяц</div>
+                <ul class="feature-list">
+                    <li>Регистрация аккаунта регионального и/или муниципального администратора</li>
+                    <li>Полный доступ к панелям администратора</li>
+                    <li>Доступ ко всем дашбордам и аналитическим инструментам</li>
+                    <li>Анализ статистики питания по подведомственным учреждениям</li>
+                    <li>Рассмотрения заявок по проблемам в федеральной базе ФЦМПО</li>
+                    <li>Массовые операции с файлами (загрузка, удаление)</li>
+                    <li>Приоритетная техническая поддержка</li>
+                </ul>
+            </div>
+            
+            <p class="section-text"><strong>3.1.</strong> Стоимость услуг по платному тарифу составляет <strong>400 (Четыреста) рублей</strong> за один календарный месяц использования.</p>
+            <p class="section-text"><strong>3.2.</strong> Оплата производится ежемесячно, авансовым платежом, не позднее 5-го числа текущего месяца.</p>
+            <p class="section-text"><strong>3.3.</strong> При неоплате услуг в установленный срок доступ к платному функционалу приостанавливается до момента полного погашения задолженности.</p>
+            <p class="section-text"><strong>3.4.</strong> Пользователь вправе в любой момент отказаться от платного тарифа. При этом доступ к платному функционалу прекращается, а неиспользованные средства не возвращаются, за исключением случаев, предусмотренных законодательством РФ.</p>
+        </div>
+
+        <!-- Порядок оплаты -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                4. Порядок оплаты
+            </h2>
+            <p class="section-text"><strong>4.1.</strong> Оплата услуг производится безналичным переводом на банковские реквизиты Исполнителя, указанные в разделе 12 настоящего Договора.</p>
+            <p class="section-text"><strong>4.2.</strong> В назначении платежа необходимо указать: <span class="highlight">«Оплата доступа к платформе monitoring95.ru, наименование учреждения, конакты для связи»</span>.</p>
+            <p class="section-text"><strong>4.3.</strong> После поступления оплаты Исполнитель в течение 24 часов активирует платный доступ для Пользователя.</p>
+            <p class="section-text"><strong>4.4.</strong> Платный доступ считается предоставленным с момента активации и действует до окончания оплаченного периода.</p>
+        </div>
+
+        <!-- Права и обязанности сторон -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 12v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3M12 2v12M8 10l4 4 4-4"/>
+                </svg>
+                5. Права и обязанности сторон
+            </h2>
+            <p class="section-text"><strong>5.1. Исполнитель имеет право:</strong></p>
+            <ul class="info-list">
+                <li>приостановить доступ к платному функционалу при нарушении сроков оплаты;</li>
+                <li>изменять стоимость услуг, предварительно уведомив Пользователя за 15 календарных дней;</li>
+                <li>отказать в предоставлении услуг Пользователю, предоставившему недостоверные сведения.</li>
+            </ul>
+            
+            <p class="section-text"><strong>5.2. Исполнитель обязан:</strong></p>
+            <ul class="info-list">
+                <li>обеспечить круглосуточный доступ к Платформе (за исключением времени проведения плановых технических работ);</li>
+                <li>обеспечить сохранность и конфиденциальность данных Пользователя;</li>
+                <li>предоставлять техническую поддержку по вопросам работы Платформы.</li>
+            </ul>
+            
+            <p class="section-text"><strong>5.3. Пользователь имеет право:</strong></p>
+            <ul class="info-list">
+                <li>бесплатно использовать базовый функционал Платформы (аккаунт школы);</li>
+                <li>оформить платную подписку на расширенный функционал;</li>
+                <li>отказаться от платной подписки в любое время;</li>
+                <li>получать техническую поддержку.</li>
+            </ul>
+            
+            <p class="section-text"><strong>5.4. Пользователь обязан:</strong></p>
+            <ul class="info-list">
+                <li>своевременно оплачивать выбранный платный тариф;</li>
+                <li>предоставлять достоверные данные при регистрации;</li>
+                <li>не нарушать условия использования Платформы;</li>
+                <li>обеспечивать сохранность своих учётных данных.</li>
+            </ul>
+        </div>
+
+        <!-- Реквизиты Исполнителя -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                12. Реквизиты Исполнителя
+            </h2>
+            <div class="contact-card">
+                <p><strong>Хаджиев Алу Ибрагимович</strong></p>
+                <p><strong>Адрес:</strong> г. Грозный, Чеченская Республика</p>
+                <p><strong>Телефон:</strong> +7 989 944‑05‑71</p>
+                <p><strong>Email:</strong> <a href="mailto:ecmpservice@yandex.ru">ecmpservice@yandex.ru</a></p>
+                <p><strong>Банковские реквизиты:</strong> 2200 2001 3094 6791 - номер карты</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="last-updated">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; margin-right: 0.5rem;">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Актуальная версия: {{ current_date }}. Все права защищены.
+    </div>
 </div>
-
-<div class="section">
-    <h2>1. Общие положения</h2>
-    <p><strong>1.1.</strong> Настоящий договор‑оферта (далее — «Договор») размещён на сайте <span class="highlight">monitoring95.ru</span> и является официальным предложением физического лица <strong>Хаджиева Алу Ибрагимовича</strong> (далее — «Исполнитель») заключить договор на оказание услуг по предоставлению доступа к информационной платформе <span class="highlight">monitoring95.ru</span> (далее — «Платформа») на изложенных ниже условиях.</p>
-    <p><strong>1.2.</strong> Акцептом оферты (принятием условий Договора) считается проставление Пользователем отметки в чекбоксе «Я ознакомился и полностью принимаю условия Договора‑оферты, Пользовательского соглашения и Политики конфиденциальности, а также даю согласие на обработку моих персональных данных, включая ФИО директора школы, для целей регистрации и предоставления услуг сервиса» при регистрации на сайте <span class="highlight">monitoring95.ru</span>, а также дальнейшее использование Платформы.</p>
-    <p><strong>1.3.</strong> Договор вступает в силу с момента акцепта и действует до полного исполнения сторонами своих обязательств.</p>
-</div>
-
-
-<div class="section">
-    <h2>2. Предмет договора</h2>
-    <p><strong>2.1.</strong> Исполнитель обязуется предоставить Пользователю <strong>безвозмездный доступ ко всем функциям Платформы</strong>, включая:</p>
-    <ul class="subsection">
-        <li>регистрацию и управление личным кабинетом;</li>
-        <li>размещение файлов ежедневного меню в соответствии с требованиями законодательства РФ;</li>
-        <li>просмотр открытых данных;</li>
-        <li>использование панелей администратора регионального и районного уровней;</li>
-        <li>технические работы по внутреннему плану развития Системы;</li>
-        <li>доступ к актуальным обновлениям Платформы.</li>
-    </ul>
-
-    <p><strong>2.2.</strong> Платформа включает следующие функциональные возможности:</p>
-    <ul class="subsection">
-        <li>создание раздела для образовательной организации;</li>
-        <li>предоставление дискового пространства для размещения файлов;</li>
-        <li>личный кабинет для управления размещёнными файлами;</li>
-        <li>разработка и внедрение обновлений.</li>
-    </ul>
-    <p><strong>2.3.</strong> Исполнитель гарантирует:</p>
-    <ul class="subsection">
-        <li>размещение серверов Платформы на территории Российской Федерации;</li>
-        <li>соблюдение требований законодательства, включая Федеральный закон от 27.07.2006 № 152‑ФЗ «О персональных данных»;</li>
-        <li>использование программного обеспечения российского происхождения;</li>
-        <li>обработку персональных данных (включая ФИО директора школы) исключительно в соответствии с Политикой конфиденциальности и целями, указанными в Договоре.</li>
-    </ul>
-</div>
-
-<div class="section">
-    <h2>3. Права исполнителя</h2>
-    <p><strong>3.1.</strong> Сообщить Пользователю в течение 3 рабочих дней и до получения от него указаний приостановить работы при обнаружении:</p>
-    <ul class="subsection">
-        <li>несоответствия предоставленных Пользователем данных требованиям работоспособности Платформы;</li>
-        <li>неверности кодов доступа;</li>
-        <li>непригодности или недоброкачественности предоставленной информации;</li>
-        <li>иных обстоятельств, влияющих на качество работы или невозможность её выполнения.</li>
-    </ul>
-    <p><strong>3.2.</strong> Отказаться от исполнения условий Договора в случаях, если Пользователь, несмотря на своевременное предупреждение, не устранил обстоятельства, указанные в п. 3.1, в разумный срок.</p>
-    <p><strong>3.3.</strong> Не нести ответственность за сделки, совершаемые с использованием информационного ресурса Пользователя.</p>
-    <p><strong>3.4.</strong> Привлекать к оказанию услуг третьих лиц (соисполнителей). При этом все права и обязанности перед Пользователем остаются за Исполнителем.</p>
-</div>
-
-<div class="section">
-    <h2>4. Обязанности исполнителя</h2>
-    <ul>
-        <li><strong>4.1.</strong> Контроль работоспособности технологической площадки (хостинга) и раздела Пользователя.</li>
-        <li><strong>4.2.</strong> Восстановление данных Пользователя из резервной копии в случае сбоя.</li>
-        <li><strong>4.3.</strong> Информирование Пользователя о появлении новых возможностей и сервисов Платформы.</li>
-        <li><strong>4.4.</strong> Обеспечение обработки персональных данных (в том числе ФИО директора школы) в соответствии с заявленными целями и требованиями законодательства.</li>
-        <li><strong>4.5.</strong> Уведомление Пользователя об изменении порядка обработки персональных данных (включая ФИО директора школы) при внесении соответствующих изменений в Договор или Политику конфиденциальности.</li>
-    </ul>
-</div>
-
-<div class="section">
-    <h2>5. Права пользователя</h2>
-    <p><strong>5.1.</strong> Пользователь имеет право на:</p>
-    <ul class="subsection">
-        <li>бесплатное использование всех функций Платформы в соответствии с их предназначением;</li>
-        <li>доступ к личному кабинету и панелям администратора;</li>
-        <li>получение технической поддержки по вопросам работы Платформы;</li>
-        <li>запрос информации о порядке обработки своих персональных данных и данных директора школы.</li>
-    </ul>
-</div>
-<div class="section">
-    <h2>6. Обязанности пользователя</h2>
-    <p><strong>6.1.</strong> Пользователь обязуется:</p>
-    <ul class="subsection">
-        <li>использовать функционал Платформы без вмешательства в программный код;</li>
-        <li>не совершать действий, ведущих к нарушению функционирования Платформы или законодательства РФ;</li>
-        <li>добавлять email Исполнителя (<span class="highlight">ecmpservice@yandex.ru</span>) в белый список своего почтового сервиса для получения уведомлений;</li>
-        <li>предоставлять достоверные персональные данные, включая корректные ФИО директора школы;</li>
-        <li>обеспечивать актуальность данных о директоре школы;</li>
-        <li>при изменении ФИО директора по его инициативе либо при назначении нового директора — своевременно обновить информацию в системе;</li>
-        <li>удалить устаревшие персональные данные прежнего директора из системы в течение 3 рабочих дней после назначения нового директора.</li>
-    </ul>
-    <p><strong>6.2.</strong> Пользователь не вправе требовать от Исполнителя выполнения работ, не описанных в разделах 2 и 4 настоящего Договора. Дополнительные работы оформляются отдельным Дополнительным соглашением.</p>
-</div>
-
-<div class="section">
-    <h2>7. Стоимость услуг и порядок расчётов</h2>
-    <p><strong>7.1.</strong> Все функции Платформы предоставляются Пользователю <strong>безвозмездно</strong> на неограниченный срок.</p>
-    <p><strong>7.2.</strong> Плата за использование Платформы, включая доступ к панелям администратора, <strong>не взимается</strong>.</p>
-    <p><strong>7.3.</strong> Исполнитель вправе в одностороннем порядке:</p>
-    <ul class="subsection">
-        <li>расширять функционал Платформы;</li>
-        <li>вносить технические улучшения;</li>
-        <li>обновлять интерфейс и сервисы — без взимания дополнительной платы.</li>
-    </ul>
-    <p><strong>7.4.</strong> Любые попытки взимания платы со стороны третьих лиц за доступ к Платформе являются незаконными. Пользователь уведомляется об этом при регистрации.</p>
-</div>
-
-
-<div class="section">
-    <h2>8. Конфиденциальность и обработка персональных данных</h2>
-    <p><strong>8.1.</strong> Исполнитель обязуется сохранять в тайне коммерческую и иную конфиденциальную информацию, полученную от Пользователя в ходе исполнения Договора.</p>
-    <p><strong>8.2.</strong> Персональные данные Пользователей, включая ФИО директора школы, обрабатываются в соответствии с:</p>
-    <ul class="subsection">
-        <li>Федеральным законом от 27.07.2006 № 152‑ФЗ «О персональных данных»;</li>
-        <li>Политикой конфиденциальности, размещённой на <span class="highlight">monitoring95.ru</span>.</li>
-    </ul>
-    <p><strong>8.3.</strong> Цели обработки персональных данных:</p>
-    <ul class="subsection">
-        <li>обеспечение функционирования Платформы;</li>
-        <li>верификация принадлежности пользователя к образовательному учреждению;</li>
-        <li>направление уведомлений о новых функциях и изменениях;</li>
-        <li>статистический анализ (без раскрытия персональных данных третьим лицам).</li>
-    </ul>
-    <p><strong>8.4.</strong> Пользователь подтверждает, что:</p>
-    <ul class="subsection">
-        <li>осознаёт и принимает порядок обработки своих персональных данных и данных директора школы;</li>
-        <li>гарантирует достоверность предоставленных данных о директоре школы;</li>
-        <li>согласен с тем, что данные могут быть использованы исключительно в рамках целей, указанных в Договоре и Политике конфиденциальности.</li>
-    </ul>
-</div>
-
-<div class="section">
-    <h2>9. Ответственность сторон</h2>
-    <p><strong>9.1.</strong> Исполнитель не несёт ответственности за:</p>
-    <ul class="subsection">
-        <li>временные сбои в работе Платформы из‑за технических работ или форс‑мажорных обстоятельств;</li>
-        <li>действия Пользователей, нарушающих условия Договора;</li>
-        <li>ущерб, причинённый третьим лицам в результате размещения Пользователем информации на Платформе;</li>
-        <li>проблемы, вызванные низким качеством каналов связи или использованием нелицензионного ПО;</li>
-        <li>неточность или неполноту данных, предоставленных Пользователем (включая данные о директоре школы).</li>
-    </ul>
-    <p><strong>9.2.</strong> Пользователь несёт ответственность за:</p>
-    <ul class="subsection">
-        <li>достоверность предоставленных при регистрации данных (в том числе ФИО директора школы);</li>
-        <li>сохранность учётной записи и пароля от Личного кабинета;</li>
-        <li>последствия внесения несанкционированных изменений в программный код Платформы;</li>
-        <li>своевременное обновление и удаление данных директора школы в соответствии с п. 6.1 настоящего Договора.</li>
-    </ul>
-</div>
-
-
-<div class="section">
-    <h2>10. Разрешение споров</h2>
-    <p><strong>10.1.</strong> Все споры разрешаются путём переговоров между сторонами.</p>
-    <p><strong>10.2.</strong> При невозможности урегулирования разногласий спор передаётся на рассмотрение в <strong>Арбитражный суд Чеченской Республики (г. Грозный)</strong>.</p>
-    <p><strong>10.3.</strong> До обращения в суд обязательна попытка досудебного урегулирования путём направления претензии по электронной почте <span class="highlight">ecmpservice@yandex.ru</span>.</p>
-</div>
-
-
-<div class="section">
-    <h2>11. Срок действия и расторжение договора</h2>
-    <p><strong>11.1.</strong> Договор действует с момента акцепта до полного исполнения обязательств сторонами.</p>
-    <p><strong>11.2.</strong> Расторжение Договора возможно:</p>
-    <ul class="subsection">
-        <li>по соглашению сторон;</li>
-        <li>в случае нарушения Пользователем условий Договора;</li>
-        <li>при одностороннем отказе стороны с уведомлением за 15 рабочих дней (в письменной форме или по email).</li>
-    </ul>
-    <p><strong>11.3.</strong> Действие Договора может быть прекращено по инициативе Пользователя при отсутствии прямой вины Исполнителя.</p>
-    <p><strong>11.4.</strong> При расторжении Договора:</p>
-    <ul class="subsection">
-        <li>доступ Пользователя к Платформе блокируется;</li>
-        <li>персональные данные Пользователя и данные директора школы хранятся в соответствии с требованиями законодательства РФ;</li>
-        <li>Пользователь обязан удалить все персональные данные директора школы из системы, если иное не требуется по закону.</li>
-    </ul>
-</div>
-
-<div class="section">
-    <h2>12. Форс‑мажор</h2>
-    <p><strong>12.1.</strong> Стороны освобождаются от ответственности за неисполнение обязательств, если это вызвано обстоятельствами непреодолимой силы (стихийные бедствия, эпидемии, военные действия, изменения законодательства и т. п.).</p>
-    <p><strong>12.2.</strong> Сторона, для которой возникли форс‑мажорные обстоятельства, обязана уведомить другую сторону в течение 5 рабочих дней с момента их наступления.</p>
-</div>
-
-<div class="section">
-    <h2>13. Прочие условия</h2>
-    <p><strong>13.1.</strong> Все дополнения и изменения к Договору оформляются в виде Дополнительных соглашений, подписываемых обеими сторонами.</p>
-    <p><strong>13.2.</strong> Исполнитель вправе вносить изменения в условия Договора. Изменения вступают в силу с момента публикации на <span class="highlight">monitoring95.ru</span>, если иной срок не указан при публикации.</p>
-    <p><strong>13.3.</strong> В случае принципиальных изменений, затрагивающих порядок обработки персональных данных (включая ФИО директора школы), Исполнитель уведомляет Пользователя по email, указанному при регистрации.</p>
-    <p><strong>13.4.</strong> Предоставление бесплатного доступа всем пользователям осуществляется в рамках реализации программы общедоступной информационной поддержки образовательных учреждений Чеченской Республики и не носит дискриминационный характер.</p>
-    <p><strong>13.5.</strong> Настоящий Договор, Пользовательское соглашение и Политика конфиденциальности составляют единый комплекс документов, регулирующих отношения между Исполнителем и Пользователем. В случае противоречий приоритет имеют положения Договора‑оферты.</p>
-</div>
-
-
-<div class="section">
-    <h2>14. Реквизиты сторон</h2>
-    <p><strong>Исполнитель:</strong><br>
-    Хаджиев Алу Ибрагимович<br>
+{% endblock %}

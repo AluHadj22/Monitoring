@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="padding: 2rem;">
+    <div style="max-width: 1000px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 2rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    ✏️ Редактирование отчёта
+                </h1>
+                <p style="color: var(--slate-500); margin-top: 0.5rem;">{{ report.title }}</p>
+            </div>
+            <a href="/regional-admin/report/{{ report.id }}" class="nav-link">← К просмотру</a>
+        </div>
+        
+        <div style="background: var(--card); border-radius: 20px; padding: 2rem; border: 1px solid var(--border);">
+            <form method="post" action="/regional-admin/report/{{ report.id }}/edit">
+                <!-- Основная информация -->
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">📝 Основная информация</h2>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Название отчёта *</label>
+                        <input type="text" name="title" value="{{ report.title }}" required
+                               style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Описание</label>
+                        <textarea name="description" rows="3"
+                                  style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">{{ report.description or '' }}</textarea>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Категория</label>
+                            <select name="category_id" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                                <option value="">Без категории</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if report.category_id == cat.id %}selected{% endif %}>{{ cat.icon }} {{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Период -->
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">📅 Период</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Год *</label>
+                            <input type="number" name="year" value="{{ report.year }}" required min="2020" max="2030"
+                                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Месяц</label>
+                            <select name="month" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                                <option value="">Не указан</option>
+                                <option value="1" {% if report.month == 1 %}selected{% endif %}>Январь</option>
+                                <option value="2" {% if report.month == 2 %}selected{% endif %}>Февраль</option>
+                                <option value="3" {% if report.month == 3 %}selected{% endif %}>Март</option>
+                                <option value="4" {% if report.month == 4 %}selected{% endif %}>Апрель</option>
+                                <option value="5" {% if report.month == 5 %}selected{% endif %}>Май</option>
+                                <option value="6" {% if report.month == 6 %}selected{% endif %}>Июнь</option>
+                                <option value="7" {% if report.month == 7 %}selected{% endif %}>Июль</option>
+                                <option value="8" {% if report.month == 8 %}selected{% endif %}>Август</option>
+                                <option value="9" {% if report.month == 9 %}selected{% endif %}>Сентябрь</option>
+                                <option value="10" {% if report.month == 10 %}selected{% endif %}>Октябрь</option>
+                                <option value="11" {% if report.month == 11 %}selected{% endif %}>Ноябрь</option>
+                                <option value="12" {% if report.month == 12 %}selected{% endif %}>Декабрь</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Квартал</label>
+                            <select name="quarter" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                                <option value="">Не указан</option>
+                                <option value="1" {% if report.quarter == 1 %}selected{% endif %}>I квартал</option>
+                                <option value="2" {% if report.quarter == 2 %}selected{% endif %}>II квартал</option>
+                                <option value="3" {% if report.quarter == 3 %}selected{% endif %}>III квартал</option>
+                                <option value="4" {% if report.quarter == 4 %}selected{% endif %}>IV квартал</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Данные отчёта -->
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">📊 Данные отчёта</h2>
+                    
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Данные (JSON формат)</label>
+                    <textarea name="report_data" rows="12"
+                              style="width: 100%; padding: 0.75rem; font-family: monospace; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">{{ report.data | tojson(indent=2) }}</textarea>
+                </div>
+                
+                <!-- Статус -->
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">⚙️ Статус</h2>
+                    
+                    <div style="display: flex; gap: 2rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="status" value="draft" {% if report.status == "draft" %}checked{% endif %}> 📝 Черновик
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="status" value="published" {% if report.is_published %}checked{% endif %}> ✅ Опубликовать
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="status" value="archived" {% if report.status == "archived" %}checked{% endif %}> 🗄️ Архив
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <a href="/regional-admin/report/{{ report.id }}" class="nav-link">Отмена</a>
+                    <button type="submit" style="padding: 0.75rem 2rem; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; cursor: pointer;">
+                        💾 Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

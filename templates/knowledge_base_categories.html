@@ -2,80 +2,163 @@
 
 {% block content %}
 <style>
+    /* Страница категорий - в едином стиле с проектом */
+    .categories-page {
+        min-height: calc(100vh - 73px);
+        background: var(--bg-main);
+        padding: 2rem 1rem;
+    }
+
     .categories-container {
         max-width: 1200px;
-        margin: 30px auto;
-        padding: 0 20px;
+        margin: 0 auto;
     }
     
-    .header {
-        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-        color: white;
-        padding: 40px;
+    /* Шапка страницы */
+    .page-header {
+        background: linear-gradient(135deg, var(--gray-100) 0%, var(--bg-card) 100%);
         border-radius: var(--radius-lg);
-        margin-bottom: 30px;
-        box-shadow: var(--shadow-xl);
-    }
-    
-    .header h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
-    }
-    
-    .add-category {
-        background: var(--card);
-        border-radius: var(--radius-lg);
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: var(--shadow-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
         border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+    }
+
+    [data-theme='dark'] .page-header {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, var(--bg-card) 100%);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
     }
     
-    .add-category h2 {
-        font-size: 1.5em;
-        margin-bottom: 20px;
-        color: var(--slate-800);
+    .page-header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    [data-theme='dark'] .page-header h1 {
+        background: linear-gradient(135deg, #e2e8f0 0%, var(--primary-light) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-header p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    /* Карточка создания категории */
+    .add-category-card {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    [data-theme='dark'] .card-header {
+        background: rgba(30, 41, 59, 0.6);
+    }
+
+    .card-header svg {
+        width: 22px;
+        height: 22px;
+        stroke: var(--primary);
+    }
+
+    .card-header h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
     }
     
     .form-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
     }
     
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 1.25rem;
     }
     
     .form-group label {
         display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: var(--slate-700);
+        margin-bottom: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
     }
     
     .form-control {
         width: 100%;
-        padding: 12px 15px;
+        padding: 0.75rem 1rem;
         border: 2px solid var(--border);
         border-radius: var(--radius-md);
-        background: var(--surface);
-        color: var(--slate-700);
-        font-size: 1em;
-        transition: all 0.3s ease;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        font-family: inherit;
     }
     
     .form-control:focus {
         outline: none;
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-bg);
     }
     
+    /* Селектор иконок */
     .icon-selector {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-        gap: 10px;
-        margin-top: 10px;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+        max-height: 150px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+    }
+
+    [data-theme='dark'] .icon-selector {
+        background: rgba(30, 41, 59, 0.6);
     }
     
     .icon-option {
@@ -84,81 +167,136 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.8em;
+        font-size: 1.6rem;
         border: 2px solid var(--border);
         border-radius: var(--radius-md);
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
+        background: var(--bg-card);
     }
     
     .icon-option:hover {
-        border-color: #8b5cf6;
-        transform: scale(1.1);
+        border-color: var(--primary);
+        transform: scale(1.05);
+        box-shadow: var(--shadow-sm);
     }
     
     .icon-option.selected {
-        background: #8b5cf6;
-        border-color: #8b5cf6;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border-color: var(--primary);
         color: white;
+        transform: scale(1.05);
     }
     
+    /* Кнопки */
     .btn {
-        padding: 14px 25px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
         border: none;
         border-radius: var(--radius-md);
-        font-size: 1em;
+        font-size: 0.85rem;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s ease;
+        font-family: inherit;
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         color: white;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
     }
     
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
     }
     
-    .categories-list {
-        background: var(--card);
-        border-radius: var(--radius-lg);
-        padding: 30px;
-        box-shadow: var(--shadow-lg);
+    .btn-secondary {
+        background: var(--gray-100);
+        color: var(--text-secondary);
         border: 1px solid var(--border);
     }
     
-    .categories-list h2 {
-        font-size: 1.5em;
-        margin-bottom: 20px;
-        color: var(--slate-800);
+    [data-theme='dark'] .btn-secondary {
+        background: var(--gray-800);
+    }
+    
+    .btn-secondary:hover {
+        background: var(--gray-200);
+        transform: translateY(-2px);
+    }
+    
+    /* Список категорий */
+    .categories-list-card {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+    
+    .categories-list-card .card-header {
+        justify-content: space-between;
+    }
+    
+    .categories-count {
+        background: var(--primary-bg);
+        color: var(--primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .categories-list {
+        padding: 0;
     }
     
     .category-item {
         display: flex;
         align-items: center;
-        gap: 20px;
-        padding: 15px;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
         border-bottom: 1px solid var(--border);
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .category-item:last-child {
+        border-bottom: none;
     }
     
     .category-item:hover {
-        background: var(--blue-light);
-        transform: translateX(5px);
+        background: var(--gray-50);
+        transform: translateX(4px);
+    }
+
+    [data-theme='dark'] .category-item:hover {
+        background: rgba(30, 41, 59, 0.6);
     }
     
     .category-icon {
-        width: 50px;
-        height: 50px;
-        background: var(--surface);
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
         border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.8em;
+        font-size: 1.8rem;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    [data-theme='dark'] .category-icon {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+    
+    .category-item:hover .category-icon {
+        transform: scale(1.05);
     }
     
     .category-info {
@@ -167,66 +305,108 @@
     
     .category-name {
         font-weight: 700;
-        color: var(--slate-800);
-        margin-bottom: 5px;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
     }
     
     .category-desc {
-        color: var(--slate-500);
-        font-size: 0.9em;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .category-meta {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .status-badge svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    .status-inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+    
+    .order-badge {
+        background: var(--gray-100);
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    [data-theme='dark'] .order-badge {
+        background: var(--gray-800);
     }
     
     .category-actions {
         display: flex;
-        gap: 10px;
+        gap: 0.5rem;
+        flex-shrink: 0;
     }
     
-    .edit-btn, .delete-btn {
-        padding: 8px 15px;
-        border: none;
+    .icon-btn {
+        width: 36px;
+        height: 36px;
         border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
+        border: none;
+        font-size: 1rem;
     }
     
     .edit-btn {
-        background: var(--blue-light);
-        color: var(--blue-dark);
+        background: var(--gray-100);
+        color: var(--text-secondary);
+    }
+
+    [data-theme='dark'] .edit-btn {
+        background: var(--gray-800);
     }
     
     .edit-btn:hover {
-        background: var(--blue);
+        background: var(--primary);
         color: white;
+        transform: translateY(-2px);
     }
     
     .delete-btn {
-        background: #fee2e2;
+        background: rgba(239, 68, 68, 0.1);
         color: #ef4444;
     }
     
     .delete-btn:hover {
         background: #ef4444;
         color: white;
+        transform: translateY(-2px);
     }
     
-    .status-badge {
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.85em;
-        font-weight: 600;
-    }
-    
-    .status-active {
-        background: #d1fae5;
-        color: #059669;
-    }
-    
-    .status-inactive {
-        background: #fee2e2;
-        color: #ef4444;
-    }
-    
+    /* Модальное окно */
     .modal {
         display: none;
         position: fixed;
@@ -234,7 +414,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
         z-index: 2000;
         align-items: center;
         justify-content: center;
@@ -242,109 +423,280 @@
     
     .modal.show {
         display: flex;
+        animation: fadeIn 0.2s ease-out;
     }
     
     .modal-content {
-        background: var(--card);
+        background: var(--bg-card);
         border-radius: var(--radius-lg);
-        padding: 30px;
-        max-width: 500px;
+        padding: 1.5rem;
+        max-width: 550px;
         width: 90%;
-        max-height: 80vh;
+        max-height: 85vh;
         overflow-y: auto;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-xl);
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
     .modal-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
     }
     
     .modal-header h3 {
-        font-size: 1.5em;
-        color: var(--slate-800);
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
     .close-btn {
-        font-size: 1.5em;
+        font-size: 1.5rem;
         cursor: pointer;
-        color: var(--slate-500);
-        transition: color 0.3s ease;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
     }
     
     .close-btn:hover {
-        color: var(--slate-800);
+        background: var(--gray-100);
+        color: var(--text-primary);
+    }
+    
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+    
+    .checkbox-label input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+    
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 1rem;
+        stroke: var(--border);
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    /* Анимации */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .categories-page {
+            padding: 1rem;
+        }
+        
+        .page-header {
+            padding: 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.4rem;
+        }
+        
+        .category-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 1.5rem;
+        }
+        
+        .category-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<div class="categories-container">
-    <div class="header">
-        <h1>📁 Управление категориями</h1>
-        <p>Создавайте и редактируйте категории для документов</p>
-    </div>
-    
-    <div class="add-category">
-        <h2>➕ Создать новую категорию</h2>
-        <form method="POST" action="/knowledge-base/admin/category/create">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Название категории</label>
-                    <input type="text" name="name" class="form-control" required placeholder="Например: Нормативные документы">
-                </div>
-                <div class="form-group">
-                    <label>Описание (необязательно)</label>
-                    <input type="text" name="description" class="form-control" placeholder="Краткое описание категории">
-                </div>
-                <div class="form-group">
-                    <label>Порядок сортировки</label>
-                    <input type="number" name="order_index" class="form-control" value="0">
-                </div>
+<div class="categories-page">
+    <div class="categories-container">
+        <!-- Шапка -->
+        <div class="page-header">
+            <h1>
+                <span>📁</span>
+                Управление категориями
+            </h1>
+            <p>Создавайте и редактируйте категории для документов в базе знаний</p>
+        </div>
+        
+        <!-- Карточка создания категории -->
+        <div class="add-category-card">
+            <div class="card-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <h2>Создать новую категорию</h2>
             </div>
-            
-            <div class="form-group">
-                <label>Выберите иконку</label>
-                <div class="icon-selector">
-                    {% for icon in icons %}
-                    <div class="icon-option" onclick="selectIcon(this, '{{ icon }}')">{{ icon }}</div>
-                    {% endfor %}
-                </div>
-                <input type="hidden" name="icon" id="selected-icon" value="📁">
-            </div>
-            
-            <button type="submit" class="btn btn-primary" style="margin-top: 20px;">
-                Создать категорию
-            </button>
-        </form>
-    </div>
-    
-    <div class="categories-list">
-        <h2>📋 Существующие категории</h2>
-        {% for category in categories %}
-        <div class="category-item">
-            <div class="category-icon">{{ category.icon }}</div>
-            <div class="category-info">
-                <div class="category-name">{{ category.name }}</div>
-                <div class="category-desc">{{ category.description or 'Нет описания' }}</div>
-                <div style="margin-top: 8px;">
-                    <span class="status-badge {% if category.is_active %}status-active{% else %}status-inactive{% endif %}">
-                        {% if category.is_active %}Активна{% else %}Неактивна{% endif %}
-                    </span>
-                    <span style="margin-left: 10px; color: var(--slate-500); font-size: 0.9em;">
-                        Порядок: {{ category.order_index }}
-                    </span>
-                </div>
-            </div>
-            <div class="category-actions">
-                <button class="edit-btn" onclick="openEditModal({{ category.id }}, '{{ category.name }}', '{{ category.description or '' }}', '{{ category.icon }}', {{ category.order_index }}, {{ 'true' if category.is_active else 'false' }})">
-                    ✏️ Редактировать
-                </button>
-                <form method="POST" action="/knowledge-base/admin/category/{{ category.id }}/delete" style="display: inline;" onsubmit="return confirm('Удалить категорию? Все документы в ней останутся без категории.');">
-                    <button type="submit" class="delete-btn">🗑️ Удалить</button>
+            <div class="card-body">
+                <form method="POST" action="/knowledge-base/admin/category/create">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Название категории</label>
+                            <input type="text" name="name" class="form-control" required placeholder="Например: Нормативные документы">
+                        </div>
+                        <div class="form-group">
+                            <label>Описание (необязательно)</label>
+                            <input type="text" name="description" class="form-control" placeholder="Краткое описание категории">
+                        </div>
+                        <div class="form-group">
+                            <label>Порядок сортировки</label>
+                            <input type="number" name="order_index" class="form-control" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Выберите иконку</label>
+                        <div class="icon-selector" id="create-icon-selector">
+                            {% for icon in icons %}
+                            <div class="icon-option" onclick="selectIcon(this, '{{ icon }}')">{{ icon }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="icon" id="selected-icon" value="📁">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Создать категорию
+                    </button>
                 </form>
             </div>
         </div>
-        {% endfor %}
+        
+        <!-- Список категорий -->
+        <div class="categories-list-card">
+            <div class="card-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18v12H3z"></path>
+                        <path d="M8 6V4h8v2"></path>
+                    </svg>
+                    <h2>Существующие категории</h2>
+                </div>
+                <span class="categories-count">{{ categories|length }} категорий</span>
+            </div>
+            
+            <div class="categories-list">
+                {% if categories %}
+                    {% for category in categories %}
+                    <div class="category-item">
+                        <div class="category-icon">{{ category.icon }}</div>
+                        <div class="category-info">
+                            <div class="category-name">{{ category.name }}</div>
+                            <div class="category-desc">{{ category.description or 'Нет описания' }}</div>
+                            <div class="category-meta">
+                                <span class="status-badge {% if category.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        {% if category.is_active %}
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        {% else %}
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        {% endif %}
+                                    </svg>
+                                    {% if category.is_active %}Активна{% else %}Неактивна{% endif %}
+                                </span>
+                                <span class="order-badge">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="display: inline; margin-right: 4px;">
+                                        <line x1="12" y1="3" x2="12" y2="21"></line>
+                                        <polyline points="8 7 12 3 16 7"></polyline>
+                                    </svg>
+                                    Порядок: {{ category.order_index }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="icon-btn edit-btn" onclick="openEditModal({{ category.id }}, '{{ category.name }}', '{{ category.description or '' }}', '{{ category.icon }}', {{ category.order_index }}, {{ 'true' if category.is_active else 'false' }})" title="Редактировать">
+                                ✏️
+                            </button>
+                            <form method="POST" action="/knowledge-base/admin/category/{{ category.id }}/delete" style="display: inline;" onsubmit="return confirm('Удалить категорию «{{ category.name }}»? Все документы в ней останутся без категории.');">
+                                <button type="submit" class="icon-btn delete-btn" title="Удалить">
+                                    🗑️
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                        </svg>
+                        <p>Пока нет созданных категорий</p>
+                        <p style="font-size: 0.8rem; margin-top: 0.5rem;">Создайте первую категорию, чтобы организовать документы</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 
@@ -352,8 +704,11 @@
 <div class="modal" id="editModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>✏️ Редактировать категорию</h3>
-            <span class="close-btn" onclick="closeEditModal()">&times;</span>
+            <h3>
+                <span>✏️</span>
+                Редактировать категорию
+            </h3>
+            <button class="close-btn" onclick="closeEditModal()">&times;</button>
         </div>
         <form method="POST" action="" id="editForm">
             <div class="form-group">
@@ -378,25 +733,30 @@
                 <input type="hidden" name="icon" id="edit-selected-icon">
             </div>
             <div class="form-group">
-                <label>
+                <label class="checkbox-label">
                     <input type="checkbox" name="is_active" id="edit-active" value="true">
-                    Категория активна
+                    <span>Категория активна</span>
                 </label>
             </div>
-            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Отмена</button>
+            </div>
         </form>
     </div>
 </div>
 
 <script>
+// Выбор иконки при создании
 function selectIcon(element, icon) {
-    document.querySelectorAll('.icon-option').forEach(el => {
+    document.querySelectorAll('#create-icon-selector .icon-option').forEach(el => {
         el.classList.remove('selected');
     });
     element.classList.add('selected');
     document.getElementById('selected-icon').value = icon;
 }
 
+// Выбор иконки при редактировании
 function selectEditIcon(element, icon) {
     document.querySelectorAll('#edit-icon-selector .icon-option').forEach(el => {
         el.classList.remove('selected');
@@ -405,14 +765,22 @@ function selectEditIcon(element, icon) {
     document.getElementById('edit-selected-icon').value = icon;
 }
 
+// Открытие модального окна редактирования
 function openEditModal(id, name, description, icon, orderIndex, isActive) {
-    document.getElementById('editModal').classList.add('show');
-    document.getElementById('editForm').action = `/knowledge-base/admin/category/${id}/update`;
-    document.getElementById('edit-name').value = name;
-    document.getElementById('edit-description').value = description;
-    document.getElementById('edit-order').value = orderIndex;
-    document.getElementById('edit-selected-icon').value = icon;
-    document.getElementById('edit-active').checked = isActive;
+    const modal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    const nameInput = document.getElementById('edit-name');
+    const descInput = document.getElementById('edit-description');
+    const orderInput = document.getElementById('edit-order');
+    const iconInput = document.getElementById('edit-selected-icon');
+    const activeCheckbox = document.getElementById('edit-active');
+    
+    editForm.action = `/knowledge-base/admin/category/${id}/update`;
+    nameInput.value = name;
+    descInput.value = description;
+    orderInput.value = orderIndex;
+    iconInput.value = icon;
+    activeCheckbox.checked = isActive;
     
     // Выделяем текущую иконку
     document.querySelectorAll('#edit-icon-selector .icon-option').forEach(el => {
@@ -422,8 +790,11 @@ function openEditModal(id, name, description, icon, orderIndex, isActive) {
             el.classList.remove('selected');
         }
     });
+    
+    modal.classList.add('show');
 }
 
+// Закрытие модального окна
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('show');
 }
@@ -435,5 +806,18 @@ window.onclick = function(event) {
         closeEditModal();
     }
 }
+
+// Анимация появления карточек
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.category-item').forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-10px)';
+        setTimeout(() => {
+            item.style.transition = 'all 0.3s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, index * 50);
+    });
+});
 </script>
 {% endblock %}

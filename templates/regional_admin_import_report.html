@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="padding: 2rem;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 2rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    📥 Импорт отчёта
+                </h1>
+                <p style="color: var(--slate-500); margin-top: 0.5rem;">Загрузите файл с отчётом (PDF, DOCX, XLSX, JSON)</p>
+            </div>
+            <a href="/regional-admin/dashboard" class="nav-link">← Назад</a>
+        </div>
+        
+        <div style="background: var(--card); border-radius: 20px; padding: 2rem; border: 1px solid var(--border);">
+            <form method="post" action="/regional-admin/import-report" enctype="multipart/form-data">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Название отчёта *</label>
+                    <input type="text" name="title" required
+                           style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);"
+                           placeholder="Например: Отчёт по горячему питанию 2025">
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Описание</label>
+                    <textarea name="description" rows="3"
+                              style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);"
+                              placeholder="Краткое описание содержания отчёта"></textarea>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Категория</label>
+                        <select name="category_id" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                            <option value="">Без категории</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Год *</label>
+                        <input type="number" name="year" value="2025" required min="2020" max="2030"
+                               style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Месяц (опционально)</label>
+                    <select name="month" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                        <option value="">Не указан</option>
+                        <option value="1">Январь</option>
+                        <option value="2">Февраль</option>
+                        <option value="3">Март</option>
+                        <option value="4">Апрель</option>
+                        <option value="5">Май</option>
+                        <option value="6">Июнь</option>
+                        <option value="7">Июль</option>
+                        <option value="8">Август</option>
+                        <option value="9">Сентябрь</option>
+                        <option value="10">Октябрь</option>
+                        <option value="11">Ноябрь</option>
+                        <option value="12">Декабрь</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Файл отчёта *</label>
+                    <input type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.json"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);">
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--slate-400);">
+                        Поддерживаемые форматы: PDF, DOC, DOCX, XLS, XLSX, JSON
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <a href="/regional-admin/dashboard" class="nav-link">Отмена</a>
+                    <button type="submit" style="padding: 0.75rem 2rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 12px; cursor: pointer;">
+                        📥 Импортировать
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div style="margin-top: 2rem; background: var(--surface); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border);">
+            <h3 style="margin-bottom: 1rem;">ℹ️ О форматах</h3>
+            <ul style="margin-left: 1.5rem; color: var(--slate-500); line-height: 1.6;">
+                <li><strong>JSON</strong> - данные из файла будут автоматически извлечены и сохранены как данные отчёта</li>
+                <li><strong>PDF, DOCX, XLSX</strong> - файл будет сохранён как прикреплённый документ</li>
+                <li>После импорта вы сможете отредактировать данные отчёта вручную</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

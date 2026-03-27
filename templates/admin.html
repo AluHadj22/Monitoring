@@ -1,1795 +1,1609 @@
 {% extends "layout.html" %}
 {% block content %}
 <style>
-    * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: transparent;
-    background-attachment: fixed;
-    min-height: 100vh;
-    color: var(--slate-800, #1e293b);
-    line-height: 1.6;
-    transition: color 0.2s ease;
-}
-
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-/* Упрощённые анимации */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.fade-in-up {
-    animation: fadeInUp 0.5s ease-out forwards;
-    opacity: 0;
-    transform: translateY(20px);
-    will-change: transform, opacity;
-}
-
-.slide-in-right {
-    animation: slideInRight 0.5s ease-out forwards;
-    will-change: transform, opacity;
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* Сетка админ панели */
-.admin-grid {
-    display: grid;
-    gap: 2rem;
-    grid-template-columns: 1fr;
-}
-
-@media (min-width: 1024px) {
-    .admin-grid {
-        grid-template-columns: 380px 1fr;
-    }
-}
-
-/* Боковая панель */
-.admin-sidebar {
-    background: var(--card, #ffffff);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border, #e2e8f0);
-    height: fit-content;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Тёмная тема для боковой панели */
-[data-theme='dark'] .admin-sidebar {
-    background: var(--card, #1e293b);
-    border-color: var(--border, #334155);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.admin-sidebar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #60a5fa, #8b5cf6, #a855f7);
-}
-
-.admin-sidebar h2 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.5px;
-}
-
-.admin-role {
-    color: var(--slate-500, #64748b);
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border, #e2e8f0);
-    font-weight: 600;
-    transition: color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Кнопка 1С */
-.onec-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);
-    color: white;
-    font-weight: 700;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    text-decoration: none;
-    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    margin-bottom: 2rem;
-    border: none;
-}
-
-.onec-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
-}
-
-.onec-button svg {
-    width: 20px;
-    height: 20px;
-}
-
-/* Формы */
-.bulk-upload-form,
-.bulk-delete-form {
-    background: var(--surface, #ffffff);
-    padding: 1.5rem;
-    border-radius: 1rem;
-    border: 1px solid var(--border, #e2e8f0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    margin-bottom: 1.5rem;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Тёмная тема для форм */
-[data-theme='dark'] .bulk-upload-form,
-[data-theme='dark'] .bulk-delete-form {
-    background: var(--surface, #1e293b);
-    border-color: var(--border, #334155);
-}
-
-.bulk-delete-form {
-    border-left: 4px solid #ef4444;
-}
-
-.bulk-upload-form h3,
-.bulk-delete-form h3 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--slate-800, #1e293b);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для заголовков форм */
-[data-theme='dark'] .bulk-upload-form h3,
-[data-theme='dark'] .bulk-delete-form h3 {
-    color: var(--slate-200, #e2e8f0);
-}
-
-.bulk-delete-form h3 {
-    color: #dc2626;
-}
-
-/* Тёмная тема для заголовка формы удаления */
-[data-theme='dark'] .bulk-delete-form h3 {
-    color: #ef4444;
-}
-
-.form-group {
-    margin-bottom: 1rem;
-}
-
-.form-label {
-    display: block;
-    font-weight: 600;
-    color: var(--slate-700, #334155);
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для меток */
-[data-theme='dark'] .form-label {
-    color: var(--slate-300, #cbd5e1);
-}
-
-.form-select,
-.form-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    background: var(--card, #ffffff);
-    border: 2px solid var(--border, #e2e8f0);
-    border-radius: 0.75rem;
-    color: var(--slate-800, #1e293b);
-    font-size: 0.9rem;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-/* Тёмная тема для полей ввода */
-[data-theme='dark'] .form-select,
-[data-theme='dark'] .form-input {
-    background: var(--slate-800, #1e293b);
-    border-color: var(--border, #334155);
-    color: var(--slate-200, #e2e8f0);
-}
-
-.form-select:focus,
-.form-input:focus {
-    outline: none;
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.1);
-    transform: translateY(0);
-}
-
-/* Тёмная тема для focused полей */
-[data-theme='dark'] .form-select:focus,
-[data-theme='dark'] .form-input:focus {
-    background: var(--slate-700, #334155);
-    border-color: #60a5fa;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-}
-
-/* Чекбоксы школ */
-.schools-selection-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-}
-
-.schools-count {
-    font-size: 0.8rem;
-    color: var(--slate-500, #64748b);
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
-
-.select-all-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.select-all-button {
-    background: var(--surface, #f1f5f9);
-    color: var(--slate-700, #334155);
-    border: 1px solid var(--border, #e2e8f0);
-    padding: 0.4rem 0.8rem;
-    border-radius: 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Тёмная тема для кнопок выбора всех */
-[data-theme='dark'] .select-all-button {
-    background: var(--slate-700, #334155);
-    border-color: var(--border, #475569);
-    color: var(--slate-300, #cbd5e1);
-}
-
-.select-all-button:hover {
-    background: #e0f2fe;
-    border-color: #60a5fa;
-    color: #3b82f6;
-}
-
-/* Тёмная тема для hover кнопок выбора всех */
-[data-theme='dark'] .select-all-button:hover {
-    background: var(--slate-600, #475569);
-    border-color: #60a5fa;
-    color: #60a5fa;
-}
-
-.schools-checkbox-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 0.75rem;
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 1rem;
-    background: var(--card, #ffffff);
-    border-radius: 0.75rem;
-    border: 1px solid var(--border, #e2e8f0);
-    margin-bottom: 1rem;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Тёмная тема для сетки чекбоксов */
-[data-theme='dark'] .schools-checkbox-grid {
-    background: var(--slate-800, #1e293b);
-    border-color: var(--border, #334155);
-}
-
-.school-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s ease;
-    cursor: pointer;
-}
-
-.school-checkbox:hover {
-    background: var(--surface, #f1f5f9);
-}
-
-/* Тёмная тема для hover чекбоксов */
-[data-theme='dark'] .school-checkbox:hover {
-    background: var(--slate-700, #334155);
-}
-
-.school-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-    accent-color: #3b82f6;
-}
-
-/* Тёмная тема для чекбоксов */
-[data-theme='dark'] .school-checkbox input[type="checkbox"] {
-    accent-color: #60a5fa;
-}
-
-.school-checkbox label {
-    font-size: 0.85rem;
-    color: var(--slate-800, #1e293b);
-    cursor: pointer;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для меток чекбоксов */
-[data-theme='dark'] .school-checkbox label {
-    color: var(--slate-300, #cbd5e1);
-}
-
-/* Опции удаления - обновлено с новыми опциями */
-.delete-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.delete-option {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    background: var(--card, #ffffff);
-    border-radius: 0.5rem;
-    border: 1px solid var(--border, #e2e8f0);
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-/* Тёмная тема для опций удаления */
-[data-theme='dark'] .delete-option {
-    background: var(--slate-800, #1e293b);
-    border-color: var(--border, #334155);
-}
-
-.delete-option:hover {
-    border-color: #ef4444;
-    background: #fef2f2;
-}
-
-/* Тёмная тема для hover опций удаления */
-[data-theme='dark'] .delete-option:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: #ef4444;
-}
-
-.delete-option input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: #ef4444;
-}
-
-.delete-option label {
-    font-size: 0.85rem;
-    color: var(--slate-800, #1e293b);
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для меток опций удаления */
-[data-theme='dark'] .delete-option label {
-    color: var(--slate-300, #cbd5e1);
-}
-
-/* Специальные стили для новых опций */
-.delete-option.tm-option {
-    border-left: 3px solid #f59e0b;
-}
-
-.delete-option.tm-option label {
-    color: #f59e0b;
-    font-weight: 700;
-}
-
-[data-theme='dark'] .delete-option.tm-option label {
-    color: #fbbf24;
-}
-
-.delete-option.findex-option {
-    border-left: 3px solid #10b981;
-}
-
-.delete-option.findex-option label {
-    color: #10b981;
-    font-weight: 700;
-}
-
-[data-theme='dark'] .delete-option.findex-option label {
-    color: #34d399;
-}
-
-.delete-option.kp-option {
-    border-left: 3px solid #8b5cf6;
-}
-
-.delete-option.kp-option label {
-    color: #8b5cf6;
-    font-weight: 700;
-}
-
-[data-theme='dark'] .delete-option.kp-option label {
-    color: #a78bfa;
-}
-
-/* Область загрузки файлов */
-.file-upload-zone {
-    border: 2px dashed var(--border, #cbd5e1);
-    border-radius: 0.75rem;
-    padding: 2rem 1rem;
-    text-align: center;
-    background: var(--card, #ffffff);
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Тёмная тема для зоны загрузки */
-[data-theme='dark'] .file-upload-zone {
-    background: var(--slate-800, #1e293b);
-    border-color: var(--border, #475569);
-}
-
-.file-upload-zone:hover {
-    border-color: #60a5fa;
-    background: var(--surface, #f8fafc);
-}
-
-/* Тёмная тема для hover зоны загрузки */
-[data-theme='dark'] .file-upload-zone:hover {
-    background: var(--slate-700, #334155);
-    border-color: #60a5fa;
-}
-
-.file-upload-zone input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.file-upload-content {
-    position: relative;
-    z-index: 2;
-}
-
-.file-upload-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 1rem;
-    color: var(--slate-400, #94a3b8);
-    transition: color 0.2s ease;
-}
-
-.file-upload-zone:hover .file-upload-icon {
-    color: #60a5fa;
-}
-
-.file-upload-text {
-    font-size: 0.9rem;
-    color: var(--slate-800, #1e293b);
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для текста загрузки */
-[data-theme='dark'] .file-upload-text {
-    color: var(--slate-300, #cbd5e1);
-}
-
-.file-upload-hint {
-    font-size: 0.8rem;
-    color: var(--slate-500, #64748b);
-    margin-top: 0.5rem;
-    transition: color 0.2s ease;
-}
-
-/* Кнопки */
-.submit-button,
-.delete-button {
-    width: 100%;
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);
-    color: white;
-    border: none;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.2);
-}
-
-.submit-button:hover,
-.delete-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
-}
-
-.delete-button {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-}
-
-.delete-button:hover {
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.loading {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid transparent;
-    border-top: 2px solid white;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    will-change: transform;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Основной контент */
-.admin-main {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-/* Поисковая панель */
-.search-panel {
-    background: var(--card, #ffffff);
-    padding: 1.5rem;
-    border-radius: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--border, #e2e8f0);
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Тёмная тема для панели поиска */
-[data-theme='dark'] .search-panel {
-    background: var(--card, #1e293b);
-    border-color: var(--border, #334155);
-}
-
-.search-form {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.search-input-wrapper {
-    flex: 1;
-    min-width: 300px;
-    position: relative;
-}
-
-.search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--slate-400, #64748b);
-    z-index: 2;
-    transition: color 0.2s ease;
-    pointer-events: none;
-}
-
-.search-input {
-    width: 100%;
-    padding: 0.875rem 1rem 0.875rem 3rem;
-    background: var(--card, #ffffff);
-    border: 2px solid var(--border, #e2e8f0);
-    border-radius: 0.75rem;
-    color: var(--slate-800, #1e293b);
-    font-size: 0.95rem;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-/* Тёмная тема для поля поиска */
-[data-theme='dark'] .search-input {
-    background: var(--slate-800, #1e293b);
-    border-color: var(--border, #334155);
-    color: var(--slate-200, #e2e8f0);
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.1);
-    transform: translateY(0);
-}
-
-/* Тёмная тема для focused поля поиска */
-[data-theme='dark'] .search-input:focus {
-    background: var(--slate-700, #334155);
-    border-color: #60a5fa;
-}
-
-.search-button,
-.reset-button {
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);
-    color: white;
-    border: none;
-    padding: 0.875rem 1.5rem;
-    border-radius: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.2);
-}
-
-.search-button:hover,
-.reset-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
-}
-
-.reset-button {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-}
-
-.reset-button:hover {
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-/* Таблица учреждений */
-.schools-table-container {
-    background: var(--card, #ffffff);
-    border-radius: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--border, #e2e8f0);
-    overflow: hidden;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Тёмная тема для контейнера таблицы */
-[data-theme='dark'] .schools-table-container {
-    background: var(--card, #1e293b);
-    border-color: var(--border, #334155);
-}
-
-.table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 1.5rem 1rem;
-    border-bottom: 1px solid var(--border, #e2e8f0);
-    transition: border-color 0.2s ease;
-}
-
-.table-header h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--slate-800, #1e293b);
-    margin: 0;
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для заголовка таблицы */
-[data-theme='dark'] .table-header h2 {
-    color: var(--slate-200, #e2e8f0);
-}
-
-.schools-count {
-    background: rgba(96, 165, 250, 0.15);
-    color: #3b82f6;
-    padding: 0.4rem 0.8rem;
-    border-radius: 1rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/* Тёмная тема для счётчика школ */
-[data-theme='dark'] .schools-count {
-    background: rgba(96, 165, 250, 0.25);
-    color: #60a5fa;
-}
-
-.table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.schools-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 800px;
-}
-
-.schools-table thead {
-    background: var(--surface, #f8fafc);
-    transition: background-color 0.2s ease;
-}
-
-/* Тёмная тема для шапки таблицы */
-[data-theme='dark'] .schools-table thead {
-    background: var(--slate-800, #1e293b);
-}
-
-.schools-table th {
-    padding: 1rem 1.5rem;
-    text-align: left;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #60a5fa;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--border, #e2e8f0);
-    transition: border-color 0.2s ease;
-}
-
-.schools-table td {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border, #f1f5f9);
-    transition: border-color 0.2s ease;
-    color: var(--slate-700, #334155);
-}
-
-/* Тёмная тема для ячеек таблицы */
-[data-theme='dark'] .schools-table td {
-    color: var(--slate-300, #cbd5e1);
-    border-bottom-color: var(--border, #334155);
-}
-
-.schools-table tbody tr {
-    transition: background-color 0.15s ease;
-}
-
-.schools-table tbody tr:hover {
-    background: var(--surface, #f1f5f9);
-}
-
-/* Тёмная тема для hover строк таблицы */
-[data-theme='dark'] .schools-table tbody tr:hover {
-    background: var(--slate-700, #334155);
-}
-
-.schools-table tbody tr:hover td {
-    transform: none;
-}
-
-.school-name {
-    font-weight: 600;
-    color: var(--slate-800, #1e293b);
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для названия школы */
-[data-theme='dark'] .school-name {
-    color: var(--slate-200, #e2e8f0);
-}
-
-.district-badge {
-    background: rgba(96, 165, 250, 0.15);
-    color: #3b82f6;
-    padding: 0.4rem 0.8rem;
-    border-radius: 1rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    display: inline-block;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/* Тёмная тема для бейджа района */
-[data-theme='dark'] .district-badge {
-    background: rgba(96, 165, 250, 0.25);
-    color: #60a5fa;
-}
-
-.food-type {
-    font-size: 0.9rem;
-    color: var(--slate-500, #64748b);
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для типа питания */
-[data-theme='dark'] .food-type {
-    color: var(--slate-400, #94a3b8);
-}
-
-.robot-link {
-    background: rgba(96, 165, 250, 0.15);
-    color: #3b82f6;
-    padding: 0.4rem 0.8rem;
-    border-radius: 0.5rem;
-    font-family: 'Monaco', 'Consolas', monospace;
-    font-size: 0.8rem;
-    font-weight: 600;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/* Тёмная тема для ссылки робота */
-[data-theme='dark'] .robot-link {
-    background: rgba(96, 165, 250, 0.25);
-    color: #60a5fa;
-}
-
-.manage-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(96, 165, 250, 0.15);
-    color: #3b82f6;
-    text-decoration: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 0.5rem;
-    border: 1px solid rgba(96, 165, 250, 0.3);
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Тёмная тема для кнопки управления */
-[data-theme='dark'] .manage-button {
-    background: rgba(96, 165, 250, 0.25);
-    color: #60a5fa;
-    border-color: rgba(96, 165, 250, 0.4);
-}
-
-.manage-button:hover {
-    background: #60a5fa;
-    color: white;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Тёмная тема для hover кнопки управления */
-[data-theme='dark'] .manage-button:hover {
-    background: #60a5fa;
-    color: white;
-}
-
-/* Пагинация */
-.pagination-info {
-    margin: 1rem 0;
-    color: var(--slate-500, #64748b);
-    font-size: 0.9rem;
-    text-align: center;
-    transition: color 0.2s ease;
-}
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.pagination a {
-    background: var(--surface, #f1f5f9);
-    color: #3b82f6;
-    text-decoration: none;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    border: 1px solid var(--border, #e2e8f0);
-}
-
-/* Тёмная тема для ссылок пагинации */
-[data-theme='dark'] .pagination a {
-    background: var(--slate-700, #334155);
-    border-color: var(--border, #475569);
-    color: #60a5fa;
-}
-
-.pagination a:hover {
-    background: #e0f2fe;
-    color: #3b82f6;
-    border-color: #60a5fa;
-}
-
-/* Тёмная тема для hover ссылок пагинации */
-[data-theme='dark'] .pagination a:hover {
-    background: var(--slate-600, #475569);
-    color: #60a5fa;
-}
-
-.pagination span {
-    color: var(--slate-500, #64748b);
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border, #e2e8f0);
-    background: var(--surface, #f8fafc);
-    transition: all 0.2s ease;
-}
-
-/* Тёмная тема для текущей страницы */
-[data-theme='dark'] .pagination span {
-    background: var(--slate-800, #1e293b);
-    border-color: var(--border, #475569);
-    color: var(--slate-400, #94a3b8);
-}
-
-/* Пустое состояние */
-.empty-state {
-    text-align: center;
-    padding: 3rem 1.5rem;
-}
-
-.empty-state-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 1rem;
-    color: var(--slate-400, #94a3b8);
-    transition: color 0.2s ease;
-}
-
-.empty-state-text {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--slate-700, #334155);
-    margin-bottom: 0.5rem;
-    transition: color 0.2s ease;
-}
-
-/* Тёмная тема для текста пустого состояния */
-[data-theme='dark'] .empty-state-text {
-    color: var(--slate-300, #cbd5e1);
-}
-
-.empty-state-subtext {
-    color: var(--slate-500, #64748b);
-    font-size: 0.9rem;
-    transition: color 0.2s ease;
-}
-
-/* Уведомления */
-.notification {
-    position: fixed;
-    top: 2rem;
-    right: 2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    background: #10b981;
-    color: white;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    will-change: transform;
-}
-
-.notification.show {
-    transform: translateX(0);
-}
-
-.notification.error {
-    background: #ef4444;
-}
-
-.notification.warning {
-    background: #f59e0b;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .container {
-        padding: 1rem;
+    /* Дополнительные стили для админ-панели - профессиональный минимализм */
+    .admin-layout {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
     }
 
     .admin-grid {
+        display: grid;
+        gap: 2rem;
         grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 1024px) {
+        .admin-grid {
+            grid-template-columns: 400px 1fr;
+        }
+    }
+
+    /* Боковая панель */
+    .admin-sidebar {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .admin-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .admin-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .admin-role {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* Кнопка 1С */
+    .onec-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        background: var(--gray-100);
+        color: var(--text-primary);
+        font-weight: 500;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+        font-size: 0.85rem;
+        border: 1px solid var(--border);
+    }
+
+    [data-theme='dark'] .onec-button {
+        background: var(--gray-800);
+    }
+
+    .onec-button:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .onec-button svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+    }
+
+    /* Карточки форм */
+    .form-card {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        padding: 0.875rem 1.25rem;
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    [data-theme='dark'] .form-card-header {
+        background: rgba(30, 41, 59, 0.4);
+    }
+
+    .form-card-header svg {
+        width: 18px;
+        height: 18px;
+        stroke: var(--primary);
+    }
+
+    .form-card-header h3 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .form-card-body {
+        padding: 1.25rem;
+    }
+
+    /* Формы */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-select,
+    .form-input {
+        width: 100%;
+        padding: 0.65rem 0.875rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+
+    .form-select:focus,
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-bg);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    /* Область загрузки файлов */
+    .file-upload-zone {
+        border: 2px dashed var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        text-align: center;
+        background: var(--gray-50);
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+    }
+
+    [data-theme='dark'] .file-upload-zone {
+        background: rgba(30, 41, 59, 0.4);
+    }
+
+    .file-upload-zone:hover {
+        border-color: var(--primary);
+        background: var(--primary-bg);
+    }
+
+    .file-upload-zone input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .file-upload-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .file-upload-icon {
+        width: 36px;
+        height: 36px;
+        margin: 0 auto 0.5rem;
+        stroke: var(--text-secondary);
+    }
+
+    .file-upload-text {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .file-upload-hint {
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    /* Кнопки */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.25rem;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        width: 100%;
+        font-family: inherit;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    .btn-danger {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    .btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: #d97706;
+        transform: translateY(-1px);
+    }
+
+    /* Сетка чекбоксов школ */
+    .schools-selection-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .schools-count {
+        font-size: 0.65rem;
+        background: var(--primary-bg);
+        color: var(--primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+
+    .select-all-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .select-all-button {
+        background: var(--gray-100);
+        border: 1px solid var(--border);
+        padding: 0.25rem 0.7rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--text-secondary);
+    }
+
+    [data-theme='dark'] .select-all-button {
+        background: var(--gray-800);
+    }
+
+    .select-all-button:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
     }
 
     .schools-checkbox-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 0.5rem;
+        max-height: 240px;
+        overflow-y: auto;
+        padding: 0.75rem;
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
     }
 
+    [data-theme='dark'] .schools-checkbox-grid {
+        background: rgba(30, 41, 59, 0.4);
+    }
+
+    .school-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+    }
+
+    .school-checkbox:hover {
+        background: var(--gray-100);
+    }
+
+    [data-theme='dark'] .school-checkbox:hover {
+        background: rgba(51, 65, 85, 0.6);
+    }
+
+    .school-checkbox input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .school-checkbox label {
+        font-size: 0.75rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    /* Опции удаления */
     .delete-options {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .delete-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    [data-theme='dark'] .delete-option {
+        background: rgba(30, 41, 59, 0.4);
+    }
+
+    .delete-option:hover {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .delete-option input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        accent-color: #ef4444;
+    }
+
+    .delete-option label {
+        font-size: 0.75rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .delete-option.tm-option {
+        border-left: 2px solid #f59e0b;
+    }
+
+    .delete-option.findex-option {
+        border-left: 2px solid #10b981;
+    }
+
+    .delete-option.kp-option {
+        border-left: 2px solid #8b5cf6;
+    }
+
+    /* Сетка месяцев */
+    .months-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.5rem;
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 0.75rem;
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+    }
+
+    [data-theme='dark'] .months-grid {
+        background: rgba(30, 41, 59, 0.4);
+    }
+
+    .months-count {
+        font-size: 0.65rem;
+        background: var(--primary-bg);
+        color: var(--primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-weight: 500;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
+    .month-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+    }
+
+    .month-checkbox:hover {
+        background: var(--gray-100);
+    }
+
+    [data-theme='dark'] .month-checkbox:hover {
+        background: rgba(51, 65, 85, 0.6);
+    }
+
+    .month-checkbox input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        cursor: pointer;
+        accent-color: #f59e0b;
+    }
+
+    .month-checkbox label {
+        font-size: 0.75rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    /* Поисковая панель */
+    .search-panel {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
     }
 
     .search-form {
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
     .search-input-wrapper {
-        min-width: 100%;
+        flex: 1;
+        min-width: 280px;
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        pointer-events: none;
+    }
+
+    .search-icon svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.65rem 1rem 0.65rem 2.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        transition: var(--transition);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-bg);
     }
 
     .search-button,
     .reset-button {
-        width: 100%;
-        justify-content: center;
+        padding: 0.65rem 1.25rem;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .search-button {
+        background: var(--primary);
+        color: white;
+    }
+
+    .search-button:hover {
+        background: var(--primary-dark);
+    }
+
+    .reset-button {
+        background: var(--gray-100);
+        color: var(--text-secondary);
+    }
+
+    [data-theme='dark'] .reset-button {
+        background: var(--gray-800);
+    }
+
+    .reset-button:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    /* Таблица */
+    .schools-table-container {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        overflow: hidden;
     }
 
     .table-header {
-        flex-direction: column;
-        align-items: flex-start;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
         gap: 1rem;
     }
 
-    .schools-count {
-        align-self: flex-start;
+    .table-header h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
     }
-}
 
-/* Стили для новой формы удаления по месяцам */
-.bulk-delete-form.month-delete-form {
-    border-left: 4px solid #f59e0b;
-    margin-top: 1.5rem;
-}
+    .schools-badge {
+        background: var(--primary-bg);
+        color: var(--primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
 
-.bulk-delete-form.month-delete-form h3 {
-    color: #f59e0b;
-}
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 
-[data-theme='dark'] .bulk-delete-form.month-delete-form h3 {
-    color: #fbbf24;
-}
+    .schools-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
 
-.months-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.5rem;
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 1rem;
-    background: var(--card, #ffffff);
-    border-radius: 0.75rem;
-    border: 1px solid var(--border, #e2e8f0);
-    margin-bottom: 1rem;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
+    .schools-table th {
+        padding: 0.875rem 1.25rem;
+        text-align: left;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border);
+        background: var(--gray-50);
+    }
 
-[data-theme='dark'] .months-grid {
-    background: var(--slate-800, #1e293b);
-    border-color: var(--border, #334155);
-}
+    [data-theme='dark'] .schools-table th {
+        background: rgba(30, 41, 59, 0.4);
+    }
 
-.months-count {
-    font-size: 0.8rem;
-    color: var(--slate-500, #64748b);
-    margin-bottom: 0.5rem;
-    transition: color 0.2s ease;
-}
+    .schools-table td {
+        padding: 0.875rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-primary);
+        font-size: 0.8rem;
+    }
 
-.month-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.3rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s ease;
-    cursor: pointer;
-}
+    .schools-table tbody tr {
+        transition: background 0.2s ease;
+        cursor: pointer;
+    }
 
-.month-checkbox:hover {
-    background: var(--surface, #f1f5f9);
-}
+    .schools-table tbody tr:hover {
+        background: var(--gray-50);
+    }
 
-[data-theme='dark'] .month-checkbox:hover {
-    background: var(--slate-700, #334155);
-}
+    [data-theme='dark'] .schools-table tbody tr:hover {
+        background: rgba(30, 41, 59, 0.4);
+    }
 
-.month-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-    accent-color: #f59e0b;
-}
+    .school-name {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
 
-.month-checkbox label {
-    font-size: 0.85rem;
-    color: var(--slate-800, #1e293b);
-    cursor: pointer;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
+    .district-badge {
+        background: var(--primary-bg);
+        color: var(--primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.65rem;
+        font-weight: 500;
+        display: inline-block;
+    }
 
-[data-theme='dark'] .month-checkbox label {
-    color: var(--slate-300, #cbd5e1);
-}
+    .food-type {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+    }
 
-.delete-option.all-months-option {
-    border-left: 3px solid #f59e0b;
-}
+    .robot-link {
+        background: var(--gray-100);
+        padding: 0.25rem 0.6rem;
+        border-radius: var(--radius-sm);
+        font-family: monospace;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: var(--primary);
+    }
 
-.delete-option.all-months-option label {
-    color: #f59e0b;
-    font-weight: 700;
-}
+    [data-theme='dark'] .robot-link {
+        background: rgba(51, 65, 85, 0.6);
+    }
 
-[data-theme='dark'] .delete-option.all-months-option label {
-    color: #fbbf24;
-}
+    .manage-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: var(--primary-bg);
+        color: var(--primary);
+        text-decoration: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-md);
+        font-size: 0.7rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
 
+    .manage-button:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .manage-button svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* Дополнительная информация для мобильных (скрыта по умолчанию) */
+    .mobile-row-details {
+        display: none;
+        background: var(--gray-50);
+        padding: 0.75rem 1rem;
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border);
+    }
+
+    [data-theme='dark'] .mobile-row-details {
+        background: rgba(30, 41, 59, 0.4);
+    }
+
+    .mobile-row-details.show {
+        display: table-row;
+    }
+
+    .mobile-row-details td {
+        padding: 0.75rem 1rem;
+    }
+
+    .mobile-detail-item {
+        display: inline-block;
+        margin-right: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .mobile-detail-item strong {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Пагинация */
+    .pagination-info {
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin: 1rem 0;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .pagination a,
+    .pagination span {
+        padding: 0.4rem 0.875rem;
+        border-radius: var(--radius-md);
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .pagination a {
+        background: var(--gray-100);
+        color: var(--primary);
+        border: 1px solid var(--border);
+    }
+
+    [data-theme='dark'] .pagination a {
+        background: var(--gray-800);
+    }
+
+    .pagination a:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .pagination span {
+        background: var(--primary-bg);
+        color: var(--primary);
+        border: 1px solid var(--border);
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+
+    .empty-state-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 1rem;
+        stroke: var(--text-secondary);
+    }
+
+    .empty-state-text {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .empty-state-subtext {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    /* Уведомления */
+    .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-md);
+        background: var(--primary);
+        color: white;
+        font-weight: 500;
+        font-size: 0.8rem;
+        box-shadow: var(--shadow-lg);
+        z-index: 2000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    }
+
+    .notification.show {
+        transform: translateX(0);
+    }
+
+    .notification.error {
+        background: #ef4444;
+    }
+
+    .notification.warning {
+        background: #f59e0b;
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .admin-layout {
+            padding: 1rem;
+        }
+        
+        .admin-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .admin-sidebar {
+            position: static;
+        }
+        
+        .search-form {
+            flex-direction: column;
+        }
+        
+        .search-input-wrapper {
+            min-width: 100%;
+        }
+        
+        .search-button,
+        .reset-button {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .schools-checkbox-grid,
+        .months-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .delete-options {
+            grid-template-columns: 1fr;
+        }
+        
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .schools-table th,
+        .schools-table td {
+            padding: 0.6rem 0.75rem;
+        }
+        
+        /* Скрываем колонку типа питания на телефоне (она будет в развернутой строке) */
+        .schools-table th:nth-child(3),
+        .schools-table td:nth-child(3) {
+            display: none;
+        }
+        
+        .notification {
+            top: 1rem;
+            right: 1rem;
+            left: 1rem;
+            text-align: center;
+        }
+        
+        /* Увеличиваем размер ссылки для удобства нажатия */
+        .manage-button {
+            padding: 0.5rem 0.9rem;
+            font-size: 0.75rem;
+        }
+        
+        .robot-link {
+            font-size: 0.65rem;
+        }
+        
+        .district-badge {
+            font-size: 0.6rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .schools-table th,
+        .schools-table td {
+            padding: 0.5rem;
+        }
+        
+        .school-name {
+            font-size: 0.7rem;
+        }
+        
+        .pagination a,
+        .pagination span {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.65rem;
+        }
+    }
 </style>
 
-<div class="container">
-  <div class="admin-grid fade-in-up">
-    <!-- Боковая панель -->
-    <aside class="admin-sidebar">
-      <h2>Панель администратора</h2>
-      <div class="admin-role">
-        {{ 'Региональный уровень' if admin.role == 'regional_admin' else 'Районный уровень (' + admin.district + ')' }}
-      </div>
-
-      <a href="{{ admin.url_1c }}" target="_blank" class="onec-button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
-        </svg>
-        1С: Питание (Web)
-      </a>
-
-      <!-- Форма массовой рассылки -->
-      <form class="bulk-upload-form" action="/bulk-upload" method="post" enctype="multipart/form-data"
-            onsubmit="handleUploadSubmit(this)">
-        <h3>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          Массовая рассылка
-        </h3>
-
-        <input type="hidden" name="admin_id" value="{{ admin.id }}">
-
-        <div class="form-group">
-          <label class="form-label">Тип питания</label>
-          <select name="target_type" class="form-select">
-            {% for ft in food_types %}
-            <option value="{{ ft }}">{{ ft }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Период</label>
-          <div class="form-grid">
-            <input type="number" name="year" value="2025" class="form-input" min="2020" max="2030">
-            <select name="month" class="form-select">
-              {% for m_id, m_name in months.items() %}
-              <option value="{{ m_id }}">{{ m_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Файлы для рассылки</label>
-          <div class="file-upload-zone" onclick="this.querySelector('input').click()">
-            <input type="file" name="files" multiple required onchange="handleFileSelect(this)">
-            <div class="file-upload-content">
-              <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-              </svg>
-              <div class="file-upload-text">Выберите файлы или перетащите сюда</div>
-              <div class="file-upload-hint">Поддерживаются все форматы</div>
+<div class="admin-layout fade-in-up">
+    <div class="admin-grid">
+        <!-- Боковая панель -->
+        <aside class="admin-sidebar">
+            <div class="admin-header">
+                <h2>Панель администратора</h2>
+                <div class="admin-role">
+                    {{ 'Региональный уровень' if admin.role == 'regional_admin' else 'Районный уровень (' + admin.district + ')' }}
+                </div>
             </div>
-          </div>
-        </div>
 
-        <button type="submit" class="submit-button">
-          Запустить рассылку
-        </button>
-      </form>
+            <a href="{{ admin.url_1c }}" target="_blank" class="onec-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                1С: Питание
+            </a>
 
-      <!-- Форма массового удаления -->
-      <form class="bulk-delete-form" action="/admin/bulk-delete-files" method="post" enctype="multipart/form-data"
-            onsubmit="handleDeleteSubmit(this)">
-        <h3>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            <path d="M9 14l2 2 4-4"></path>
-          </svg>
-          Массовое удаление файлов
-        </h3>
-
-        <input type="hidden" name="admin_id" value="{{ admin.id }}">
-
-        <div class="form-group">
-          <div class="schools-selection-header">
-            <span class="form-label">Выберите школы:</span>
-            <div class="select-all-buttons">
-              <button type="button" class="select-all-button" onclick="selectAllSchools(true)">Выбрать все</button>
-              <button type="button" class="select-all-button" onclick="selectAllSchools(false)">Снять выделение</button>
-            </div>
-          </div>
-          <div class="schools-count" id="selected-schools-count">Выбрано: 0 из {{ schools|length }}</div>
-          
-          <div class="schools-checkbox-grid">
-            {% for school in schools %}
-            <div class="school-checkbox">
-              <input type="checkbox" name="school_ids" value="{{ school.id }}" id="school-{{ school.id }}" 
-                     onchange="updateSelectedCount()">
-              <label for="school-{{ school.id }}">{{ school.unit_name }} ({{ school.district }})</label>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <!-- Обновлённые опции удаления -->
-        <div class="delete-options">
-          <div class="delete-option">
-            <input type="checkbox" id="delete_all" name="delete_all" value="true">
-            <label for="delete_all">🗑️ Удалить все файлы</label>
-          </div>
-          
-          <div class="delete-option">
-            <input type="checkbox" id="keep_exceptions" name="keep_exceptions" value="true">
-            <label for="keep_exceptions">🔒 Сохранить findex.xlsx, tm*.xlsx, kp*.xlsx</label>
-          </div>
-          
-          <div class="delete-option tm-option">
-            <input type="checkbox" id="only_tm_sm" name="only_tm_sm" value="true">
-            <label for="only_tm_sm">🍽️ Только типовое меню (tm*-sm.xlsx)</label>
-          </div>
-          
-          <div class="delete-option findex-option">
-            <input type="checkbox" id="only_findex" name="only_findex" value="true">
-            <label for="only_findex">📊 Только findex.xlsx (для ФЦМПО)</label>
-          </div>
-          
-          <div class="delete-option kp-option">
-            <input type="checkbox" id="only_kp" name="only_kp" value="true">
-            <label for="only_kp">📅 Только календари питания (kp*.xlsx)</label>
-          </div>
-        </div>
-
-        <button type="submit" class="delete-button">
-          Удалить выбранные файлы
-        </button>
-      </form>
-
-      <!-- НОВАЯ ФОРМА: Массовое удаление файлов по месяцам -->
-      <form class="bulk-delete-form month-delete-form" action="/admin/bulk-delete-files-by-month" method="post" enctype="multipart/form-data"
-            onsubmit="handleMonthDeleteSubmit(this)">
-        <h3>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path>
-          </svg>
-          Удаление файлов по месяцам
-        </h3>
-
-        <input type="hidden" name="admin_id" value="{{ admin.id }}">
-
-        <div class="form-group">
-          <div class="schools-selection-header">
-            <span class="form-label">Выберите школы:</span>
-            <div class="select-all-buttons">
-              <button type="button" class="select-all-button" onclick="selectAllSchoolsMonth(true)">Выбрать все</button>
-              <button type="button" class="select-all-button" onclick="selectAllSchoolsMonth(false)">Снять выделение</button>
-            </div>
-          </div>
-          <div class="schools-count" id="selected-schools-month-count">Выбрано: 0 из {{ schools|length }}</div>
-          
-          <div class="schools-checkbox-grid">
-            {% for school in schools %}
-            <div class="school-checkbox">
-              <input type="checkbox" name="school_ids" value="{{ school.id }}" id="school-month-{{ school.id }}" 
-                     class="school-month-checkbox" onchange="updateSelectedMonthCount()">
-              <label for="school-month-{{ school.id }}">{{ school.unit_name }} ({{ school.district }})</label>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Год:</label>
-          <input type="number" name="year" value="2025" class="form-input" min="2020" max="2030" style="width: 100%;" id="delete-year">
-        </div>
-
-        <div class="form-group">
-          <div class="schools-selection-header">
-            <span class="form-label">Выберите месяцы:</span>
-            <div class="select-all-buttons">
-              <button type="button" class="select-all-button" onclick="selectAllMonths(true)">Выбрать все</button>
-              <button type="button" class="select-all-button" onclick="selectAllMonths(false)">Снять выделение</button>
-            </div>
-          </div>
-          <div class="months-count" id="selected-months-count">Выбрано: 0 из 12</div>
-          
-          <div class="months-grid">
-            {% for m_id, m_name in months.items() %}
-            <div class="month-checkbox">
-              <input type="checkbox" name="months" value="{{ m_id }}" id="month-{{ m_id }}" class="month-checkbox-input" onchange="updateSelectedMonthCount()">
-              <label for="month-{{ m_id }}">{{ m_name }}</label>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <div class="delete-options">
-          <div class="delete-option all-months-option">
-            <input type="checkbox" id="delete_all_months" name="delete_all_months" value="true" onchange="toggleAllMonths(this)">
-            <label for="delete_all_months">🗓️ Удалить файлы за ВСЕ месяцы</label>
-          </div>
-        </div>
-
-        <button type="submit" class="delete-button" style="background: linear-gradient(135deg, #f59e0b, #d97706); margin-top: 1rem;">
-          Удалить файлы за выбранные месяцы
-        </button>
-      </form>
-    </aside>
-
-    <!-- Основной контент -->
-    <main class="admin-main">
-      <!-- Поисковая панель -->
-      <section class="search-panel">
-        <form class="search-form" action="/admin" method="get">
-          <input type="hidden" name="admin_id" value="{{ admin.id }}">
-          
-          <div class="search-input-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" name="q" value="{{ search_query }}" 
-                   placeholder="Поиск учреждения по названию..." class="search-input">
-          </div>
-          
-          <button type="submit" class="search-button">Найти</button>
-          
-          {% if search_query %}
-          <a href="/admin?admin_id={{ admin.id }}" class="reset-button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-            Сброс
-          </a>
-          {% endif %}
-        </form>
-      </section>
-
-      <!-- Информация о пагинации -->
-      <div class="pagination-info">
-        Показано <strong>{{ per_page }}</strong> из <strong>{{ total_count }}</strong> записей.
-        Страница <strong>{{ current_page }}</strong> из <strong>{{ (total_count + per_page - 1) // per_page }}</strong>.
-      </div>
-
-      <!-- Навигация -->
-      <div class="pagination">
-        {% if current_page > 1 %}
-          <a href="?admin_id={{ admin.id }}&q={{ search_query }}&page={{ current_page - 1 }}&per_page={{ per_page }}">
-            ← Предыдущая
-          </a>
-        {% else %}
-          <span>← Предыдущая</span>
-        {% endif %}
-
-        {% if current_page * per_page < total_count %}
-          <a href="?admin_id={{ admin.id }}&q={{ search_query }}&page={{ current_page + 1 }}&per_page={{ per_page }}">
-            Следующая →
-          </a>
-        {% else %}
-          <span>Следующая →</span>
-        {% endif %}
-      </div>
-
-      <!-- Таблица учреждений -->
-      <section class="schools-table-container">
-        <div class="table-header">
-          <h2>Учреждения питания</h2>
-          <span class="schools-count">Найдено: {{ schools|length }}</span>
-        </div>
-
-        <div class="table-wrapper">
-          <table class="schools-table">
-            <thead>
-              <tr>
-                <th>Учреждение</th>
-                <th>Район</th>
-                <th>Тип питания</th>
-                <th>Ссылка робота</th>
-                <th style="text-align: center;">Действия</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for school in schools %}
-              <tr>
-                <td>
-                  <div class="school-name">{{ school.unit_name }}</div>
-                </td>
-                <td>
-                  <span class="district-badge">{{ school.district }}</span>
-                </td>
-                <td>
-                  <span class="food-type">{{ school.food_type }}</span>
-                </td>
-                <td>
-                  <code class="robot-link">/{{ school.id }}/food/</code>
-                </td>
-                <td style="text-align: center;">
-                  <a href="/dashboard?uid={{ school.id }}" class="manage-button">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 15l5-5-5-5"></path>
+            <!-- Форма массовой рассылки -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
-                    Управление
-                  </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+                    <h3>Массовая рассылка</h3>
+                </div>
+                <div class="form-card-body">
+                    <form action="/bulk-upload" method="post" enctype="multipart/form-data" onsubmit="handleUploadSubmit(this)">
+                        <input type="hidden" name="admin_id" value="{{ admin.id }}">
 
-          {% if not schools %}
-          <div class="empty-state">
-            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"></path>
-            </svg>
-            <div class="empty-state-text">Учреждения не найдены</div>
-            <div class="empty-state-subtext">
-              {% if search_query %}
-              Попробуйте изменить условия поиска
-              {% else %}
-              Нет учреждений для отображения
-              {% endif %}
+                        <div class="form-group">
+                            <label class="form-label">Тип питания</label>
+                            <select name="target_type" class="form-select">
+                                {% for ft in food_types %}
+                                <option value="{{ ft }}">{{ ft }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Период</label>
+                            <div class="form-grid">
+                                <input type="number" name="year" value="2025" class="form-input" min="2020" max="2030">
+                                <select name="month" class="form-select">
+                                    {% for m_id, m_name in months.items() %}
+                                    <option value="{{ m_id }}">{{ m_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Файлы для рассылки</label>
+                            <div class="file-upload-zone" onclick="this.querySelector('input').click()">
+                                <input type="file" name="files" multiple required onchange="handleFileSelect(this)">
+                                <div class="file-upload-content">
+                                    <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    </svg>
+                                    <div class="file-upload-text">Выберите файлы или перетащите сюда</div>
+                                    <div class="file-upload-hint">Поддерживаются все форматы</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Запустить рассылку
+                        </button>
+                    </form>
+                </div>
             </div>
-          </div>
-          {% endif %}
-        </div>
-      </section>
-    </main>
-  </div>
+
+            <!-- Форма массового удаления -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="9" y1="14" x2="15" y2="14"></line>
+                    </svg>
+                    <h3>Массовое удаление</h3>
+                </div>
+                <div class="form-card-body">
+                    <form action="/admin/bulk-delete-files" method="post" enctype="multipart/form-data" onsubmit="handleDeleteSubmit(this)">
+                        <input type="hidden" name="admin_id" value="{{ admin.id }}">
+
+                        <div class="form-group">
+                            <div class="schools-selection-header">
+                                <span class="form-label">Выберите школы</span>
+                                <div class="select-all-buttons">
+                                    <button type="button" class="select-all-button" onclick="selectAllSchools(true)">Все</button>
+                                    <button type="button" class="select-all-button" onclick="selectAllSchools(false)">Снять</button>
+                                </div>
+                            </div>
+                            <div class="schools-count" id="selected-schools-count">Выбрано: 0 из {{ schools|length }}</div>
+                            
+                            <div class="schools-checkbox-grid">
+                                {% for school in schools %}
+                                <div class="school-checkbox">
+                                    <input type="checkbox" name="school_ids" value="{{ school.id }}" id="school-{{ school.id }}" onchange="updateSelectedCount()">
+                                    <label for="school-{{ school.id }}">{{ school.unit_name }} ({{ school.district }})</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="delete-options">
+                            <div class="delete-option">
+                                <input type="checkbox" id="delete_all" name="delete_all" value="true">
+                                <label for="delete_all">Удалить все файлы</label>
+                            </div>
+                            <div class="delete-option">
+                                <input type="checkbox" id="keep_exceptions" name="keep_exceptions" value="true">
+                                <label for="keep_exceptions">Сохранить исключения</label>
+                            </div>
+                            <div class="delete-option tm-option">
+                                <input type="checkbox" id="only_tm_sm" name="only_tm_sm" value="true">
+                                <label for="only_tm_sm">Только типовое меню</label>
+                            </div>
+                            <div class="delete-option findex-option">
+                                <input type="checkbox" id="only_findex" name="only_findex" value="true">
+                                <label for="only_findex">Только findex.xlsx</label>
+                            </div>
+                            <div class="delete-option kp-option">
+                                <input type="checkbox" id="only_kp" name="only_kp" value="true">
+                                <label for="only_kp">Только календари питания</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger">
+                            Удалить выбранные файлы
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Форма удаления по месяцам -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <h3>Удаление по месяцам</h3>
+                </div>
+                <div class="form-card-body">
+                    <form action="/admin/bulk-delete-files-by-month" method="post" enctype="multipart/form-data" onsubmit="handleMonthDeleteSubmit(this)">
+                        <input type="hidden" name="admin_id" value="{{ admin.id }}">
+
+                        <div class="form-group">
+                            <div class="schools-selection-header">
+                                <span class="form-label">Выберите школы</span>
+                                <div class="select-all-buttons">
+                                    <button type="button" class="select-all-button" onclick="selectAllSchoolsMonth(true)">Все</button>
+                                    <button type="button" class="select-all-button" onclick="selectAllSchoolsMonth(false)">Снять</button>
+                                </div>
+                            </div>
+                            <div class="schools-count" id="selected-schools-month-count">Выбрано: 0 из {{ schools|length }}</div>
+                            
+                            <div class="schools-checkbox-grid">
+                                {% for school in schools %}
+                                <div class="school-checkbox">
+                                    <input type="checkbox" name="school_ids" value="{{ school.id }}" id="school-month-{{ school.id }}" class="school-month-checkbox" onchange="updateSelectedMonthCount()">
+                                    <label for="school-month-{{ school.id }}">{{ school.unit_name }} ({{ school.district }})</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Год</label>
+                            <input type="number" name="year" value="2025" class="form-input" min="2020" max="2030" id="delete-year">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="schools-selection-header">
+                                <span class="form-label">Выберите месяцы</span>
+                                <div class="select-all-buttons">
+                                    <button type="button" class="select-all-button" onclick="selectAllMonths(true)">Все</button>
+                                    <button type="button" class="select-all-button" onclick="selectAllMonths(false)">Снять</button>
+                                </div>
+                            </div>
+                            <div class="months-count" id="selected-months-count">Выбрано: 0 из 12</div>
+                            
+                            <div class="months-grid">
+                                {% for m_id, m_name in months.items() %}
+                                <div class="month-checkbox">
+                                    <input type="checkbox" name="months" value="{{ m_id }}" id="month-{{ m_id }}" class="month-checkbox-input" onchange="updateSelectedMonthCount()">
+                                    <label for="month-{{ m_id }}">{{ m_name }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="delete-options">
+                            <div class="delete-option" style="border-left-color: #f59e0b;">
+                                <input type="checkbox" id="delete_all_months" name="delete_all_months" value="true" onchange="toggleAllMonths(this)">
+                                <label for="delete_all_months">Все месяцы</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning">
+                            Удалить файлы за выбранные месяцы
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Основной контент -->
+        <main>
+            <!-- Поисковая панель -->
+            <div class="search-panel">
+                <form class="search-form" action="/admin" method="get">
+                    <input type="hidden" name="admin_id" value="{{ admin.id }}">
+                    
+                    <div class="search-input-wrapper">
+                        <span class="search-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </span>
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="Поиск учреждения по названию..." class="search-input">
+                    </div>
+                    
+                    <button type="submit" class="search-button">Найти</button>
+                    
+                    {% if search_query %}
+                    <a href="/admin?admin_id={{ admin.id }}" class="reset-button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14">
+                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Сброс
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Пагинация -->
+            <div class="pagination-info">
+                Показано <strong>{{ per_page }}</strong> из <strong>{{ total_count }}</strong> записей.
+                Страница <strong>{{ current_page }}</strong> из <strong>{{ (total_count + per_page - 1) // per_page }}</strong>
+            </div>
+
+            <div class="pagination">
+                {% if current_page > 1 %}
+                <a href="?admin_id={{ admin.id }}&q={{ search_query }}&page={{ current_page - 1 }}&per_page={{ per_page }}">← Предыдущая</a>
+                {% else %}
+                <span>← Предыдущая</span>
+                {% endif %}
+
+                {% if current_page * per_page < total_count %}
+                <a href="?admin_id={{ admin.id }}&q={{ search_query }}&page={{ current_page + 1 }}&per_page={{ per_page }}">Следующая →</a>
+                {% else %}
+                <span>Следующая →</span>
+                {% endif %}
+            </div>
+
+            <!-- Таблица учреждений -->
+            <div class="schools-table-container">
+                <div class="table-header">
+                    <h2>Учреждения питания</h2>
+                    <span class="schools-badge">Найдено: {{ schools|length }}</span>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="schools-table" id="schoolsTable">
+                        <thead>
+                            <tr>
+                                <th>Учреждение</th>
+                                <th>Район</th>
+                                <th>Тип питания</th>
+                                <th>Ссылка</th>
+                                <th style="text-align: center;">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for school in schools %}
+                            <tr class="school-row" data-school-id="{{ school.id }}">
+                                <td>
+                                    <div class="school-name">{{ school.unit_name }}</div>
+                                </td>
+                                <td>
+                                    <span class="district-badge">{{ school.district }}</span>
+                                </td>
+                                <td>
+                                    <span class="food-type">{{ school.food_type }}</span>
+                                </td>
+                                <td>
+                                    <code class="robot-link">/{{ school.id }}/food/</code>
+                                </td>
+                                <td style="text-align: center;">
+                                    <a href="/dashboard?uid={{ school.id }}" class="manage-button">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="12" height="12">
+                                            <path d="M12 5v14M5 12h14"></path>
+                                        </svg>
+                                        Управление
+                                    </a>
+                                </td>
+                            </tr>
+                            <!-- Мобильная дополнительная строка для развернутой информации -->
+                            <tr class="mobile-row-details" data-parent="{{ school.id }}" style="display: none;">
+                                <td colspan="5">
+                                    <div class="mobile-detail-item"><strong>Тип питания:</strong> {{ school.food_type }}</div>
+                                    <div class="mobile-detail-item"><strong>ID:</strong> {{ school.id }}</div>
+                                    <div class="mobile-detail-item"><strong>Email:</strong> {{ school.email }}</div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {% if not schools %}
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"></path>
+                        </svg>
+                        <div class="empty-state-text">Учреждения не найдены</div>
+                        <div class="empty-state-subtext">
+                            {% if search_query %}
+                            Попробуйте изменить условия поиска
+                            {% else %}
+                            Нет учреждений для отображения
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
 </div>
 
 <!-- Уведомление -->
 <div class="notification" id="notification"></div>
 
 <script>
-// Оптимизированные функции
-let uploadTimeout, deleteTimeout, monthDeleteTimeout;
+    let uploadTimeout, deleteTimeout, monthDeleteTimeout;
 
-// Обработчик отправки формы рассылки
-function handleUploadSubmit(form) {
-  const button = form.querySelector('.submit-button');
-  button.classList.add('loading');
-  button.disabled = true;
-  
-  if (uploadTimeout) clearTimeout(uploadTimeout);
-  
-  uploadTimeout = setTimeout(() => {
-    showNotification('Рассылка успешно запущена!', 'success');
-    button.classList.remove('loading');
-    button.disabled = false;
-  }, 1000);
-  
-  return true; // Для реальной отправки формы
-}
-
-// Обработчик отправки формы удаления
-function handleDeleteSubmit(form) {
-  const button = form.querySelector('.delete-button');
-  const selectedSchools = form.querySelectorAll('input[name="school_ids"]:checked').length;
-  
-  if (selectedSchools === 0) {
-    showNotification('Выберите хотя бы одну школу для удаления!', 'warning');
-    return false;
-  }
-  
-  // Проверяем, выбрана ли хоть одна опция удаления
-  const deleteAll = document.getElementById('delete_all')?.checked;
-  const keepExceptions = document.getElementById('keep_exceptions')?.checked;
-  const onlyTmSm = document.getElementById('only_tm_sm')?.checked;
-  const onlyFindex = document.getElementById('only_findex')?.checked;
-  const onlyKp = document.getElementById('only_kp')?.checked;
-  
-  if (!deleteAll && !keepExceptions && !onlyTmSm && !onlyFindex && !onlyKp) {
-    showNotification('Выберите опцию удаления!', 'warning');
-    return false;
-  }
-  
-  button.classList.add('loading');
-  button.disabled = true;
-  
-  if (deleteTimeout) clearTimeout(deleteTimeout);
-  
-  deleteTimeout = setTimeout(() => {
-    showNotification(`Удаление файлов для ${selectedSchools} школ запущено!`, 'success');
-    button.classList.remove('loading');
-    button.disabled = false;
-  }, 1000);
-  
-  return true; // Для реальной отправки формы
-}
-
-// НОВЫЙ ОБРАБОТЧИК: Отправка формы удаления по месяцам
-function handleMonthDeleteSubmit(form) {
-  const button = form.querySelector('.delete-button');
-  const selectedSchools = form.querySelectorAll('.school-month-checkbox:checked').length;
-  const selectedMonths = form.querySelectorAll('.month-checkbox-input:checked').length;
-  const deleteAllMonths = document.getElementById('delete_all_months')?.checked;
-  
-  if (selectedSchools === 0) {
-    showNotification('Выберите хотя бы одну школу для удаления!', 'warning');
-    return false;
-  }
-  
-  if (!deleteAllMonths && selectedMonths === 0) {
-    showNotification('Выберите хотя бы один месяц или отметьте "Все месяцы"!', 'warning');
-    return false;
-  }
-  
-  button.classList.add('loading');
-  button.disabled = true;
-  
-  if (monthDeleteTimeout) clearTimeout(monthDeleteTimeout);
-  
-  monthDeleteTimeout = setTimeout(() => {
-    const year = document.getElementById('delete-year').value;
-    const period = deleteAllMonths ? `все месяцы ${year} года` : `выбранные месяцы ${year} года`;
-    showNotification(`Удаление файлов за ${period} для ${selectedSchools} школ запущено!`, 'success');
-    button.classList.remove('loading');
-    button.disabled = false;
-  }, 1000);
-  
-  return true; // Для реальной отправки формы
-}
-
-// Обработчик выбора файлов
-function handleFileSelect(input) {
-  const zone = input.closest('.file-upload-zone');
-  const text = zone.querySelector('.file-upload-text');
-  const hint = zone.querySelector('.file-upload-hint');
-  
-  if (input.files.length > 0) {
-    const fileCount = input.files.length;
-    const totalSize = Array.from(input.files).reduce((sum, file) => sum + file.size, 0);
-    const sizeMB = (totalSize / (1024 * 1024)).toFixed(1);
-    
-    text.textContent = `Выбрано файлов: ${fileCount}`;
-    hint.textContent = `Общий размер: ${sizeMB} МБ`;
-    zone.classList.add('has-files');
-  } else {
-    text.textContent = 'Выберите файлы или перетащите сюда';
-    hint.textContent = 'Поддерживаются все форматы';
-    zone.classList.remove('has-files');
-  }
-}
-
-// Drag and drop
-document.addEventListener('DOMContentLoaded', function() {
-  const uploadZones = document.querySelectorAll('.file-upload-zone');
-  
-  uploadZones.forEach(zone => {
-    zone.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      this.classList.add('drag-over');
-    }, { passive: false });
-    
-    zone.addEventListener('dragleave', function(e) {
-      e.preventDefault();
-      this.classList.remove('drag-over');
-    }, { passive: false });
-    
-    zone.addEventListener('drop', function(e) {
-      e.preventDefault();
-      this.classList.remove('drag-over');
-      const input = this.querySelector('input[type="file"]');
-      input.files = e.dataTransfer.files;
-      handleFileSelect(input);
-    }, { passive: false });
-  });
-  
-  // Обновляем счетчики
-  updateSelectedCount();
-  updateSelectedMonthCount();
-  
-  // Добавляем обработчики для чекбоксов удаления
-  setupDeleteCheckboxes();
-  
-  const animatedElements = document.querySelectorAll('.fade-in-up');
-  animatedElements.forEach(el => {
-    el.style.opacity = '1';
-    el.style.transform = 'translateY(0)';
-  });
-});
-
-// Функция для настройки чекбоксов удаления
-function setupDeleteCheckboxes() {
-  const deleteAllCheckbox = document.getElementById('delete_all');
-  const keepExceptionsCheckbox = document.getElementById('keep_exceptions');
-  const onlyTmSmCheckbox = document.getElementById('only_tm_sm');
-  const onlyFindexCheckbox = document.getElementById('only_findex');
-  const onlyKpCheckbox = document.getElementById('only_kp');
-  
-  const checkboxes = [deleteAllCheckbox, keepExceptionsCheckbox, 
-                      onlyTmSmCheckbox, onlyFindexCheckbox, onlyKpCheckbox];
-  
-  function handleCheckboxChange(changedBox) {
-    if (changedBox.checked) {
-      // Если выбрана специфическая опция, снимаем delete_all и keep_exceptions
-      if (changedBox === onlyTmSmCheckbox || 
-          changedBox === onlyFindexCheckbox || 
-          changedBox === onlyKpCheckbox) {
+    function handleUploadSubmit(form) {
+        const button = form.querySelector('.btn-primary');
+        button.classList.add('loading');
+        button.disabled = true;
         
-        if (deleteAllCheckbox) deleteAllCheckbox.checked = false;
-        if (keepExceptionsCheckbox) keepExceptionsCheckbox.checked = false;
-      }
-      
-      // Если выбран delete_all, снимаем специфические опции
-      if (changedBox === deleteAllCheckbox) {
-        if (onlyTmSmCheckbox) onlyTmSmCheckbox.checked = false;
-        if (onlyFindexCheckbox) onlyFindexCheckbox.checked = false;
-        if (onlyKpCheckbox) onlyKpCheckbox.checked = false;
-        if (keepExceptionsCheckbox) keepExceptionsCheckbox.checked = false;
-      }
-      
-      // Если выбраны специфические опции, они не должны быть вместе
-      if (changedBox === onlyTmSmCheckbox) {
-        if (onlyFindexCheckbox) onlyFindexCheckbox.checked = false;
-        if (onlyKpCheckbox) onlyKpCheckbox.checked = false;
-      }
-      if (changedBox === onlyFindexCheckbox) {
-        if (onlyTmSmCheckbox) onlyTmSmCheckbox.checked = false;
-        if (onlyKpCheckbox) onlyKpCheckbox.checked = false;
-      }
-      if (changedBox === onlyKpCheckbox) {
-        if (onlyTmSmCheckbox) onlyTmSmCheckbox.checked = false;
-        if (onlyFindexCheckbox) onlyFindexCheckbox.checked = false;
-      }
+        if (uploadTimeout) clearTimeout(uploadTimeout);
+        
+        uploadTimeout = setTimeout(() => {
+            showNotification('Рассылка успешно запущена!', 'success');
+            button.classList.remove('loading');
+            button.disabled = false;
+        }, 1000);
+        
+        return true;
     }
-  }
-  
-  checkboxes.forEach(checkbox => {
-    if (checkbox) {
-      checkbox.addEventListener('change', function() {
-        handleCheckboxChange(this);
-      });
+
+    function handleDeleteSubmit(form) {
+        const button = form.querySelector('.btn-danger');
+        const selectedSchools = form.querySelectorAll('input[name="school_ids"]:checked').length;
+        
+        if (selectedSchools === 0) {
+            showNotification('Выберите хотя бы одну школу для удаления!', 'warning');
+            return false;
+        }
+        
+        const deleteAll = document.getElementById('delete_all')?.checked;
+        const keepExceptions = document.getElementById('keep_exceptions')?.checked;
+        const onlyTmSm = document.getElementById('only_tm_sm')?.checked;
+        const onlyFindex = document.getElementById('only_findex')?.checked;
+        const onlyKp = document.getElementById('only_kp')?.checked;
+        
+        if (!deleteAll && !keepExceptions && !onlyTmSm && !onlyFindex && !onlyKp) {
+            showNotification('Выберите опцию удаления!', 'warning');
+            return false;
+        }
+        
+        button.classList.add('loading');
+        button.disabled = true;
+        
+        if (deleteTimeout) clearTimeout(deleteTimeout);
+        
+        deleteTimeout = setTimeout(() => {
+            showNotification(`Удаление файлов для ${selectedSchools} школ запущено!`, 'success');
+            button.classList.remove('loading');
+            button.disabled = false;
+        }, 1000);
+        
+        return true;
     }
-  });
-}
 
-// Функция для выбора/снятия выделения со всех школ (первая форма)
-function selectAllSchools(select) {
-  const schoolCheckboxes = document.querySelectorAll('input[name="school_ids"]');
-  schoolCheckboxes.forEach(checkbox => {
-    checkbox.checked = select;
-  });
-  updateSelectedCount();
-}
-
-// Функция для выбора/снятия выделения со всех школ (форма по месяцам)
-function selectAllSchoolsMonth(select) {
-  const schoolCheckboxes = document.querySelectorAll('.school-month-checkbox');
-  schoolCheckboxes.forEach(checkbox => {
-    checkbox.checked = select;
-  });
-  updateSelectedMonthCount();
-}
-
-// Функция для выбора/снятия выделения со всех месяцев
-function selectAllMonths(select) {
-  const monthCheckboxes = document.querySelectorAll('.month-checkbox-input');
-  monthCheckboxes.forEach(checkbox => {
-    checkbox.checked = select;
-  });
-  updateSelectedMonthCount();
-}
-
-// Функция для включения/отключения выбора месяцев при выборе "Все месяцы"
-function toggleAllMonths(checkbox) {
-  const monthCheckboxes = document.querySelectorAll('.month-checkbox-input');
-  monthCheckboxes.forEach(cb => {
-    cb.disabled = checkbox.checked;
-    if (checkbox.checked) {
-      cb.checked = false;
+    function handleMonthDeleteSubmit(form) {
+        const button = form.querySelector('.btn-warning');
+        const selectedSchools = form.querySelectorAll('.school-month-checkbox:checked').length;
+        const selectedMonths = form.querySelectorAll('.month-checkbox-input:checked').length;
+        const deleteAllMonths = document.getElementById('delete_all_months')?.checked;
+        
+        if (selectedSchools === 0) {
+            showNotification('Выберите хотя бы одну школу для удаления!', 'warning');
+            return false;
+        }
+        
+        if (!deleteAllMonths && selectedMonths === 0) {
+            showNotification('Выберите хотя бы один месяц или отметьте "Все месяцы"!', 'warning');
+            return false;
+        }
+        
+        button.classList.add('loading');
+        button.disabled = true;
+        
+        if (monthDeleteTimeout) clearTimeout(monthDeleteTimeout);
+        
+        monthDeleteTimeout = setTimeout(() => {
+            const year = document.getElementById('delete-year').value;
+            const period = deleteAllMonths ? `все месяцы ${year} года` : `выбранные месяцы ${year} года`;
+            showNotification(`Удаление файлов за ${period} для ${selectedSchools} школ запущено!`, 'success');
+            button.classList.remove('loading');
+            button.disabled = false;
+        }, 1000);
+        
+        return true;
     }
-  });
-  updateSelectedMonthCount();
-}
 
-// Обновление счетчика выбранных школ (первая форма)
-function updateSelectedCount() {
-  const selectedCount = document.querySelectorAll('input[name="school_ids"]:checked').length;
-  const totalCount = document.querySelectorAll('input[name="school_ids"]').length;
-  const counterElement = document.getElementById('selected-schools-count');
-  
-  if (counterElement) {
-    counterElement.textContent = `Выбрано: ${selectedCount} из ${totalCount}`;
-  }
-}
+    function handleFileSelect(input) {
+        const zone = input.closest('.file-upload-zone');
+        const text = zone.querySelector('.file-upload-text');
+        const hint = zone.querySelector('.file-upload-hint');
+        
+        if (input.files.length > 0) {
+            const fileCount = input.files.length;
+            const totalSize = Array.from(input.files).reduce((sum, file) => sum + file.size, 0);
+            const sizeMB = (totalSize / (1024 * 1024)).toFixed(1);
+            
+            text.textContent = `Выбрано файлов: ${fileCount}`;
+            hint.textContent = `Общий размер: ${sizeMB} МБ`;
+            zone.classList.add('has-files');
+        } else {
+            text.textContent = 'Выберите файлы или перетащите сюда';
+            hint.textContent = 'Поддерживаются все форматы';
+            zone.classList.remove('has-files');
+        }
+    }
 
-// НОВАЯ ФУНКЦИЯ: Обновление счетчиков для формы по месяцам
-function updateSelectedMonthCount() {
-  // Счетчик школ
-  const selectedSchools = document.querySelectorAll('.school-month-checkbox:checked').length;
-  const totalSchools = document.querySelectorAll('.school-month-checkbox').length;
-  const schoolsCounter = document.getElementById('selected-schools-month-count');
-  
-  if (schoolsCounter) {
-    schoolsCounter.textContent = `Выбрано: ${selectedSchools} из ${totalSchools}`;
-  }
-  
-  // Счетчик месяцев
-  const selectedMonths = document.querySelectorAll('.month-checkbox-input:checked').length;
-  const monthsCounter = document.getElementById('selected-months-count');
-  if (monthsCounter) {
-    monthsCounter.textContent = `Выбрано: ${selectedMonths} из 12`;
-  }
-}
+    function selectAllSchools(select) {
+        const schoolCheckboxes = document.querySelectorAll('input[name="school_ids"]');
+        schoolCheckboxes.forEach(checkbox => {
+            checkbox.checked = select;
+        });
+        updateSelectedCount();
+    }
 
-// Показ уведомлений
-let notificationTimeout;
-function showNotification(message, type = 'success') {
-  const notification = document.getElementById('notification');
-  notification.textContent = message;
-  notification.className = `notification ${type} show`;
-  
-  if (notificationTimeout) clearTimeout(notificationTimeout);
-  
-  notificationTimeout = setTimeout(() => {
-    notification.classList.remove('show');
-  }, 2000);
-}
+    function selectAllSchoolsMonth(select) {
+        const schoolCheckboxes = document.querySelectorAll('.school-month-checkbox');
+        schoolCheckboxes.forEach(checkbox => {
+            checkbox.checked = select;
+        });
+        updateSelectedMonthCount();
+    }
 
+    function selectAllMonths(select) {
+        const monthCheckboxes = document.querySelectorAll('.month-checkbox-input');
+        monthCheckboxes.forEach(checkbox => {
+            checkbox.checked = select;
+        });
+        updateSelectedMonthCount();
+    }
+
+    function toggleAllMonths(checkbox) {
+        const monthCheckboxes = document.querySelectorAll('.month-checkbox-input');
+        monthCheckboxes.forEach(cb => {
+            cb.disabled = checkbox.checked;
+            if (checkbox.checked) {
+                cb.checked = false;
+            }
+        });
+        updateSelectedMonthCount();
+    }
+
+    function updateSelectedCount() {
+        const selectedCount = document.querySelectorAll('input[name="school_ids"]:checked').length;
+        const totalCount = document.querySelectorAll('input[name="school_ids"]').length;
+        const counterElement = document.getElementById('selected-schools-count');
+        
+        if (counterElement) {
+            counterElement.textContent = `Выбрано: ${selectedCount} из ${totalCount}`;
+        }
+    }
+
+    function updateSelectedMonthCount() {
+        const selectedSchools = document.querySelectorAll('.school-month-checkbox:checked').length;
+        const totalSchools = document.querySelectorAll('.school-month-checkbox').length;
+        const schoolsCounter = document.getElementById('selected-schools-month-count');
+        
+        if (schoolsCounter) {
+            schoolsCounter.textContent = `Выбрано: ${selectedSchools} из ${totalSchools}`;
+        }
+        
+        const selectedMonths = document.querySelectorAll('.month-checkbox-input:checked').length;
+        const monthsCounter = document.getElementById('selected-months-count');
+        if (monthsCounter) {
+            monthsCounter.textContent = `Выбрано: ${selectedMonths} из 12`;
+        }
+    }
+
+    function setupDeleteCheckboxes() {
+        const deleteAllCheckbox = document.getElementById('delete_all');
+        const keepExceptionsCheckbox = document.getElementById('keep_exceptions');
+        const onlyTmSmCheckbox = document.getElementById('only_tm_sm');
+        const onlyFindexCheckbox = document.getElementById('only_findex');
+        const onlyKpCheckbox = document.getElementById('only_kp');
+        
+        const checkboxes = [deleteAllCheckbox, keepExceptionsCheckbox, onlyTmSmCheckbox, onlyFindexCheckbox, onlyKpCheckbox];
+        
+        function handleCheckboxChange(changedBox) {
+            if (changedBox.checked) {
+                if (changedBox === onlyTmSmCheckbox || changedBox === onlyFindexCheckbox || changedBox === onlyKpCheckbox) {
+                    if (deleteAllCheckbox) deleteAllCheckbox.checked = false;
+                    if (keepExceptionsCheckbox) keepExceptionsCheckbox.checked = false;
+                }
+                if (changedBox === deleteAllCheckbox) {
+                    if (onlyTmSmCheckbox) onlyTmSmCheckbox.checked = false;
+                    if (onlyFindexCheckbox) onlyFindexCheckbox.checked = false;
+                    if (onlyKpCheckbox) onlyKpCheckbox.checked = false;
+                    if (keepExceptionsCheckbox) keepExceptionsCheckbox.checked = false;
+                }
+                if (changedBox === onlyTmSmCheckbox) {
+                    if (onlyFindexCheckbox) onlyFindexCheckbox.checked = false;
+                    if (onlyKpCheckbox) onlyKpCheckbox.checked = false;
+                }
+                if (changedBox === onlyFindexCheckbox) {
+                    if (onlyTmSmCheckbox) onlyTmSmCheckbox.checked = false;
+                    if (onlyKpCheckbox) onlyKpCheckbox.checked = false;
+                }
+                if (changedBox === onlyKpCheckbox) {
+                    if (onlyTmSmCheckbox) onlyTmSmCheckbox.checked = false;
+                    if (onlyFindexCheckbox) onlyFindexCheckbox.checked = false;
+                }
+            }
+        }
+        
+        checkboxes.forEach(checkbox => {
+            if (checkbox) {
+                checkbox.addEventListener('change', function() {
+                    handleCheckboxChange(this);
+                });
+            }
+        });
+    }
+
+    let notificationTimeout;
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type} show`;
+        
+        if (notificationTimeout) clearTimeout(notificationTimeout);
+        
+        notificationTimeout = setTimeout(() => {
+            notification.classList.remove('show');
+        }, 2000);
+    }
+
+    // Мобильная адаптация: клик по строке раскрывает дополнительную информацию
+    function initMobileRowClick() {
+        if (window.innerWidth <= 768) {
+            const rows = document.querySelectorAll('.school-row');
+            rows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    // Не срабатывать при клике на ссылку
+                    if (e.target.closest('.manage-button')) return;
+                    
+                    const schoolId = this.dataset.schoolId;
+                    const detailRow = document.querySelector(`.mobile-row-details[data-parent="${schoolId}"]`);
+                    
+                    if (detailRow) {
+                        const isVisible = detailRow.style.display !== 'none';
+                        // Скрываем все другие развернутые строки
+                        document.querySelectorAll('.mobile-row-details').forEach(row => {
+                            row.style.display = 'none';
+                        });
+                        // Показываем/скрываем текущую
+                        detailRow.style.display = isVisible ? 'none' : 'table-row';
+                    }
+                });
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadZones = document.querySelectorAll('.file-upload-zone');
+        
+        uploadZones.forEach(zone => {
+            zone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            }, { passive: false });
+            
+            zone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+            }, { passive: false });
+            
+            zone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                const input = this.querySelector('input[type="file"]');
+                input.files = e.dataTransfer.files;
+                handleFileSelect(input);
+            }, { passive: false });
+        });
+        
+        updateSelectedCount();
+        updateSelectedMonthCount();
+        setupDeleteCheckboxes();
+        initMobileRowClick();
+        
+        const animatedElements = document.querySelectorAll('.fade-in-up');
+        animatedElements.forEach(el => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        });
+        
+        // При изменении размера окна обновляем поведение мобильной строки
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                // На больших экранах скрываем все дополнительные строки
+                document.querySelectorAll('.mobile-row-details').forEach(row => {
+                    row.style.display = 'none';
+                });
+            }
+            initMobileRowClick();
+        });
+    });
 </script>
 {% endblock %}

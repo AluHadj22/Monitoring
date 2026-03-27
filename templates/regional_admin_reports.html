@@ -1,0 +1,205 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="padding: 2rem;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <!-- Шапка -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #2563eb, #3b82f6); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+                            <path d="M4 4h16v16H4z"/>
+                            <path d="M8 8h8M8 12h6M8 16h4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 style="font-size: 1.5rem; font-weight: 600; color: var(--slate-800); margin: 0;">Все отчёты</h1>
+                        <p style="color: var(--slate-500); margin-top: 0.25rem; font-size: 0.875rem;">Всего отчётов: {{ total }}</p>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <a href="/regional-admin/report/create" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; background: #059669; color: white; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.875rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Создать отчёт
+                </a>
+                <a href="/regional-admin/dashboard" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--slate-600); font-size: 0.875rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Назад
+                </a>
+            </div>
+        </div>
+        
+        <!-- Фильтры -->
+        <div style="background: var(--card); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 1.5rem; overflow: hidden;">
+            <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--surface);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--slate-500)" stroke-width="2">
+                        <polygon points="22 3 2 3 10 13 10 21 14 18 14 13 22 3"/>
+                    </svg>
+                    <span style="font-size: 0.75rem; font-weight: 500; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Фильтры</span>
+                </div>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form method="get" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+                    <div style="flex: 2; min-width: 200px;">
+                        <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600); text-transform: uppercase; letter-spacing: 0.3px;">Поиск</label>
+                        <input type="text" name="search" value="{{ search }}" placeholder="Название или описание..."
+                               style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600); text-transform: uppercase; letter-spacing: 0.3px;">Категория</label>
+                        <select name="category_id" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+                            <option value="">Все категории</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if selected_category|string == cat.id|string %}selected{% endif %}>{{ cat.icon }} {{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600); text-transform: uppercase; letter-spacing: 0.3px;">Год</label>
+                        <select name="year" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+                            <option value="">Все годы</option>
+                            {% for y in years %}
+                            <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="display: block; font-weight: 500; font-size: 0.75rem; margin-bottom: 0.375rem; color: var(--slate-600); text-transform: uppercase; letter-spacing: 0.3px;">Статус</label>
+                        <select name="status" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.875rem;">
+                            <option value="">Все статусы</option>
+                            <option value="draft" {% if selected_status == "draft" %}selected{% endif %}>Черновик</option>
+                            <option value="published" {% if selected_status == "published" %}selected{% endif %}>Опубликован</option>
+                            <option value="archived" {% if selected_status == "archived" %}selected{% endif %}>Архив</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="submit" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            Применить
+                        </button>
+                        <a href="/regional-admin/reports" style="padding: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--slate-600); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                            Сбросить
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Список отчётов -->
+        <div style="background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden;">
+            {% if reports %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border); background: var(--surface);">
+                            <th style="text-align: left; padding: 1rem; font-size: 0.75rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Название</th>
+                            <th style="text-align: left; padding: 1rem; font-size: 0.75rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Категория</th>
+                            <th style="text-align: left; padding: 1rem; font-size: 0.75rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Период</th>
+                            <th style="text-align: left; padding: 1rem; font-size: 0.75rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Статус</th>
+                            <th style="text-align: left; padding: 1rem; font-size: 0.75rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;">Создан</th>
+                            <th style="text-align: left; padding: 1rem; font-size: 0.75rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 1rem;">
+                                <div style="font-weight: 500; color: var(--slate-800);">{{ report.title }}</div>
+                                <div style="font-size: 0.75rem; color: var(--slate-400); margin-top: 0.25rem;">{{ report.description[:80] }}{% if report.description|length > 80 %}...{% endif %}</div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                {% if report.category %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.625rem; background: var(--surface); border-radius: 20px; font-size: 0.75rem;">
+                                    <span>{{ report.category.icon }}</span>
+                                    <span>{{ report.category.name }}</span>
+                                </span>
+                                {% else %}
+                                <span style="color: var(--slate-400); font-size: 0.75rem;">Без категории</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem; font-size: 0.875rem; color: var(--slate-600);">{{ report.year }}{% if report.month %} / {{ report.month }}{% endif %}</td>
+                            <td style="padding: 1rem;">
+                                {% if report.status == "draft" %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; background: #fef3c7; color: #b45309; border-radius: 20px; font-size: 0.75rem; font-weight: 500;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg>
+                                    Черновик
+                                </span>
+                                {% elif report.is_published %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 0.75rem; font-weight: 500;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                    Опубликован
+                                </span>
+                                {% else %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; background: #f1f5f9; color: #475569; border-radius: 20px; font-size: 0.75rem; font-weight: 500;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+                                    Архив
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem; font-size: 0.875rem; color: var(--slate-500);">{{ report.created_at.strftime('%d.%m.%Y') if report.created_at else '—' }}</td>
+                            <td style="padding: 1rem;">
+                                <a href="/regional-admin/report/{{ report.id }}" style="color: #2563eb; text-decoration: none; font-size: 0.875rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                    Просмотр
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Пагинация -->
+            {% if total > per_page %}
+            <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--surface); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="font-size: 0.875rem; color: var(--slate-500);">
+                    Показано {{ (page-1)*per_page + 1 }}-{{ [page*per_page, total]|min }} из {{ total }}
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    {% if page > 1 %}
+                    <a href="?page={{ page-1 }}&category_id={{ selected_category }}&year={{ selected_year }}&status={{ selected_status }}&search={{ search }}" 
+                       style="padding: 0.5rem 0.875rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--slate-600); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                        Предыдущая
+                    </a>
+                    {% endif %}
+                    <span style="padding: 0.5rem 0.875rem; background: #2563eb; color: white; border-radius: 6px; font-size: 0.875rem; font-weight: 500;">{{ page }}</span>
+                    {% if page * per_page < total %}
+                    <a href="?page={{ page+1 }}&category_id={{ selected_category }}&year={{ selected_year }}&status={{ selected_status }}&search={{ search }}" 
+                       style="padding: 0.5rem 0.875rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--slate-600); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                        Следующая
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div style="text-align: center; padding: 3rem;">
+                <div style="width: 64px; height: 64px; background: var(--surface); border-radius: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--slate-400)" stroke-width="1.5">
+                        <path d="M4 4h16v16H4z"/>
+                        <path d="M8 8h8M8 12h6M8 16h4"/>
+                    </svg>
+                </div>
+                <h3 style="font-size: 1rem; font-weight: 500; color: var(--slate-600); margin-bottom: 0.5rem;">Нет отчётов</h3>
+                <p style="color: var(--slate-400); font-size: 0.875rem; margin-bottom: 1rem;">Создайте первый отчёт</p>
+                <a href="/regional-admin/report/create" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #059669; color: white; border-radius: 6px; text-decoration: none; font-size: 0.875rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    Создать отчёт
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

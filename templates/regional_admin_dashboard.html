@@ -1,0 +1,861 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* Дополнительные стили для региональной системы отчётности */
+    .reports-dashboard {
+        padding: 2rem;
+    }
+    
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    /* Шапка */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .header-logo {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .header-title h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .header-title p {
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Кнопки действий */
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-create {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .btn-create:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+    
+    .btn-import {
+        background: #f59e0b;
+        color: white;
+    }
+    
+    .btn-import:hover {
+        background: #d97706;
+        transform: translateY(-1px);
+    }
+    
+    .btn-categories {
+        background: var(--gray-100);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+    }
+    
+    .btn-categories:hover {
+        background: var(--gray-200);
+        transform: translateY(-1px);
+    }
+    
+    .btn-logout {
+        background: var(--gray-100);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+    }
+    
+    .btn-logout:hover {
+        background: #ef4444;
+        color: white;
+        border-color: #ef4444;
+    }
+    
+    [data-theme='dark'] .btn-categories,
+    [data-theme='dark'] .btn-logout {
+        background: var(--gray-800);
+    }
+    
+    /* Статистика */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--bg-card);
+        border-radius: 1rem;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        transition: all 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1;
+    }
+    
+    /* Сетка категорий и годов */
+    .two-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-card {
+        background: var(--bg-card);
+        border-radius: 1rem;
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+    
+    .card-header {
+        padding: 0.875rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--gray-50);
+    }
+    
+    [data-theme='dark'] .card-header {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .card-header h2 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Список категорий */
+    .categories-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .category-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.65rem 0.875rem;
+        background: var(--gray-50);
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    [data-theme='dark'] .category-item {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .category-item:hover {
+        background: var(--primary-bg);
+        transform: translateX(4px);
+    }
+    
+    .category-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .category-icon {
+        font-size: 1.2rem;
+    }
+    
+    .category-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+    }
+    
+    .category-count {
+        background: var(--primary-bg);
+        color: var(--primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    /* Список годов */
+    .years-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .year-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.65rem 0.875rem;
+        background: var(--gray-50);
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    [data-theme='dark'] .year-item {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .year-item:hover {
+        background: var(--primary-bg);
+        transform: translateX(4px);
+    }
+    
+    .year-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+    }
+    
+    .year-count {
+        background: var(--primary-bg);
+        color: var(--primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    /* Таблица отчётов */
+    .reports-table-container {
+        background: var(--bg-card);
+        border-radius: 1rem;
+        border: 1px solid var(--border);
+        margin-top: 1.5rem;
+        overflow: hidden;
+    }
+    
+    .table-header {
+        padding: 0.875rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--gray-50);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    [data-theme='dark'] .table-header {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .table-header h2 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .table-link {
+        font-size: 0.75rem;
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .table-link:hover {
+        text-decoration: underline;
+    }
+    
+    .reports-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .reports-table th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border);
+        background: var(--gray-50);
+    }
+    
+    [data-theme='dark'] .reports-table th {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .reports-table td {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-primary);
+        font-size: 0.8rem;
+    }
+    
+    .reports-table tr:hover {
+        background: var(--gray-50);
+    }
+    
+    [data-theme='dark'] .reports-table tr:hover {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .report-title {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .report-description {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .status-draft {
+        background: #fef3c7;
+        color: #b45309;
+    }
+    
+    .status-published {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-archived {
+        background: #f1f5f9;
+        color: #475569;
+    }
+    
+    [data-theme='dark'] .status-draft {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fbbf24;
+    }
+    
+    [data-theme='dark'] .status-published {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+    }
+    
+    [data-theme='dark'] .status-archived {
+        background: rgba(100, 116, 139, 0.2);
+        color: #94a3b8;
+    }
+    
+    .report-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .report-link:hover {
+        text-decoration: underline;
+    }
+    
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .empty-state h3 {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--primary);
+        color: white;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-size: 0.8rem;
+    }
+    
+    /* Быстрые действия */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1rem;
+        background: var(--gray-50);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    [data-theme='dark'] .quick-action {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .quick-action:hover {
+        transform: translateY(-2px);
+        border-color: var(--primary);
+        background: var(--primary-bg);
+    }
+    
+    .quick-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-bg);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .quick-icon svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--primary);
+    }
+    
+    .quick-info h4 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.2rem 0;
+    }
+    
+    .quick-info p {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .reports-dashboard {
+            padding: 1rem;
+        }
+        
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .two-columns {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .reports-table {
+            font-size: 0.75rem;
+        }
+        
+        .reports-table th,
+        .reports-table td {
+            padding: 0.6rem 0.75rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            width: 100%;
+            flex-direction: column;
+        }
+        
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="reports-dashboard">
+    <div class="dashboard-container">
+        <!-- Шапка -->
+        <div class="dashboard-header">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div class="header-logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+                        <path d="M3 3v16a2 2 0 0 0 2 2h16" stroke="white"/>
+                        <path d="M7 16l4-4 4 4 6-6" stroke="white"/>
+                        <path d="M17 10h4v4" stroke="white"/>
+                    </svg>
+                </div>
+                <div class="header-title">
+                    <h1>Региональная система отчётности</h1>
+                    <p>Управление отчётами, документами и правовой базой</p>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <a href="/regional-admin/report/create" class="btn-action btn-create">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Создать отчёт
+                </a>
+                <a href="/regional-admin/import-report-form" class="btn-action btn-import">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Импорт
+                </a>
+                <a href="/regional-admin/categories" class="btn-action btn-categories">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                    Категории
+                </a>
+                <a href="/regional-admin/logout" class="btn-action btn-logout">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Выход
+                </a>
+            </div>
+        </div>
+        
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Всего отчётов</span>
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </span>
+                </div>
+                <div class="stat-value">{{ total_reports }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Категорий</span>
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2">
+                            <path d="M4 4h16v16H4z"></path>
+                            <line x1="9" y1="8" x2="15" y2="8"></line>
+                            <line x1="9" y1="12" x2="15" y2="12"></line>
+                            <line x1="9" y1="16" x2="13" y2="16"></line>
+                        </svg>
+                    </span>
+                </div>
+                <div class="stat-value">{{ total_categories }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Файлов</span>
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                            <polyline points="13 2 13 9 20 9"></polyline>
+                        </svg>
+                    </span>
+                </div>
+                <div class="stat-value">{{ total_files }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Черновики</span>
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                            <path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                        </svg>
+                    </span>
+                </div>
+                <div class="stat-value">{{ draft_count }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Опубликовано</span>
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </span>
+                </div>
+                <div class="stat-value">{{ published_count }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Архив</span>
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+                            <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                        </svg>
+                    </span>
+                </div>
+                <div class="stat-value">{{ archived_count }}</div>
+            </div>
+        </div>
+        
+        <!-- Категории и годы -->
+        <div class="two-columns">
+            <!-- Категории -->
+            <div class="info-card">
+                <div class="card-header">
+                    <h2>Категории отчётов</h2>
+                </div>
+                <div class="card-body">
+                    <div class="categories-list">
+                        {% for cat in categories %}
+                        <a href="/regional-admin/reports?category_id={{ cat.id }}" class="category-item">
+                            <div class="category-info">
+                                <span class="category-icon">{{ cat.icon }}</span>
+                                <span class="category-name">{{ cat.name }}</span>
+                            </div>
+                            <span class="category-count">{{ cat.report_count }}</span>
+                        </a>
+                        {% endfor %}
+                        {% if not categories %}
+                        <div class="empty-state" style="padding: 2rem;">
+                            <p style="color: var(--text-secondary);">Нет категорий. Создайте первую через <a href="/regional-admin/categories" style="color: var(--primary);">управление категориями</a></p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Годы -->
+            <div class="info-card">
+                <div class="card-header">
+                    <h2>Отчёты по годам</h2>
+                </div>
+                <div class="card-body">
+                    <div class="years-list">
+                        {% for year, count in years_stats %}
+                        <a href="/regional-admin/reports?year={{ year }}" class="year-item">
+                            <span class="year-name">{{ year }} год</span>
+                            <span class="year-count">{{ count }}</span>
+                        </a>
+                        {% endfor %}
+                        {% if not years_stats %}
+                        <div class="empty-state" style="padding: 2rem;">
+                            <p style="color: var(--text-secondary);">Нет данных</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Последние отчёты -->
+        <div class="reports-table-container">
+            <div class="table-header">
+                <h2>Последние отчёты</h2>
+                <a href="/regional-admin/reports" class="table-link">Все отчёты →</a>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="reports-table">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Период</th>
+                            <th>Статус</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in recent_reports %}
+                        <tr>
+                            <td>
+                                <div class="report-title">{{ report.title }}</div>
+                                <div class="report-description">{{ report.description[:60] }}{% if report.description|length > 60 %}...{% endif %}</div>
+                            </td>
+                            <td style="font-size: 0.8rem; color: var(--text-secondary);">{{ report.year }}{% if report.month %} / {{ report.month }}{% endif %}</td>
+                            <td>
+                                {% if report.status == "draft" %}
+                                <span class="status-badge status-draft">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg>
+                                    Черновик
+                                </span>
+                                {% elif report.is_published %}
+                                <span class="status-badge status-published">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Опубликован
+                                </span>
+                                {% else %}
+                                <span class="status-badge status-archived">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+                                    Архив
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 0.8rem; color: var(--text-secondary);">{{ report.created_at.strftime('%d.%m.%Y') if report.created_at else '—' }}</td>
+                            <td><a href="/regional-admin/report/{{ report.id }}" class="report-link">Просмотр →</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not recent_reports %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h3>Нет отчётов</h3>
+                <p>Создайте первый отчёт</p>
+                <a href="/regional-admin/report/create" class="empty-state-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Создать отчёт
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Быстрые действия -->
+        <div class="quick-actions">
+            <a href="/regional-admin/report/create" class="quick-action">
+                <div class="quick-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </div>
+                <div class="quick-info">
+                    <h4>Создать отчёт</h4>
+                    <p>Новый отчёт по питанию, зарплате и др.</p>
+                </div>
+            </a>
+            <a href="/regional-admin/import-report-form" class="quick-action">
+                <div class="quick-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <div class="quick-info">
+                    <h4>Импорт отчёта</h4>
+                    <p>Загрузить PDF, DOCX, XLSX или JSON</p>
+                </div>
+            </a>
+            <a href="/regional-admin/categories" class="quick-action">
+                <div class="quick-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </div>
+                <div class="quick-info">
+                    <h4>Управление категориями</h4>
+                    <p>Создание и настройка категорий</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

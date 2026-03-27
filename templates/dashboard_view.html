@@ -2,78 +2,135 @@
 
 {% block styles %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css">
+{% endblock %}
+
+{% block content %}
 <style>
-    .dashboard-view {
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    .dashboard-container {
         max-width: 1400px;
-        margin: 2rem auto;
-        padding: 0 2rem;
+        margin: 0 auto;
+        padding: 2rem;
     }
 
-    .dashboard-header {
+    /* Hero секция */
+    .dashboard-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 32px;
+        padding: 2rem 2.5rem;
         margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid var(--border);
+        position: relative;
+        overflow: hidden;
     }
 
-    .dashboard-header h1 {
-        font-size: 2.5rem;
-        color: var(--slate-700);
+    .dashboard-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .dashboard-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .dashboard-hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .dashboard-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16, 185, 129, 0.2);
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #10b981;
+        margin-bottom: 1rem;
+    }
+
+    .dashboard-hero h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
         margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
     }
 
-    .dashboard-header p {
-        color: var(--slate-500);
-        font-size: 1.1rem;
+    .dashboard-description {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 600px;
+        margin-bottom: 1rem;
     }
 
     .dashboard-meta {
         display: flex;
         gap: 1rem;
-        color: var(--slate-400);
-        font-size: 0.9rem;
-        margin-top: 1rem;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.8rem;
     }
 
+    /* Сетка дашборда */
     .dashboard-grid {
         display: grid;
         grid-template-columns: repeat(12, 1fr);
         gap: 1.5rem;
-        margin-top: 2rem;
+        margin-bottom: 2rem;
     }
 
-    .grid-item {
-        background: var(--card);
+    /* Карточка элемента */
+    .dashboard-card {
+        background: var(--bg-card);
+        border-radius: 24px;
         border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 1.5rem;
-        box-shadow: var(--shadow-md);
-        transition: transform 0.2s ease;
-        min-height: 200px;
+        overflow: hidden;
+        transition: var(--transition);
         display: flex;
         flex-direction: column;
     }
 
-    .grid-item:hover {
+    .dashboard-card:hover {
         transform: translateY(-2px);
-        box-shadow: var(--shadow-xl);
+        box-shadow: var(--shadow-lg);
     }
 
-    .element-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--slate-600);
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.5rem;
+    .card-header {
+        padding: 1rem 1.25rem;
         border-bottom: 1px solid var(--border);
-        flex-shrink: 0;
+        background: var(--surface);
     }
 
-    .element-content {
+    .card-header h3 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .card-content {
+        padding: 1.25rem;
         flex: 1;
-        min-height: 0;
         overflow: auto;
+        min-height: 200px;
     }
 
+    /* Стили для различных типов элементов */
     .chart-container {
         width: 100%;
         height: 100%;
@@ -82,128 +139,74 @@
     }
 
     .text-element {
-        font-size: 1rem;
-        color: var(--slate-700);
+        font-size: 0.9rem;
+        color: var(--text-secondary);
         line-height: 1.6;
         white-space: pre-wrap;
         word-wrap: break-word;
-        padding: 0.5rem;
-    }
-
-    .list-element {
-        padding-left: 0.5rem;
     }
 
     .list-element ul,
     .list-element ol {
         margin: 0;
-        padding-left: 1.5rem;
+        padding-left: 1.25rem;
     }
 
     .list-element li {
-        color: var(--slate-700);
+        color: var(--text-secondary);
         margin-bottom: 0.25rem;
-        font-size: 0.95rem;
+        font-size: 0.85rem;
     }
 
-    .table-element {
-        width: 100%;
-        height: 100%;
-        overflow: auto;
+    /* Таблица */
+    .table-wrapper {
+        overflow-x: auto;
     }
 
-    .table-element table {
+    .data-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
-    .table-element th {
-        background: var(--blue-light);
-        color: var(--slate-700);
+    .data-table th {
+        background: var(--surface);
+        color: var(--text-primary);
         font-weight: 600;
-        padding: 0.5rem;
+        padding: 0.6rem 0.75rem;
         border: 1px solid var(--border);
+        text-align: left;
     }
 
-    .table-element td {
-        padding: 0.5rem;
+    .data-table td {
+        padding: 0.6rem 0.75rem;
         border: 1px solid var(--border);
-        color: var(--slate-600);
+        color: var(--text-secondary);
     }
 
-    .table-element tr:hover {
+    .data-table tr:hover {
         background: var(--surface);
     }
 
+    /* Gauge */
     .gauge-component {
-        padding: 0.5rem;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
+        text-align: center;
     }
 
     .gauge-value {
         font-size: 2rem;
         font-weight: 700;
-        color: var(--blue);
+        color: var(--primary);
         line-height: 1.2;
     }
 
     .gauge-label {
-        font-size: 0.9rem;
-        color: var(--slate-500);
-        margin-bottom: 10px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
     }
 
     .gauge-bar {
-        width: 100%;
-        height: 20px;
-        background: var(--surface);
-        border-radius: 10px;
-        overflow: hidden;
-        margin-top: 5px;
-    }
-
-    .gauge-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--blue), #818cf8);
-        border-radius: 10px;
-        transition: width 0.3s ease;
-    }
-
-    .progress-component {
-        padding: 0.5rem;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        overflow-y: auto;
-    }
-
-    .progress-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .progress-header {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.85rem;
-    }
-
-    .progress-label {
-        color: var(--slate-600);
-        font-weight: 500;
-    }
-
-    .progress-percent {
-        color: var(--blue);
-        font-weight: 600;
-    }
-
-    .progress-bar {
         width: 100%;
         height: 8px;
         background: var(--surface);
@@ -211,254 +214,272 @@
         overflow: hidden;
     }
 
-    .progress-fill {
+    .gauge-fill {
         height: 100%;
-        background: linear-gradient(90deg, var(--blue), #818cf8);
+        background: linear-gradient(90deg, var(--primary), var(--primary-light));
         border-radius: 4px;
         transition: width 0.3s ease;
     }
 
-    .sparkline-component {
-        padding: 0.5rem;
-        height: 100%;
+    /* Progress */
+    .progress-component {
         display: flex;
         flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .progress-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+    }
+
+    .progress-label {
+        color: var(--text-secondary);
+    }
+
+    .progress-percent {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: var(--surface);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        border-radius: 3px;
+    }
+
+    /* Sparkline */
+    .sparkline-component {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
     .sparkline-svg {
         width: 100%;
-        height: 70%;
-        min-height: 60px;
-    }
-
-    .sparkline-line {
-        fill: none;
-        stroke: var(--blue);
-        stroke-width: 2;
-    }
-
-    .sparkline-area {
-        fill: rgba(96, 165, 250, 0.1);
+        height: 80px;
     }
 
     .sparkline-values {
         display: flex;
         justify-content: space-between;
-        font-size: 0.7rem;
-        color: var(--slate-500);
-        margin-top: 5px;
+        font-size: 0.65rem;
+        color: var(--text-secondary);
     }
 
-    .slicer-component {
-        padding: 0.5rem;
-    }
-
+    /* Slicer */
     .slicer-buttons {
         display: flex;
-        gap: 5px;
+        gap: 0.5rem;
         flex-wrap: wrap;
     }
 
     .slicer-btn {
-        padding: 4px 10px;
+        padding: 0.25rem 0.75rem;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
+        border-radius: 20px;
+        font-size: 0.75rem;
         cursor: default;
-        font-size: 0.8rem;
-        color: var(--slate-600);
+        color: var(--text-secondary);
     }
 
     .slicer-btn.active {
-        background: var(--blue);
+        background: var(--primary);
         color: white;
-        border-color: var(--blue);
+        border-color: var(--primary);
     }
 
-    /* Математические компоненты */
+    /* Matrix */
     .matrix-component {
-        padding: 0.5rem;
-        height: 100%;
         display: flex;
-        flex-direction: column;
-        overflow: auto;
+        justify-content: center;
+        align-items: center;
+        gap: 0.25rem;
     }
 
     .matrix-brackets {
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 5px;
+        gap: 0.5rem;
     }
 
     .matrix-left-bracket,
     .matrix-right-bracket {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 300;
-        color: var(--slate-500);
-        line-height: 1;
+        color: var(--text-secondary);
     }
 
     .matrix-table {
         border-collapse: collapse;
-        margin: 0 auto;
     }
 
     .matrix-table td {
-        padding: 6px;
+        padding: 0.25rem 0.5rem;
         text-align: center;
         border: 1px solid var(--border);
-        min-width: 50px;
-        color: var(--slate-700);
+        min-width: 40px;
+        color: var(--text-primary);
+        font-size: 0.8rem;
     }
 
+    /* Formula */
     .formula-component {
-        padding: 0.5rem;
-        height: 100%;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 0.75rem;
     }
 
     .formula-display {
-        font-size: 1.2rem;
+        font-size: 1rem;
         text-align: center;
-        padding: 10px;
+        padding: 0.75rem;
         background: var(--surface);
-        border-radius: var(--radius-sm);
+        border-radius: 12px;
         border: 1px solid var(--border);
-        color: var(--slate-800);
+        color: var(--text-primary);
+        font-family: monospace;
         overflow-x: auto;
         white-space: nowrap;
-        font-family: 'Courier New', monospace;
     }
 
     .formula-variables {
         display: flex;
         flex-wrap: wrap;
-        gap: 5px;
-        padding: 5px;
-        background: var(--surface);
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
+        gap: 0.5rem;
     }
 
     .variable-item {
-        font-size: 0.8rem;
-        padding: 2px 6px;
-        background: var(--card);
-        border-radius: var(--radius-sm);
-        color: var(--blue);
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        background: var(--primary-bg);
+        border-radius: 12px;
+        color: var(--primary);
         font-family: monospace;
     }
 
+    /* Statistics */
     .statistics-component {
-        padding: 0.5rem;
-        height: 100%;
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        overflow: auto;
+        gap: 0.75rem;
     }
 
     .stats-input {
-        font-size: 0.8rem;
-        padding: 6px;
+        font-size: 0.75rem;
+        padding: 0.5rem;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        color: var(--slate-600);
+        border-radius: 10px;
+        color: var(--text-secondary);
         font-family: monospace;
+        word-break: break-all;
     }
 
     .stats-results {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        gap: 0.5rem;
     }
 
     .stat-item {
-        padding: 6px;
+        padding: 0.5rem;
         background: var(--surface);
-        border-radius: var(--radius-sm);
+        border-radius: 10px;
         border: 1px solid var(--border);
+        text-align: center;
     }
 
     .stat-label {
-        font-size: 0.7rem;
-        color: var(--slate-500);
-        margin-bottom: 2px;
+        font-size: 0.6rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 0.2rem;
     }
 
     .stat-value {
-        font-size: 1rem;
+        font-size: 0.9rem;
         font-weight: 600;
-        color: var(--blue);
+        color: var(--primary);
     }
 
+    /* Percentage */
     .percentage-component {
-        padding: 0.5rem;
-        height: 100%;
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        justify-content: center;
+        gap: 0.75rem;
     }
 
     .percentage-calculator {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 0.5rem;
     }
 
     .percentage-row {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 0.5rem;
     }
 
     .percentage-label {
-        min-width: 60px;
-        font-size: 0.8rem;
-        color: var(--slate-600);
+        min-width: 50px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
     }
 
     .percentage-value {
         flex: 1;
-        padding: 4px 8px;
+        padding: 0.25rem 0.5rem;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        color: var(--blue);
-        font-weight: 600;
+        border-radius: 8px;
+        color: var(--primary);
+        font-weight: 500;
         text-align: center;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     .percentage-result {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         font-weight: 700;
-        color: var(--blue);
+        color: var(--primary);
         text-align: center;
-        padding: 10px;
+        padding: 0.5rem;
         background: var(--surface);
-        border-radius: var(--radius-sm);
+        border-radius: 10px;
         border: 1px solid var(--border);
     }
 
+    /* Ratio */
     .ratio-component {
-        padding: 0.5rem;
-        height: 100%;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 0.75rem;
     }
 
     .ratio-inputs {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
+        gap: 0.5rem;
         flex-wrap: wrap;
     }
 
@@ -466,51 +487,57 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
+        gap: 0.1rem;
     }
 
     .ratio-field span {
-        font-size: 1rem;
-        color: var(--slate-700);
+        font-size: 0.9rem;
+        color: var(--text-primary);
     }
 
     .ratio-field label {
-        font-size: 0.7rem;
-        color: var(--slate-500);
+        font-size: 0.6rem;
+        color: var(--text-secondary);
     }
 
     .ratio-equals {
-        font-size: 1rem;
-        color: var(--slate-400);
+        font-size: 0.8rem;
+        color: var(--text-secondary);
     }
 
     .ratio-result {
-        font-size: 1rem;
+        font-size: 0.8rem;
         font-weight: 600;
-        color: var(--blue);
         text-align: center;
-        padding: 8px;
+        padding: 0.5rem;
         background: var(--surface);
-        border-radius: var(--radius-sm);
+        border-radius: 10px;
         border: 1px solid var(--border);
     }
 
+    .ratio-result.correct {
+        color: var(--success);
+    }
+
+    .ratio-result.incorrect {
+        color: var(--error);
+    }
+
+    /* Function plot */
     .function-plot-component {
-        padding: 0.5rem;
-        height: 100%;
         display: flex;
         flex-direction: column;
+        gap: 0.5rem;
     }
 
     .function-expression {
-        font-size: 0.9rem;
-        padding: 4px 8px;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        color: var(--slate-700);
+        border-radius: 8px;
+        color: var(--primary);
         font-family: monospace;
-        margin-bottom: 8px;
         text-align: center;
     }
 
@@ -519,28 +546,26 @@
         height: 120px;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
+        border-radius: 8px;
     }
 
+    /* Comparison */
     .comparison-component {
-        padding: 0.5rem;
-        height: 100%;
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        overflow-y: auto;
+        gap: 0.5rem;
     }
 
     .comparison-item {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0.5rem;
     }
 
     .comparison-label {
         width: 60px;
-        font-size: 0.8rem;
-        color: var(--slate-600);
+        font-size: 0.7rem;
+        color: var(--text-secondary);
     }
 
     .comparison-bars {
@@ -552,7 +577,7 @@
 
     .comparison-bar {
         height: 100%;
-        background: linear-gradient(90deg, var(--blue), #818cf8);
+        background: linear-gradient(90deg, var(--primary), var(--primary-light));
         border-radius: 3px;
     }
 
@@ -562,72 +587,70 @@
 
     .comparison-value {
         width: 50px;
-        font-size: 0.8rem;
-        color: var(--slate-600);
+        font-size: 0.7rem;
+        color: var(--text-secondary);
         text-align: right;
     }
 
+    /* Timeline */
     .timeline-component {
-        padding: 0.5rem;
-        height: 100%;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 0.5rem;
     }
 
     .timeline-item {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0.5rem;
     }
 
     .timeline-dot {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-        background: var(--blue);
+        background: var(--primary);
     }
 
     .timeline-line {
         flex: 1;
         height: 2px;
-        background: linear-gradient(90deg, var(--blue), #818cf8);
+        background: linear-gradient(90deg, var(--primary), var(--primary-light));
         border-radius: 1px;
     }
 
     .timeline-label {
-        font-size: 0.8rem;
-        color: var(--slate-600);
-        min-width: 50px;
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        min-width: 40px;
     }
 
+    /* Icon */
     .icon-component {
-        width: 100%;
-        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3rem;
-        color: var(--blue);
+        height: 100%;
     }
 
+    /* Badge */
     .badge-component {
-        width: 100%;
-        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
+        height: 100%;
     }
 
     .badge {
-        padding: 6px 12px;
-        border-radius: 16px;
-        font-weight: 600;
         display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
     }
 
     .badge.primary {
-        background: var(--blue);
+        background: var(--primary);
         color: white;
     }
 
@@ -651,63 +674,126 @@
         color: white;
     }
 
-    .share-buttons {
+    /* Кнопки */
+    .dashboard-actions {
         display: flex;
         gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 2rem;
+        justify-content: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
         border-top: 1px solid var(--border);
     }
 
-    .share-button {
-        padding: 0.75rem 1.5rem;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        color: var(--slate-600);
-        text-decoration: none;
-        display: flex;
+    .action-btn {
+        display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        transition: all 0.2s ease;
+        padding: 0.6rem 1.2rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 60px;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
     }
 
-    .share-button:hover {
-        background: var(--blue);
+    .action-btn:hover {
+        background: var(--primary);
         color: white;
-        border-color: var(--blue);
-        transform: translateY(-2px);
+        border-color: var(--primary);
+        transform: translateY(-1px);
     }
 
-    @media (max-width: 768px) {
+    /* Адаптивность */
+    @media (max-width: 1024px) {
         .dashboard-grid {
             grid-template-columns: repeat(6, 1fr);
         }
     }
-</style>
-{% endblock %}
 
-{% block content %}
-<div class="dashboard-view fade-in">
-    <div class="dashboard-header">
-        <h1>{{ dashboard.title }}</h1>
-        {% if dashboard.description %}
-        <p>{{ dashboard.description }}</p>
-        {% endif %}
-        <div class="dashboard-meta">
-            <span>📅 {{ dashboard.updated_at.strftime('%d.%m.%Y %H:%M') if dashboard.updated_at else '—' }}</span>
-            <span>📊 {{ dashboard.elements|length }} элементов</span>
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+        
+        .dashboard-hero {
+            padding: 1.5rem;
+        }
+        
+        .dashboard-hero h1 {
+            font-size: 1.5rem;
+        }
+        
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .card-content {
+            padding: 1rem;
+        }
+        
+        .stats-results {
+            grid-template-columns: 1fr;
+        }
+        
+        .ratio-inputs {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-actions {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Hero секция -->
+    <div class="dashboard-hero">
+        <div class="dashboard-hero-content">
+            <div class="dashboard-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <line x1="9" y1="3" x2="9" y2="21"/>
+                    <line x1="15" y1="3" x2="15" y2="21"/>
+                </svg>
+                <span>Дашборд</span>
+            </div>
+            <h1>{{ dashboard.title }}</h1>
+            {% if dashboard.description %}
+            <p class="dashboard-description">{{ dashboard.description }}</p>
+            {% endif %}
+            <div class="dashboard-meta">
+                <span>📅 {{ dashboard.updated_at.strftime('%d.%m.%Y %H:%M') if dashboard.updated_at else '—' }}</span>
+                <span>📊 {{ dashboard.elements|length }} элементов</span>
+            </div>
         </div>
     </div>
 
+    <!-- Сетка дашборда -->
     <div class="dashboard-grid" id="dashboardGrid">
         {% for element in dashboard.elements %}
-        <div class="grid-item" style="grid-column: span {{ element.width }}; grid-row: span {{ element.height }};">
+        <div class="dashboard-card" style="grid-column: span {{ element.width }}; grid-row: span {{ element.height }};">
             {% if element.title %}
-            <div class="element-title">{{ element.title }}</div>
+            <div class="card-header">
+                <h3>{{ element.title }}</h3>
+            </div>
             {% endif %}
             
-            <div class="element-content">
+            <div class="card-content">
                 {% if element.element_type == 'chart' %}
                 <div class="chart-container">
                     <canvas id="chart-{{ element.id }}"></canvas>
@@ -724,9 +810,9 @@
                     {% if items %}
                         {% set list_style = element.content.get('listStyle', 'disc') %}
                         {% if list_style.startswith('decimal') or list_style.startswith('lower') or list_style.startswith('upper') %}
-                        <ol style="list-style-type: {{ list_style }}; font-size: {{ element.settings.textSize }}; color: {{ element.settings.textColor }};">
+                        <ol style="list-style-type: {{ list_style }};">
                         {% else %}
-                        <ul style="list-style-type: {{ list_style }}; font-size: {{ element.settings.textSize }}; color: {{ element.settings.textColor }};">
+                        <ul style="list-style-type: {{ list_style }};">
                         {% endif %}
                             {% for item in items %}
                             <li>{{ item.text | default('') }}</li>
@@ -740,8 +826,8 @@
                 </div>
                 
                 {% elif element.element_type == 'table' %}
-                <div class="table-element">
-                    <table>
+                <div class="table-wrapper">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 {% for header in element.content.get('headers', []) %}
@@ -763,7 +849,7 @@
 
                 {% elif element.element_type == 'gauge' %}
                 <div class="gauge-component">
-                    <div class="gauge-value" style="color: {{ element.content.get('color', '#60a5fa') }};">
+                    <div class="gauge-value" style="color: {{ element.content.get('color', '#10b981') }};">
                         {{ element.content.get('value', 0) }}
                     </div>
                     <div class="gauge-label">{{ element.content.get('label', 'Прогресс') }}</div>
@@ -771,7 +857,7 @@
                         {% set value = element.content.get('value', 0) | float %}
                         {% set max_val = element.content.get('max', 100) | float %}
                         {% set percent = (value / max_val * 100) if max_val > 0 else 0 %}
-                        <div class="gauge-fill" style="width: {{ percent }}%; background: {{ element.content.get('color', '#60a5fa') }};"></div>
+                        <div class="gauge-fill" style="width: {{ percent }}%;"></div>
                     </div>
                 </div>
 
@@ -783,12 +869,10 @@
                         <div class="progress-item">
                             <div class="progress-header">
                                 <span class="progress-label">{{ item.get('label', '') }}</span>
-                                <span class="progress-percent" style="color: {{ element.content.get('color', '#60a5fa') }};">
-                                    {{ item.get('value', 0) }}%
-                                </span>
+                                <span class="progress-percent">{{ item.get('value', 0) }}%</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: {{ item.get('value', 0) }}%; background: {{ element.content.get('color', '#60a5fa') }};"></div>
+                                <div class="progress-fill" style="width: {{ item.get('value', 0) }}%;"></div>
                             </div>
                         </div>
                         {% endfor %}
@@ -811,9 +895,9 @@
                             {% endfor %}
                             {% set points_str = points|join(' ') %}
                             {% if element.content.get('showArea', false) %}
-                            <polygon points="{{ points_str }} 100,50 0,50" class="sparkline-area" fill="{{ element.content.get('color', '#60a5fa') }}20" />
+                            <polygon points="{{ points_str }} 100,50 0,50" class="sparkline-area" fill="rgba(16, 185, 129, 0.1)" />
                             {% endif %}
-                            <polyline points="{{ points_str }}" class="sparkline-line" stroke="{{ element.content.get('color', '#60a5fa') }}" fill="none" />
+                            <polyline points="{{ points_str }}" class="sparkline-line" stroke="var(--primary)" fill="none" stroke-width="2" />
                         {% endif %}
                     </svg>
                     {% set labels = element.content.get('labels', []) %}
@@ -855,7 +939,7 @@
 
                 {% elif element.element_type == 'formula' %}
                 <div class="formula-component">
-                    <div class="formula-display" style="font-size: {{ element.content.get('size', 24) }}px; color: {{ element.content.get('color', '#334155') }};">
+                    <div class="formula-display">
                         {{ element.content.get('expression', '') }}
                     </div>
                     <div class="formula-variables">
@@ -869,20 +953,16 @@
                 <div class="statistics-component">
                     {% set data_str = element.content.get('data', '') %}
                     {% set data = data_str.split(',') | map('trim') | map('float') | select('defined') | list %}
-                    {% set stats = element.content.get('stats', {}) %}
-                    {% set stats_color = element.content.get('color', '#60a5fa') %}
                     
                     <div class="stats-input">{{ data_str }}</div>
                     <div class="stats-results">
-                        {% if stats.get('mean', true) and data|length > 0 %}
+                        {% if data|length > 0 %}
                             {% set mean = data | sum / data | length %}
                             <div class="stat-item">
                                 <div class="stat-label">Среднее</div>
-                                <div class="stat-value" style="color: {{ stats_color }};">{{ "%.2f"|format(mean) }}</div>
+                                <div class="stat-value">{{ "%.2f"|format(mean) }}</div>
                             </div>
-                        {% endif %}
-                        
-                        {% if stats.get('median', true) and data|length > 0 %}
+                            
                             {% set sorted = data | sort %}
                             {% if sorted|length % 2 == 0 %}
                                 {% set median = (sorted[sorted|length//2 - 1] + sorted[sorted|length//2]) / 2 %}
@@ -891,35 +971,27 @@
                             {% endif %}
                             <div class="stat-item">
                                 <div class="stat-label">Медиана</div>
-                                <div class="stat-value" style="color: {{ stats_color }};">{{ "%.2f"|format(median) }}</div>
+                                <div class="stat-value">{{ "%.2f"|format(median) }}</div>
                             </div>
-                        {% endif %}
-                        
-                        {% if stats.get('min', true) and data|length > 0 %}
+                            
                             <div class="stat-item">
                                 <div class="stat-label">Минимум</div>
-                                <div class="stat-value" style="color: {{ stats_color }};">{{ data | min }}</div>
+                                <div class="stat-value">{{ data | min }}</div>
                             </div>
-                        {% endif %}
-                        
-                        {% if stats.get('max', true) and data|length > 0 %}
+                            
                             <div class="stat-item">
                                 <div class="stat-label">Максимум</div>
-                                <div class="stat-value" style="color: {{ stats_color }};">{{ data | max }}</div>
+                                <div class="stat-value">{{ data | max }}</div>
                             </div>
-                        {% endif %}
-                        
-                        {% if stats.get('sum', true) and data|length > 0 %}
+                            
                             <div class="stat-item">
                                 <div class="stat-label">Сумма</div>
-                                <div class="stat-value" style="color: {{ stats_color }};">{{ data | sum }}</div>
+                                <div class="stat-value">{{ data | sum }}</div>
                             </div>
-                        {% endif %}
-                        
-                        {% if stats.get('count', true) %}
+                            
                             <div class="stat-item">
                                 <div class="stat-label">Количество</div>
-                                <div class="stat-value" style="color: {{ stats_color }};">{{ data | length }}</div>
+                                <div class="stat-value">{{ data | length }}</div>
                             </div>
                         {% endif %}
                     </div>
@@ -936,7 +1008,7 @@
                             <span class="percentage-label">Процент:</span>
                             <span class="percentage-value">{{ element.content.get('perc', 15) }}%</span>
                         </div>
-                        <div class="percentage-result" style="color: {{ element.content.get('color', '#60a5fa') }};">
+                        <div class="percentage-result">
                             {{ (element.content.get('num', 100) * element.content.get('perc', 15) / 100) | round(2) }}
                         </div>
                     </div>
@@ -965,11 +1037,11 @@
                             <label>D</label>
                         </div>
                     </div>
-                    <div class="ratio-result" style="color: {% if element.content.get('a',2)*element.content.get('d',6) == element.content.get('b',3)*element.content.get('c',4) %}#10b981{% else %}#ef4444{% endif %};">
+                    <div class="ratio-result {% if element.content.get('a',2)*element.content.get('d',6) == element.content.get('b',3)*element.content.get('c',4) %}correct{% else %}incorrect{% endif %}">
                         {% if element.content.get('a',2)*element.content.get('d',6) == element.content.get('b',3)*element.content.get('c',4) %}
-                            Пропорция верна ✓
+                            ✓ Пропорция верна
                         {% else %}
-                            Пропорция не верна ✗
+                            ✗ Пропорция не верна
                         {% endif %}
                     </div>
                 </div>
@@ -977,7 +1049,7 @@
                 {% elif element.element_type == 'function' %}
                 <div class="function-plot-component">
                     <div class="function-expression">{{ element.content.get('expression', 'sin(x)') }}</div>
-                    <canvas class="function-canvas" id="function-{{ element.id }}"></canvas>
+                    <canvas class="function-canvas" id="function-{{ element.id }}" width="300" height="120"></canvas>
                 </div>
 
                 {% elif element.element_type == 'comparison' %}
@@ -992,8 +1064,8 @@
                     <div class="comparison-item">
                         <span class="comparison-label">{{ item.label }}</span>
                         <div class="comparison-bars">
-                            <div class="comparison-bar" style="width: {{ (item.value1|default(0) / max_val * 100) if max_val > 0 else 0 }}%; background: {{ element.content.get('color1', '#60a5fa') }};"></div>
-                            <div class="comparison-bar secondary" style="width: {{ (item.value2|default(0) / max_val * 100) if max_val > 0 else 0 }}%; background: {{ element.content.get('color2', '#f59e0b') }};"></div>
+                            <div class="comparison-bar" style="width: {{ (item.value1|default(0) / max_val * 100) if max_val > 0 else 0 }}%;"></div>
+                            <div class="comparison-bar secondary" style="width: {{ (item.value2|default(0) / max_val * 100) if max_val > 0 else 0 }}%;"></div>
                         </div>
                         <span class="comparison-value">{{ item.value1 }}/{{ item.value2 }}</span>
                     </div>
@@ -1011,20 +1083,20 @@
                     {% for item in timeline_items %}
                     <div class="timeline-item">
                         <span class="timeline-label">{{ item.label }}</span>
-                        <div class="timeline-dot" style="background: {{ element.content.get('color', '#60a5fa') }};"></div>
-                        <div class="timeline-line" style="width: {{ (item.value|default(0) / max_timeline * 100) if max_timeline > 0 else 0 }}%; background: linear-gradient(90deg, {{ element.content.get('color', '#60a5fa') }}, #818cf8);"></div>
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-line" style="width: {{ (item.value|default(0) / max_timeline * 100) if max_timeline > 0 else 0 }}%;"></div>
                     </div>
                     {% endfor %}
                 </div>
 
                 {% elif element.element_type == 'icon' %}
                 <div class="icon-component">
-                    <i class="fas {{ element.content.get('name', 'fa-star') }}" style="font-size: {{ element.content.get('size', 48) }}px; color: {{ element.content.get('color', '#60a5fa') }};"></i>
+                    <i class="fas {{ element.content.get('name', 'fa-star') }}" style="font-size: {{ element.content.get('size', 48) }}px; color: {{ element.content.get('color', '#10b981') }};"></i>
                 </div>
 
                 {% elif element.element_type == 'badge' %}
                 <div class="badge-component">
-                    <span class="badge {{ element.content.get('type', 'primary') }}" style="font-size: {{ element.content.get('size', 14) }}px;">
+                    <span class="badge {{ element.content.get('type', 'primary') }}">
                         {{ element.content.get('text', 'Новинка') }}
                     </span>
                 </div>
@@ -1034,16 +1106,17 @@
         {% endfor %}
     </div>
 
-    <div class="share-buttons">
-        <button class="share-button" onclick="copyLink()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <!-- Кнопки действий -->
+    <div class="dashboard-actions">
+        <button class="action-btn" onclick="copyLink()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
             </svg>
             Скопировать ссылку
         </button>
-        <a href="/dashboards" class="share-button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="/dashboards" class="action-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 12h2l3-9 4 18 3-9h2"/>
             </svg>
             Все дашборды
@@ -1065,67 +1138,33 @@ function initCharts() {
         
         try {
             const ctx = canvas.getContext('2d');
-            
-            // Данные для графика
             const chartData = {{ element.content|tojson }};
-            
-            // Определяем тип диаграммы
             const chartType = '{{ element.chart_type }}';
             
-            // Проверяем, нужно ли показывать подписи
-            const showDataLabels = {% if element.options and element.options.showDataLabels %}true{% else %}false{% endif %};
-            const dataLabelsColor = '{{ element.options.dataLabelsColor if element.options and element.options.dataLabelsColor else "#334155" }}';
-            
-            // Базовые опции
-            const options = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            font: { size: 11 }
-                        }
-                    },
-                    tooltip: {
-                        enabled: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)'
-                    }
-                },
-                // Добавляем отступ сверху для названия
-                layout: {
-                    padding: {
-                        top: 25
-                    }
-                }
-            };
-            
-            // Добавляем подписи данных, если нужно
-            if (showDataLabels) {
-                if (chartType === 'pie' || chartType === 'doughnut') {
-                    options.plugins.datalabels = {
-                        display: true,
-                        color: dataLabelsColor,
-                        formatter: (value) => value,
-                        font: { size: 11, weight: '500' }
-                    };
-                } else {
-                    options.plugins.datalabels = {
-                        display: true,
-                        color: dataLabelsColor,
-                        anchor: 'end',
-                        align: 'top',
-                        offset: 4,
-                        font: { size: 10, weight: '500' }
-                    };
-                }
-            }
-            
-            // Создаем график
             charts['{{ element.id }}'] = new Chart(ctx, {
                 type: chartType,
                 data: chartData,
-                options: options
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 20
+                        }
+                    }
+                }
             });
         } catch (e) {
             console.error('Error creating chart {{ element.id }}:', e);
@@ -1147,14 +1186,14 @@ function initCharts() {
             const expr = '{{ element.content.expression|default("sin(x)") }}';
             const xMin = {{ element.content.xMin|default(-5) }};
             const xMax = {{ element.content.xMax|default(5) }};
-            const color = '{{ element.content.color|default("#60a5fa") }}';
+            const color = '#10b981';
             
             // Очищаем canvas
             ctx.clearRect(0, 0, width, height);
             
             // Рисуем оси
             ctx.beginPath();
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = 'var(--border)';
             ctx.lineWidth = 1;
             
             // Ось X
@@ -1178,27 +1217,21 @@ function initCharts() {
                 const x = xMin + (xMax - xMin) * i / steps;
                 let y;
                 
-                // Простой парсер выражений
                 try {
-                    // Заменяем ^ на ** для возведения в степень
                     let func = expr.replace(/\^/g, '**');
-                    // Заменяем математические функции
                     func = func.replace(/sin\(/g, 'Math.sin(')
                                .replace(/cos\(/g, 'Math.cos(')
                                .replace(/tan\(/g, 'Math.tan(')
                                .replace(/sqrt\(/g, 'Math.sqrt(')
                                .replace(/log\(/g, 'Math.log(')
                                .replace(/abs\(/g, 'Math.abs(');
-                    
-                    // Вычисляем значение
                     y = eval(func);
                 } catch(e) {
-                    console.error('Error evaluating function:', e);
-                    return;
+                    continue;
                 }
                 
                 const screenX = (x - xMin) / (xMax - xMin) * width;
-                const screenY = height/2 - y * height/10; // Масштабируем
+                const screenY = height/2 - y * height/10;
                 
                 if (first) {
                     ctx.moveTo(screenX, screenY);
@@ -1216,14 +1249,14 @@ function initCharts() {
     {% endfor %}
 }
 
-// Инициализация после загрузки страницы
-document.addEventListener('DOMContentLoaded', function() {
-    initCharts();
-});
-
 function copyLink() {
     navigator.clipboard.writeText(window.location.href);
     alert('Ссылка скопирована в буфер обмена');
 }
+
+// Инициализация после загрузки страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initCharts();
+});
 </script>
 {% endblock %}

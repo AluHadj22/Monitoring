@@ -2,109 +2,196 @@
 
 {% block content %}
 <style>
+    /* Панель управления библиотекой знаний - сдержанный профессиональный стиль */
+    .admin-page {
+        min-height: calc(100vh - 73px);
+        background: var(--bg-main);
+        padding: 2rem 1rem;
+    }
+
     .admin-container {
-        max-width: 1400px;
-        margin: 30px auto;
-        padding: 0 20px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
     
+    /* Шапка страницы - сдержанная, без эмодзи и ярких цветов */
     .admin-header {
-        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-        color: white;
-        padding: 40px;
+        background: var(--bg-card);
         border-radius: var(--radius-lg);
-        margin-bottom: 30px;
-        box-shadow: var(--shadow-xl);
+        padding: 2rem;
+        margin-bottom: 2rem;
         position: relative;
-        overflow: hidden;
-    }
-    
-    .admin-header::before {
-        content: '⚙️';
-        position: absolute;
-        right: 30px;
-        bottom: 20px;
-        font-size: 100px;
-        opacity: 0.1;
-        transform: rotate(10deg);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
     }
     
     .admin-header h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .admin-header h1 svg {
+        width: 28px;
+        height: 28px;
+        stroke: var(--primary);
     }
     
     .admin-header p {
-        font-size: 1.2em;
-        opacity: 0.95;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
     }
     
+    .admin-user-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--gray-100);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+    
+    [data-theme='dark'] .admin-user-badge {
+        background: var(--gray-800);
+    }
+    
+    .admin-user-badge svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--text-secondary);
+    }
+    
+    /* Статистика */
     .admin-stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
     }
     
     .stat-card {
-        background: var(--card);
+        background: var(--bg-card);
         border-radius: var(--radius-lg);
-        padding: 25px;
-        box-shadow: var(--shadow-lg);
+        padding: 1.25rem;
+        box-shadow: var(--shadow-sm);
         border: 1px solid var(--border);
         transition: all 0.3s ease;
+        position: relative;
     }
     
     .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-xl);
-        border-color: #8b5cf6;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--border);
+    }
+    
+    .stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
     }
     
     .stat-icon {
-        font-size: 2em;
-        margin-bottom: 15px;
+        width: 44px;
+        height: 44px;
+        background: var(--gray-100);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    [data-theme='dark'] .stat-icon {
+        background: var(--gray-800);
+    }
+    
+    .stat-icon svg {
+        width: 22px;
+        height: 22px;
+        stroke: var(--primary);
     }
     
     .stat-value {
-        font-size: 2.2em;
-        font-weight: 800;
-        color: #8b5cf6;
-        margin-bottom: 5px;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        line-height: 1;
     }
     
     .stat-label {
-        color: var(--slate-500);
-        font-size: 0.95em;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
+    /* Сетка админ-панели */
     .admin-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
     
     .admin-card {
-        background: var(--card);
+        background: var(--bg-card);
         border-radius: var(--radius-lg);
-        padding: 25px;
-        box-shadow: var(--shadow-lg);
         border: 1px solid var(--border);
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
     
-    .admin-card h2 {
-        font-size: 1.5em;
-        margin-bottom: 20px;
-        color: var(--slate-800);
+    .admin-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+    
+    .card-header {
+        padding: 1rem 1.25rem;
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--border);
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid var(--border);
+        gap: 0.75rem;
     }
     
+    [data-theme='dark'] .card-header {
+        background: rgba(30, 41, 59, 0.4);
+    }
+    
+    .card-header svg {
+        width: 18px;
+        height: 18px;
+        stroke: var(--primary);
+    }
+    
+    .card-header h2 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        letter-spacing: 0.3px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Список последних документов */
     .recent-list {
         list-style: none;
+        margin: 0;
         padding: 0;
     }
     
@@ -112,18 +199,21 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 15px;
+        padding: 0.75rem;
         border-bottom: 1px solid var(--border);
-        transition: all 0.3s ease;
-    }
-    
-    .recent-item:hover {
-        background: var(--blue-light);
-        transform: translateX(5px);
+        transition: all 0.2s ease;
     }
     
     .recent-item:last-child {
         border-bottom: none;
+    }
+    
+    .recent-item:hover {
+        background: var(--gray-50);
+    }
+    
+    [data-theme='dark'] .recent-item:hover {
+        background: rgba(30, 41, 59, 0.4);
     }
     
     .recent-info {
@@ -131,56 +221,71 @@
     }
     
     .recent-title {
-        font-weight: 600;
-        color: var(--slate-800);
-        margin-bottom: 5px;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        font-size: 0.85rem;
     }
     
     .recent-meta {
-        font-size: 0.85em;
-        color: var(--slate-500);
+        font-size: 0.65rem;
+        color: var(--text-secondary);
         display: flex;
-        gap: 15px;
+        gap: 0.75rem;
+    }
+    
+    .recent-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .recent-meta svg {
+        width: 10px;
+        height: 10px;
+        stroke: currentColor;
     }
     
     .recent-actions {
         display: flex;
-        gap: 10px;
+        gap: 0.5rem;
     }
     
     .action-btn {
-        padding: 8px 15px;
+        padding: 0.3rem 0.7rem;
         border: none;
         border-radius: var(--radius-sm);
         cursor: pointer;
-        font-size: 0.9em;
-        font-weight: 600;
-        transition: all 0.3s ease;
+        font-size: 0.7rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 0.25rem;
+        background: var(--gray-100);
+        color: var(--text-secondary);
     }
     
-    .edit-btn {
-        background: var(--blue-light);
-        color: var(--blue-dark);
+    [data-theme='dark'] .action-btn {
+        background: var(--gray-800);
     }
     
-    .edit-btn:hover {
-        background: var(--blue);
+    .action-btn:hover {
+        background: var(--primary);
         color: white;
     }
     
+    /* Статистика по категориям */
     .category-stats {
-        margin-top: 20px;
+        margin-top: 0;
     }
     
     .category-stat-item {
         display: flex;
         align-items: center;
-        gap: 15px;
-        padding: 12px;
+        gap: 0.75rem;
+        padding: 0.6rem 0;
         border-bottom: 1px solid var(--border);
     }
     
@@ -189,14 +294,19 @@
     }
     
     .category-icon {
-        font-size: 1.5em;
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
+        background: var(--gray-100);
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--surface);
-        border-radius: var(--radius-sm);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+    
+    [data-theme='dark'] .category-icon {
+        background: var(--gray-800);
     }
     
     .category-info {
@@ -204,183 +314,394 @@
     }
     
     .category-name {
-        font-weight: 600;
-        color: var(--slate-800);
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        margin-bottom: 0.15rem;
     }
     
     .category-count {
-        font-size: 0.9em;
-        color: var(--slate-500);
+        font-size: 0.65rem;
+        color: var(--text-secondary);
     }
     
     .category-bar {
         width: 100px;
-        height: 8px;
-        background: var(--border);
-        border-radius: 4px;
+        height: 4px;
+        background: var(--gray-200);
+        border-radius: 2px;
         overflow: hidden;
+    }
+    
+    [data-theme='dark'] .category-bar {
+        background: var(--gray-700);
     }
     
     .category-bar-fill {
         height: 100%;
-        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-        border-radius: 4px;
+        background: var(--primary);
+        border-radius: 2px;
         transition: width 0.3s ease;
     }
     
+    /* Быстрые действия */
     .quick-actions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 15px;
-        margin-top: 25px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 0;
     }
     
     .quick-action-btn {
-        padding: 20px;
-        background: var(--surface);
+        background: var(--bg-card);
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
+        padding: 1rem;
         text-decoration: none;
-        color: var(--slate-700);
         display: flex;
-        flex-direction: column;
         align-items: center;
-        gap: 10px;
-        transition: all 0.3s ease;
+        gap: 0.75rem;
+        transition: all 0.2s ease;
     }
     
     .quick-action-btn:hover {
-        transform: translateY(-5px);
-        border-color: #8b5cf6;
-        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+        border-color: var(--primary);
+        box-shadow: var(--shadow-sm);
     }
     
-    .quick-action-icon {
-        font-size: 2em;
+    .quick-action-icon svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--text-secondary);
+        transition: stroke 0.2s ease;
+    }
+    
+    .quick-action-btn:hover .quick-action-icon svg {
+        stroke: var(--primary);
     }
     
     .quick-action-text {
-        font-weight: 600;
-        text-align: center;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.85rem;
     }
     
+    .quick-action-btn.logout .quick-action-text {
+        color: var(--text-secondary);
+    }
+    
+    .quick-action-btn.logout:hover .quick-action-text {
+        color: #ef4444;
+    }
+    
+    .quick-action-btn.logout:hover .quick-action-icon svg {
+        stroke: #ef4444;
+    }
+    
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state svg {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.75rem;
+        stroke: var(--border);
+    }
+    
+    .empty-state p {
+        font-size: 0.8rem;
+    }
+    
+    /* Адаптивность */
     @media (max-width: 768px) {
+        .admin-page {
+            padding: 1rem;
+        }
+        
+        .admin-header {
+            padding: 1.25rem;
+        }
+        
+        .admin-header h1 {
+            font-size: 1.3rem;
+        }
+        
         .admin-grid {
             grid-template-columns: 1fr;
         }
         
         .admin-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+        }
+        
+        .quick-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .admin-stats {
             grid-template-columns: 1fr;
         }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .recent-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .recent-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+    
+    /* Анимация появления */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.3s ease-out forwards;
     }
 </style>
 
-<div class="admin-container">
-    <div class="admin-header">
-        <h1>⚙️ Панель управления библиотекой знаний</h1>
-        <p>Управляйте документами, категориями и просматривайте статистику</p>
-        <div style="margin-top: 20px;">
-            <span style="background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 50px;">
-                👤 {{ admin_name }} ({{ admin_email }})
-            </span>
-        </div>
-    </div>
-    
-    <div class="admin-stats">
-        <div class="stat-card">
-            <div class="stat-icon">📄</div>
-            <div class="stat-value">{{ total_docs }}</div>
-            <div class="stat-label">Всего документов</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">📁</div>
-            <div class="stat-value">{{ total_categories }}</div>
-            <div class="stat-label">Категорий</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">📥</div>
-            <div class="stat-value">{{ total_downloads }}</div>
-            <div class="stat-label">Скачиваний</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">👁️</div>
-            <div class="stat-value">{{ total_views }}</div>
-            <div class="stat-label">Просмотров</div>
-        </div>
-    </div>
-    
-    <div class="admin-grid">
-        <div class="admin-card">
-            <h2>
-                <span>🆕</span>
-                Последние загруженные
-            </h2>
-            {% if recent_docs %}
-            <ul class="recent-list">
-                {% for doc in recent_docs %}
-                <li class="recent-item">
-                    <div class="recent-info">
-                        <div class="recent-title">{{ doc.title }}</div>
-                        <div class="recent-meta">
-                            <span>📅 {{ doc.created_at.strftime('%d.%m.%Y') }}</span>
-                            <span>📥 {{ doc.downloads_count }}</span>
-                            <span>👁️ {{ doc.views_count }}</span>
-                        </div>
-                    </div>
-                    <div class="recent-actions">
-                        <a href="/knowledge-base/admin/edit/{{ doc.id }}" class="action-btn edit-btn">
-                            ✏️ Ред.
-                        </a>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p style="text-align: center; color: var(--slate-500); padding: 30px;">
-                Нет загруженных документов
-            </p>
-            {% endif %}
-        </div>
-        
-        <div class="admin-card">
-            <h2>
-                <span>📊</span>
-                Статистика по категориям
-            </h2>
-            <div class="category-stats">
-                {% for category, doc_count in categories_stats %}
-                <div class="category-stat-item">
-                    <div class="category-icon">{{ category.icon }}</div>
-                    <div class="category-info">
-                        <div class="category-name">{{ category.name }}</div>
-                        <div class="category-count">{{ doc_count }} документов</div>
-                    </div>
-                    <div class="category-bar">
-                        <div class="category-bar-fill" style="width: {{ (doc_count / total_docs * 100) if total_docs > 0 else 0 }}%"></div>
-                    </div>
-                </div>
-                {% endfor %}
+<div class="admin-page">
+    <div class="admin-container">
+        <!-- Шапка - без эмодзи, сдержанная -->
+        <div class="admin-header fade-in-up">
+            <h1>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                Панель управления
+            </h1>
+            <p>Управление документами, категориями и статистика библиотеки знаний</p>
+            <div class="admin-user-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                {{ admin_name }} ({{ admin_email }})
             </div>
         </div>
-    </div>
-    
-    <div class="quick-actions">
-        <a href="/knowledge-base/admin/upload" class="quick-action-btn">
-            <span class="quick-action-icon">📤</span>
-            <span class="quick-action-text">Загрузить документ</span>
-        </a>
-        <a href="/knowledge-base/admin/categories" class="quick-action-btn">
-            <span class="quick-action-icon">📁</span>
-            <span class="quick-action-text">Управление категориями</span>
-        </a>
-        <a href="/knowledge-base" class="quick-action-btn">
-            <span class="quick-action-icon">👁️</span>
-            <span class="quick-action-text">Просмотр библиотеки</span>
-        </a>
-        <a href="/knowledge-base/admin/logout" class="quick-action-btn" style="color: #ef4444;">
-            <span class="quick-action-icon">🚪</span>
-            <span class="quick-action-text">Выйти</span>
-        </a>
+        
+        <!-- Статистика - без эмодзи, с иконками SVG -->
+        <div class="admin-stats">
+            <div class="stat-card fade-in-up" style="animation-delay: 0.05s">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value">{{ total_docs }}</div>
+                <div class="stat-label">Всего документов</div>
+            </div>
+            <div class="stat-card fade-in-up" style="animation-delay: 0.1s">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
+                            <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+                            <line x1="12" y1="7" x2="12" y2="17"></line>
+                            <line x1="7" y1="12" x2="17" y2="12"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value">{{ total_categories }}</div>
+                <div class="stat-label">Категорий</div>
+            </div>
+            <div class="stat-card fade-in-up" style="animation-delay: 0.15s">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value">{{ total_downloads }}</div>
+                <div class="stat-label">Скачиваний</div>
+            </div>
+            <div class="stat-card fade-in-up" style="animation-delay: 0.2s">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value">{{ total_views }}</div>
+                <div class="stat-label">Просмотров</div>
+            </div>
+        </div>
+        
+        <!-- Основная сетка -->
+        <div class="admin-grid">
+            <!-- Последние документы -->
+            <div class="admin-card fade-in-up" style="animation-delay: 0.25s">
+                <div class="card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <h2>Последние загруженные</h2>
+                </div>
+                <div class="card-body">
+                    {% if recent_docs %}
+                    <ul class="recent-list">
+                        {% for doc in recent_docs %}
+                        <li class="recent-item">
+                            <div class="recent-info">
+                                <div class="recent-title">{{ doc.title }}</div>
+                                <div class="recent-meta">
+                                    <span>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        {{ doc.created_at.strftime('%d.%m.%Y') }}
+                                    </span>
+                                    <span>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                        {{ doc.downloads_count }}
+                                    </span>
+                                    <span>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                        {{ doc.views_count }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="recent-actions">
+                                <a href="/knowledge-base/admin/edit/{{ doc.id }}" class="action-btn">
+                                    Редактировать
+                                </a>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2" y="2" width="20" height="20" rx="2.18"></rect>
+                            <line x1="8" y1="2" x2="8" y2="22"></line>
+                            <line x1="16" y1="2" x2="16" y2="22"></line>
+                        </svg>
+                        <p>Нет загруженных документов</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Статистика по категориям -->
+            <div class="admin-card fade-in-up" style="animation-delay: 0.3s">
+                <div class="card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
+                        <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+                        <line x1="12" y1="7" x2="12" y2="17"></line>
+                        <line x1="7" y1="12" x2="17" y2="12"></line>
+                    </svg>
+                    <h2>Распределение по категориям</h2>
+                </div>
+                <div class="card-body">
+                    <div class="category-stats">
+                        {% for category, doc_count in categories_stats %}
+                        <div class="category-stat-item">
+                            <div class="category-icon">{{ category.icon }}</div>
+                            <div class="category-info">
+                                <div class="category-name">{{ category.name }}</div>
+                                <div class="category-count">{{ doc_count }} документов</div>
+                            </div>
+                            <div class="category-bar">
+                                <div class="category-bar-fill" style="width: {{ (doc_count / total_docs * 100) if total_docs > 0 else 0 }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Быстрые действия - без эмодзи, с иконками SVG -->
+        <div class="quick-actions">
+            <a href="/knowledge-base/admin/upload" class="quick-action-btn fade-in-up" style="animation-delay: 0.35s">
+                <span class="quick-action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </span>
+                <span class="quick-action-text">Загрузить документ</span>
+            </a>
+            <a href="/knowledge-base/admin/categories" class="quick-action-btn fade-in-up" style="animation-delay: 0.4s">
+                <span class="quick-action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
+                        <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+                    </svg>
+                </span>
+                <span class="quick-action-text">Управление категориями</span>
+            </a>
+            <a href="/knowledge-base" class="quick-action-btn fade-in-up" style="animation-delay: 0.45s">
+                <span class="quick-action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </span>
+                <span class="quick-action-text">Просмотр библиотеки</span>
+            </a>
+            <a href="/knowledge-base/admin/logout" class="quick-action-btn logout fade-in-up" style="animation-delay: 0.5s">
+                <span class="quick-action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </span>
+                <span class="quick-action-text">Выйти</span>
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

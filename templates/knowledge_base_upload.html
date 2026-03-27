@@ -2,358 +2,668 @@
 
 {% block content %}
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
     .upload-container {
-        max-width: 800px;
-        margin: 30px auto;
-        padding: 0 20px;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 24px;
     }
-    
-    .upload-header {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        padding: 40px;
-        border-radius: var(--radius-lg);
-        margin-bottom: 30px;
-        box-shadow: var(--shadow-xl);
+
+    /* Hero секция */
+    .hero-section {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 32px;
+        padding: 48px;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
         text-align: center;
     }
-    
-    .upload-header h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
     }
-    
-    .upload-card {
-        background: var(--card);
-        border-radius: var(--radius-lg);
-        padding: 40px;
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--border);
+
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
     }
-    
-    .form-group {
-        margin-bottom: 25px;
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
     }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 10px;
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16, 185, 129, 0.2);
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #10b981;
+        margin-bottom: 20px;
+        backdrop-filter: blur(4px);
+    }
+
+    .hero-title {
+        font-size: 2rem;
         font-weight: 700;
-        color: var(--slate-800);
-        font-size: 1.1em;
+        color: white;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
     }
-    
-    .form-control {
-        width: 100%;
-        padding: 15px 20px;
-        border: 2px solid var(--border);
-        border-radius: var(--radius-md);
-        background: var(--surface);
-        color: var(--slate-700);
-        font-size: 1em;
-        transition: all 0.3s ease;
+
+    .hero-description {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 500px;
+        margin: 0 auto;
     }
-    
-    .form-control:focus {
-        outline: none;
-        border-color: #10b981;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+
+    /* Карточка формы */
+    .form-card {
+        background: var(--bg-card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
-    
-    .file-upload {
-        border: 3px dashed var(--border);
-        border-radius: var(--radius-lg);
-        padding: 40px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
+
+    .form-header {
+        padding: 28px 32px;
+        border-bottom: 1px solid var(--border);
         background: var(--surface);
     }
-    
-    .file-upload:hover {
-        border-color: #10b981;
-        background: rgba(16, 185, 129, 0.05);
-    }
-    
-    .file-upload-icon {
-        font-size: 3em;
-        margin-bottom: 15px;
-        color: var(--slate-400);
-    }
-    
-    .file-upload-text {
-        color: var(--slate-500);
-        font-size: 1.1em;
-    }
-    
-    .file-upload input {
-        display: none;
-    }
-    
-    .file-info {
-        margin-top: 20px;
-        padding: 15px;
-        background: var(--blue-light);
-        border-radius: var(--radius-md);
-        display: none;
-    }
-    
-    .file-info.show {
-        display: block;
-    }
-    
-    .checkbox-group {
+
+    .form-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
         display: flex;
         align-items: center;
         gap: 10px;
     }
-    
-    .checkbox-group input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
+
+    .form-header p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 6px;
     }
-    
-    .btn-upload {
+
+    .form-body {
+        padding: 32px;
+    }
+
+    /* Группы полей */
+    .form-group {
+        margin-bottom: 28px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+    }
+
+    .form-label .required {
+        color: #ef4444;
+        margin-left: 4px;
+    }
+
+    .form-label .optional {
+        color: var(--text-secondary);
+        font-weight: 400;
+        font-size: 0.75rem;
+        margin-left: 8px;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
         width: 100%;
-        padding: 18px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        border: none;
-        border-radius: var(--radius-md);
-        font-size: 1.2em;
-        font-weight: 700;
+        padding: 12px 16px;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    /* Зона загрузки файлов */
+    .upload-zone {
+        border: 2px dashed var(--border);
+        border-radius: 20px;
+        padding: 32px;
+        text-align: center;
         cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 20px;
+        transition: all 0.2s ease;
+        background: var(--surface);
     }
-    
-    .btn-upload:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+
+    .upload-zone:hover {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.03);
     }
-    
-    .btn-upload:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+
+    .upload-zone.drag-over {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.08);
     }
-    
-    .progress-bar {
-        width: 100%;
-        height: 6px;
-        background: var(--border);
-        border-radius: 3px;
-        margin-top: 20px;
-        overflow: hidden;
+
+    .upload-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 12px;
+        color: var(--text-secondary);
+    }
+
+    .upload-title {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+
+    .upload-hint {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .upload-input {
         display: none;
     }
-    
-    .progress-bar.show {
+
+    .file-preview {
+        margin-top: 16px;
+        padding: 12px 16px;
+        background: rgba(16, 185, 129, 0.08);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        display: none;
+    }
+
+    .file-preview.show {
+        display: flex;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .file-icon-small {
+        width: 32px;
+        height: 32px;
+        background: rgba(16, 185, 129, 0.15);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .file-icon-small svg {
+        width: 16px;
+        height: 16px;
+        color: #10b981;
+    }
+
+    .file-details {
+        flex: 1;
+    }
+
+    .file-name {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+    }
+
+    .file-size {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+    }
+
+    .file-remove {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 6px;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+    }
+
+    .file-remove:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    /* Чекбокс */
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+    }
+
+    .checkbox-wrapper input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #10b981;
+    }
+
+    .checkbox-wrapper span {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    /* Теги */
+    .tags-container {
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 8px 12px;
+        transition: all 0.2s ease;
+    }
+
+    .tags-container:focus-within {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .tags-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #10b981;
+    }
+
+    .tag-remove {
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        transition: color 0.2s ease;
+    }
+
+    .tag-remove:hover {
+        color: #ef4444;
+    }
+
+    .tags-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 6px 0;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        outline: none;
+    }
+
+    /* Прогресс-бар */
+    .progress-container {
+        margin-top: 24px;
+        display: none;
+    }
+
+    .progress-container.show {
         display: block;
     }
-    
+
+    .progress-bar {
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
     .progress-fill {
         height: 100%;
         background: linear-gradient(90deg, #10b981, #059669);
         width: 0%;
         transition: width 0.3s ease;
+        border-radius: 2px;
     }
-    
-    .tags-input {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 10px;
-        background: var(--surface);
-        border: 2px solid var(--border);
-        border-radius: var(--radius-md);
+
+    .progress-text {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-top: 8px;
+        text-align: center;
     }
-    
-    .tag {
-        background: var(--blue-light);
-        color: var(--blue-dark);
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.9em;
+
+    /* Кнопка отправки */
+    .submit-button {
+        width: 100%;
+        padding: 14px 24px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 60px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 8px;
         display: flex;
         align-items: center;
-        gap: 5px;
+        justify-content: center;
+        gap: 8px;
     }
-    
-    .tag-remove {
-        cursor: pointer;
-        font-weight: bold;
+
+    .submit-button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
-    
-    .tag-remove:hover {
-        color: #ef4444;
+
+    .submit-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
-    
-    .tags-input input {
-        border: none;
-        background: transparent;
-        padding: 5px;
-        flex: 1;
-        min-width: 100px;
-    }
-    
-    .tags-input input:focus {
-        outline: none;
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .upload-container {
+            padding: 24px 16px;
+        }
+        
+        .hero-section {
+            padding: 32px 24px;
+        }
+        
+        .hero-title {
+            font-size: 1.5rem;
+        }
+        
+        .form-header {
+            padding: 20px 24px;
+        }
+        
+        .form-body {
+            padding: 24px;
+        }
+        
+        .upload-zone {
+            padding: 24px;
+        }
+        
+        .file-preview {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .file-remove {
+            align-self: flex-end;
+        }
     }
 </style>
 
 <div class="upload-container">
-    <div class="upload-header">
-        <h1>📤 Загрузка документа</h1>
-        <p>Добавьте новый документ в библиотеку знаний</p>
+    <!-- Hero секция -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>Загрузка документа</span>
+            </div>
+            <h1 class="hero-title">Добавление в библиотеку</h1>
+            <p class="hero-description">
+                Загрузите новый документ, инструкцию или методический материал 
+                для пополнения базы знаний
+            </p>
+        </div>
     </div>
-    
-    <div class="upload-card">
-        <form id="uploadForm" method="POST" action="/knowledge-base/admin/upload" enctype="multipart/form-data">
-            <div class="form-group">
-                <label>Название документа *</label>
-                <input type="text" name="title" class="form-control" required placeholder="Введите полное название документа">
-            </div>
-            
-            <div class="form-group">
-                <label>Описание</label>
-                <textarea name="description" class="form-control" rows="4" placeholder="Краткое описание содержимого документа"></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label>Категория</label>
-                <select name="category_id" class="form-control">
-                    <option value="">-- Без категории --</option>
-                    {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.icon }} {{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Тип документа</label>
-                <select name="document_type" class="form-control">
-                    {% for key, value in document_types.items() %}
-                    <option value="{{ key }}" {% if key == 'document' %}selected{% endif %}>{{ value }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Теги (для поиска)</label>
-                <div class="tags-input" id="tagsContainer">
-                    <div id="tagsList"></div>
-                    <input type="text" id="tagInput" placeholder="Введите тег и нажмите Enter">
+
+    <!-- Карточка формы -->
+    <div class="form-card">
+        <div class="form-header">
+            <h2>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Информация о документе
+            </h2>
+            <p>Заполните все необходимые поля для корректного отображения документа</p>
+        </div>
+        
+        <div class="form-body">
+            <form id="uploadForm" method="POST" action="/knowledge-base/admin/upload" enctype="multipart/form-data">
+                <!-- Название -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Название документа
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" 
+                           name="title" 
+                           class="form-input" 
+                           required 
+                           placeholder="Например: Методические рекомендации по организации питания">
                 </div>
-                <input type="hidden" name="tags" id="tagsHidden">
-            </div>
-            
-            <div class="form-group">
-                <label>Основной файл *</label>
-                <div class="file-upload" id="fileUpload" onclick="document.getElementById('file').click()">
-                    <div class="file-upload-icon">📄</div>
-                    <div class="file-upload-text" id="fileText">Нажмите или перетащите файл</div>
-                    <input type="file" name="file" id="file" required>
+                
+                <!-- Описание -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Описание
+                        <span class="optional">необязательно</span>
+                    </label>
+                    <textarea name="description" 
+                              class="form-textarea" 
+                              placeholder="Краткое описание содержимого документа..."></textarea>
                 </div>
-                <div class="file-info" id="fileInfo"></div>
-            </div>
-            
-            <div class="form-group">
-                <label>Обложка (необязательно)</label>
-                <div class="file-upload" onclick="document.getElementById('cover').click()">
-                    <div class="file-upload-icon">🖼️</div>
-                    <div class="file-upload-text" id="coverText">Нажмите или перетащите изображение</div>
-                    <input type="file" name="cover_image" id="cover" accept="image/*">
+                
+                <!-- Категория и тип -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Категория</label>
+                        <select name="category_id" class="form-select">
+                            <option value="">-- Выберите категорию --</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.icon }} {{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Тип документа</label>
+                        <select name="document_type" class="form-select">
+                            {% for key, value in document_types.items() %}
+                            <option value="{{ key }}" {% if key == 'document' %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-                <div class="file-info" id="coverInfo"></div>
-            </div>
-            
-            <div class="form-group">
-                <label class="checkbox-group">
-                    <input type="checkbox" name="is_featured" value="true">
-                    <span>📌 Отметить как рекомендуемый документ</span>
-                </label>
-            </div>
-            
-            <div class="progress-bar" id="progressBar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            
-            <button type="submit" class="btn-upload" id="submitBtn">
-                Загрузить документ
-            </button>
-        </form>
+                
+                <!-- Теги -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Теги
+                        <span class="optional">для удобного поиска</span>
+                    </label>
+                    <div class="tags-container">
+                        <div class="tags-list" id="tagsList"></div>
+                        <input type="text" 
+                               id="tagInput" 
+                               class="tags-input" 
+                               placeholder="Введите тег и нажмите Enter...">
+                    </div>
+                    <input type="hidden" name="tags" id="tagsHidden">
+                </div>
+                
+                <!-- Загрузка файла -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Основной файл
+                        <span class="required">*</span>
+                    </label>
+                    <div class="upload-zone" id="fileZone">
+                        <div class="upload-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="12" y1="18" x2="12" y2="12"/>
+                                <line x1="9" y1="15" x2="15" y2="15"/>
+                            </svg>
+                        </div>
+                        <div class="upload-title">Нажмите или перетащите файл</div>
+                        <div class="upload-hint">PDF, DOC, DOCX, XLS, XLSX, JPG, PNG — до 50 МБ</div>
+                        <input type="file" name="file" id="fileInput" class="upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" required>
+                    </div>
+                    <div class="file-preview" id="filePreview">
+                        <div class="file-info">
+                            <div class="file-icon-small">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                            </div>
+                            <div class="file-details">
+                                <div class="file-name" id="fileName"></div>
+                                <div class="file-size" id="fileSize"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="file-remove" onclick="clearFile()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Обложка -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Обложка
+                        <span class="optional">необязательно</span>
+                    </label>
+                    <div class="upload-zone" id="coverZone">
+                        <div class="upload-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="2" y="2" width="20" height="20" rx="2.18"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        </div>
+                        <div class="upload-title">Нажмите или перетащите изображение</div>
+                        <div class="upload-hint">JPG, PNG — рекомендуется 800x600</div>
+                        <input type="file" name="cover_image" id="coverInput" class="upload-input" accept="image/*">
+                    </div>
+                    <div class="file-preview" id="coverPreview">
+                        <div class="file-info">
+                            <div class="file-icon-small">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="2" width="20" height="20" rx="2.18"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                </svg>
+                            </div>
+                            <div class="file-details">
+                                <div class="file-name" id="coverName"></div>
+                                <div class="file-size" id="coverSize"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="file-remove" onclick="clearCover()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Рекомендуемый -->
+                <div class="form-group">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" name="is_featured" value="true">
+                        <span>Отметить как рекомендуемый документ</span>
+                    </label>
+                </div>
+                
+                <!-- Кнопка отправки -->
+                <button type="submit" class="submit-button" id="submitBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Загрузить документ
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
 <script>
-// Предпросмотр файла
-document.getElementById('file').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        document.getElementById('fileText').textContent = file.name;
-        document.getElementById('fileInfo').textContent = `Размер: ${(file.size / 1024).toFixed(2)} KB`;
-        document.getElementById('fileInfo').classList.add('show');
-    }
-});
-
-document.getElementById('cover').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        document.getElementById('coverText').textContent = file.name;
-        document.getElementById('coverInfo').textContent = `Размер: ${(file.size / 1024).toFixed(2)} KB`;
-        document.getElementById('coverInfo').classList.add('show');
-    }
-});
-
-// Drag and drop
-['file', 'cover'].forEach(id => {
-    const dropZone = document.getElementById(id).parentElement;
-    
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = '#10b981';
-        dropZone.style.background = 'rgba(16, 185, 129, 0.05)';
-    });
-    
-    dropZone.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = '';
-        dropZone.style.background = '';
-    });
-    
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = '';
-        dropZone.style.background = '';
-        
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            document.getElementById(id).files = e.dataTransfer.files;
-            if (id === 'file') {
-                document.getElementById('fileText').textContent = file.name;
-                document.getElementById('fileInfo').textContent = `Размер: ${(file.size / 1024).toFixed(2)} KB`;
-                document.getElementById('fileInfo').classList.add('show');
-            } else {
-                document.getElementById('coverText').textContent = file.name;
-                document.getElementById('coverInfo').textContent = `Размер: ${(file.size / 1024).toFixed(2)} KB`;
-                document.getElementById('coverInfo').classList.add('show');
-            }
-        }
-    });
-});
-
 // Теги
-const tagsContainer = document.getElementById('tagsContainer');
+let tags = [];
 const tagsList = document.getElementById('tagsList');
 const tagInput = document.getElementById('tagInput');
 const tagsHidden = document.getElementById('tagsHidden');
-let tags = [];
 
 tagInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
-        const tag = this.value.trim();
+        let tag = this.value.trim();
+        if (tag.endsWith(',')) {
+            tag = tag.slice(0, -1);
+        }
         if (tag && !tags.includes(tag)) {
             tags.push(tag);
             renderTags();
@@ -378,25 +688,116 @@ function removeTag(tag) {
     renderTags();
 }
 
-// Прогресс загрузки
-document.getElementById('uploadForm').addEventListener('submit', function(e) {
-    const submitBtn = document.getElementById('submitBtn');
-    const progressBar = document.getElementById('progressBar');
-    const progressFill = document.getElementById('progressFill');
+// Функции для работы с файлами
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function handleFileSelect(input, previewId, nameId, sizeId) {
+    const file = input.files[0];
+    if (!file) return;
     
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Загрузка...';
-    progressBar.classList.add('show');
+    const preview = document.getElementById(previewId);
+    const nameSpan = document.getElementById(nameId);
+    const sizeSpan = document.getElementById(sizeId);
     
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 10;
-        progressFill.style.width = progress + '%';
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-        }
-    }, 300);
+    nameSpan.textContent = file.name;
+    sizeSpan.textContent = formatFileSize(file.size);
+    preview.classList.add('show');
+}
+
+function clearFileInput(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    input.value = '';
+    const preview = document.getElementById(previewId);
+    preview.classList.remove('show');
+}
+
+document.getElementById('fileInput').addEventListener('change', function() {
+    handleFileSelect(this, 'filePreview', 'fileName', 'fileSize');
 });
+
+document.getElementById('coverInput').addEventListener('change', function() {
+    handleFileSelect(this, 'coverPreview', 'coverName', 'coverSize');
+});
+
+function clearFile() {
+    clearFileInput('fileInput', 'filePreview');
+}
+
+function clearCover() {
+    clearFileInput('coverInput', 'coverPreview');
+}
+
+// Drag and drop для файлов
+function setupDragAndDrop(zoneId, inputId, previewId, nameId, sizeId) {
+    const zone = document.getElementById(zoneId);
+    const input = document.getElementById(inputId);
+    
+    zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('drag-over');
+    });
+    
+    zone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+    });
+    
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            input.files = e.dataTransfer.files;
+            const event = new Event('change');
+            input.dispatchEvent(event);
+        }
+    });
+}
+
+setupDragAndDrop('fileZone', 'fileInput', 'filePreview', 'fileName', 'fileSize');
+setupDragAndDrop('coverZone', 'coverInput', 'coverPreview', 'coverName', 'coverSize');
+
+// Простая валидация перед отправкой (без симуляции прогресса)
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('fileInput');
+    if (!fileInput.files.length) {
+        e.preventDefault();
+        alert('Пожалуйста, выберите файл для загрузки');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Загрузка...';
+    
+    // Форма отправится обычным способом
+    // Прогресс-бар не нужен, так как форма отправляется на сервер
+});
+
+// Стиль для спиннера
+const style = document.createElement('style');
+style.textContent = `
+    .loading-spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}

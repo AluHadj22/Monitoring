@@ -6,396 +6,455 @@
     <title>Анализ статистики - Панель администратора</title>
     <style>
         * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #d0e9ff 0%, #f8faff 100%);
-  min-height: 100vh;
-  color: #1e293b;
-  line-height: 1.6;
-}
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-main, #f9fafb);
+            min-height: 100vh;
+            color: var(--text-primary, #1f2937);
+            line-height: 1.5;
+        }
 
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-}
+        [data-theme='dark'] body {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --border: #334155;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --primary: #34d399;
+            --primary-dark: #10b981;
+            --primary-bg: rgba(52, 211, 153, 0.15);
+        }
 
-/* Анимации */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+        body:not([data-theme]) {
+            --bg-main: #f9fafb;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-bg: rgba(16, 185, 129, 0.1);
+        }
 
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-.fade-in-up {
-  animation: fadeInUp 0.8s ease-out;
-}
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
 
-.slide-in-right {
-  animation: slideInRight 0.8s ease-out;
-}
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
 
-/* === АВТОРИЗАЦИЯ — ТАКЖЕ В СВЕТЛОМ СТИЛЕ === */
-.auth-card {
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(12px);
-  border-radius: 1.5rem;
-  padding: 3rem;
-  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(196, 214, 255, 0.7);
-  max-width: 500px;
-  margin: 5rem auto;
-  position: relative;
-  overflow: hidden;
-}
+        .slide-in-right {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
 
-.auth-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #4f7ee6, #60a5fa, #93c5fd);
-}
+        /* Карточка авторизации */
+        .auth-card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            max-width: 480px;
+            margin: 4rem auto;
+            position: relative;
+            overflow: hidden;
+        }
 
-.auth-title {
-  font-size: 2rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #4f7ee6, #60a5fa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
 
-.auth-subtitle {
-  color: #5e6e85;
-  text-align: center;
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
-}
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
 
-/* Форма */
-.form-group {
-  margin-bottom: 1.5rem;
-}
+        .auth-subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+        }
 
-.form-label {
-  display: block;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
+        /* Формы */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
 
-.form-input {
-  width: 100%;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.92);
-  border: 2px solid rgba(196, 214, 255, 0.7);
-  border-radius: 0.75rem;
-  color: #1e293b;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
+        .form-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
 
-.form-input:focus {
-  outline: none;
-  border-color: #4f7ee6;
-  box-shadow: 0 0 0 3px rgba(79, 126, 230, 0.25);
-  background: rgba(255, 255, 255, 0.98);
-}
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.65rem 0.875rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
 
-.auth-button {
-  width: 100%;
-  background: linear-gradient(135deg, #4f7ee6, #3a68d0);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 0.75rem;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(79, 126, 230, 0.2);
-}
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-bg);
+        }
 
-.auth-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(79, 126, 230, 0.3);
-}
+        /* Кнопки */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-family: inherit;
+        }
 
-.auth-button:active {
-  transform: translateY(0);
-}
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
 
-/* === ОСНОВНОЙ ИНТЕРФЕЙС АНАЛИЗА === */
-.analysis-interface {
-  display: none;
-}
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
 
-.welcome-message {
-  background: linear-gradient(135deg, #e0f2ff, #f0f8ff);
-  padding: 2rem;
-  border-radius: 1rem;
-  margin-bottom: 2rem;
-  border-left: 4px solid #4f7ee6;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
 
-.welcome-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #4f7ee6, #60a5fa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+        .btn-secondary:hover {
+            background: var(--gray-100);
+            transform: translateY(-1px);
+        }
 
-/* Карточки функционала */
-.analysis-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-.analysis-card {
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(12px);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  border: 1px solid rgba(196, 214, 255, 0.7);
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+        /* Основной интерфейс */
+        .analysis-interface {
+            display: none;
+        }
 
-.analysis-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
-  border-color: rgba(79, 126, 230, 0.5);
-}
+        .welcome-message {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 3px solid var(--primary);
+        }
 
-.card-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
+        .welcome-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
 
-.card-title svg {
-  width: 24px;
-  height: 24px;
-  color: #4f7ee6;
-}
+        .welcome-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
 
-/* Кнопки */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-}
+        /* Сетка карточек */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-.btn-primary {
-  background: linear-gradient(135deg, #4f7ee6, #3a68d0);
-  color: white;
-}
+        .analysis-card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(79, 126, 230, 0.3);
-}
+        .analysis-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
 
-.btn-secondary {
-  background: rgba(196, 214, 255, 0.5);
-  color: #1e293b;
-  border: 1px solid rgba(196, 214, 255, 0.7);
-}
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-.btn-secondary:hover {
-  background: rgba(196, 214, 255, 0.7);
-  transform: translateY(-1px);
-}
+        .card-title svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--primary);
+        }
 
-/* Область загрузки файлов */
-.file-upload-zone {
-  border: 2px dashed rgba(196, 214, 255, 0.7);
-  border-radius: 0.75rem;
-  padding: 2rem;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.85);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-}
+        /* Область загрузки файлов */
+        .file-upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            background: var(--bg-card);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
 
-.file-upload-zone:hover {
-  border-color: #4f7ee6;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 12px rgba(79, 126, 230, 0.1);
-}
+        .file-upload-zone:hover {
+            border-color: var(--primary);
+            background: var(--primary-bg);
+        }
 
-.file-upload-zone input {
-  display: none;
-}
+        .file-upload-zone p {
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
 
-/* Результаты анализа */
-.results-section {
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(12px);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-top: 2rem;
-  border: 1px solid rgba(196, 214, 255, 0.7);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+        .file-upload-zone small {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
 
-.results-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
+        .file-info {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--primary-bg);
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-primary);
+        }
 
-.results-table th,
-.results-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid rgba(196, 214, 255, 0.7);
-}
+        /* Результаты */
+        .results-section {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            margin-top: 1.5rem;
+            display: none;
+        }
 
-.results-table th {
-  background: rgba(79, 126, 230, 0.08);
-  font-weight: 700;
-  color: #1e293b;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
+        .stat-summary {
+            background: var(--primary-bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
 
-.results-table tr:hover {
-  background: rgba(79, 126, 230, 0.05);
-}
+        .stat-summary strong {
+            color: var(--primary);
+        }
 
-/* Уведомления */
-.notification {
-  position: fixed;
-  top: 2rem;
-  right: 2rem;
-  padding: 1rem 1.5rem;
-  border-radius: 0.75rem;
-  background: #0f766e;
-  color: white;
-  font-weight: 600;
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
-  border: 1px solid rgba(15, 118, 110, 0.3);
-}
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
 
-.notification.show {
-  transform: translateX(0);
-}
+        .results-table th,
+        .results-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
 
-.notification.error {
-  background: #dc2626;
-  border-color: rgba(220, 38, 38, 0.3);
-}
+        .results-table th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-.notification.warning {
-  background: #d97706;
-  border-color: rgba(217, 119, 6, 0.3);
-}
+        [data-theme='dark'] .results-table th {
+            background: rgba(30, 41, 59, 0.6);
+        }
 
-/* Загрузка */
-.loading {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid transparent;
-  border-top: 2px solid #4f7ee6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
+        .results-table tr:hover {
+            background: var(--gray-50);
+        }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+        [data-theme='dark'] .results-table tr:hover {
+            background: rgba(30, 41, 59, 0.4);
+        }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
+        .score-high {
+            color: #10b981;
+            font-weight: 600;
+        }
 
-  .auth-card {
-    padding: 2rem;
-    margin: 2rem auto;
-  }
+        .score-medium {
+            color: #f59e0b;
+            font-weight: 600;
+        }
 
-  .analysis-grid {
-    grid-template-columns: 1fr;
-  }
+        .score-low {
+            color: #ef4444;
+        }
 
-  .auth-title,
-  .welcome-title {
-    font-size: 1.5rem;
-  }
+        .score-critical {
+            color: #dc2626;
+            font-weight: 600;
+        }
 
-  .card-title,
-  .btn {
-    font-size: 0.95rem;
-  }
+        .info-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
 
-  .file-upload-zone,
-  .results-section,
-  .analysis-card {
-    padding: 1.2rem;
-  }
-}
+        [data-theme='dark'] .info-box {
+            background: rgba(30, 41, 59, 0.6);
+        }
 
+        .info-box ul {
+            margin-top: 0.5rem;
+            padding-left: 1.25rem;
+        }
+
+        .info-box li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            .auth-card {
+                margin: 2rem 1rem;
+                padding: 1.5rem;
+            }
+            .results-table {
+                font-size: 0.7rem;
+            }
+            .results-table th,
+            .results-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .results-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -419,544 +478,356 @@ body {
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Код доступа для Министерства и РОО</label>
+                    <label class="form-label">Код доступа - выдается после оплаты подписки</label>
                     <input type="password" class="form-input" id="accessCode" required 
                            placeholder="Введите код доступа">
                 </div>
                 
-                <button type="submit" class="auth-button">
-                    Получить доступ к анализу
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Получить доступ
                 </button>
             </form>
         </div>
 
-        <!-- Основной интерфейс анализа (скрыт до авторизации) -->
+        <!-- Основной интерфейс анализа -->
         <div id="analysisSection" class="analysis-interface">
-            <!-- Приветственное сообщение -->
             <div class="welcome-message slide-in-right">
                 <h2 class="welcome-title" id="welcomeTitle">Добро пожаловать!</h2>
-                <p id="welcomeText">Вы успешно авторизовались в системе анализа статистики.</p>
+                <p class="welcome-text" id="welcomeText">Вы успешно авторизовались в системе анализа статистики.</p>
             </div>
 
-            <!-- Функционал анализа -->
             <div class="analysis-grid">
-                <!-- Карточка загрузки файла -->
                 <div class="analysis-card slide-in-right" style="animation-delay: 0.1s">
                     <h3 class="card-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                         </svg>
                         Загрузка данных
                     </h3>
                     <div class="file-upload-zone" onclick="document.getElementById('fileInput').click()">
-                        <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileSelect(this)">
-                        <p>Выберите файл Excel для анализа</p>
+                        <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileSelect(this)" style="display: none;">
+                        <p>📁 Выберите файл Excel для анализа</p>
                         <small>Поддерживаются форматы .xlsx и .xls</small>
                     </div>
-                    <div id="fileInfo" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(15,23,42,0.5); border-radius: 0.5rem;">
+                    <div id="fileInfo" class="file-info">
                         <strong>Выбранный файл:</strong> <span id="fileName"></span><br>
                         <strong>Размер:</strong> <span id="fileSize"></span>
                     </div>
                 </div>
 
-                <!-- Карточка настроек анализа -->
                 <div class="analysis-card slide-in-right" style="animation-delay: 0.2s">
                     <h3 class="card-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="8" x2="12" y2="16"></line>
                             <line x1="8" y1="12" x2="16" y2="12"></line>
                         </svg>
-                        Настройки анализа
+                        Анализ соответствия
                     </h3>
                     <div class="form-group">
                         <label class="form-label">Тип анализа</label>
-                        <select class="form-input" id="analysisType">
-                            <option value="score5">Балл нормированный к 5</option>
+                        <select class="form-select" id="analysisType">
                             <option value="menuCompliance">Соответствие типовому меню</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" onclick="analyzeData()" id="analyzeBtn" disabled>
+                    <button class="btn btn-primary" onclick="analyzeData()" id="analyzeBtn" disabled style="width: 100%;">
                         <span id="analyzeText">Запустить анализ</span>
                         <span id="analyzeSpinner" class="loading" style="display: none;"></span>
                     </button>
                 </div>
             </div>
 
-            <!-- Результаты анализа -->
-            <div class="results-section slide-in-right" style="animation-delay: 0.3s" id="resultsSection" style="display: none;">
+            <div class="results-section" id="resultsSection">
                 <h3 class="card-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
-                    Результаты анализа
+                    Результаты анализа по районам
                 </h3>
-                <div id="resultsContent">
-                    <!-- Результаты будут отображаться здесь -->
-                </div>
-                <button class="btn btn-secondary" onclick="saveResults()" id="saveBtn" style="display: none;">
+                <div id="resultsContent"></div>
+                <button class="btn btn-secondary" onclick="saveResults()" id="saveBtn" style="display: none; margin-top: 1rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
                     Сохранить результаты
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Уведомление -->
     <div class="notification" id="notification"></div>
 
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<script>
-    // Конфигурация
-    const ACCESS_CODE = "admin3377%";
-    const DISTRICTS = [
-        "Аргун", "Ачхой-Мартановский", "Веденский", "Грозненский", "Грозный",
-        "Гудермесский", "Гудермес", "Итум-Калинский", "Курчалоевский", "Надтеречный",
-        "Наурский", "Ножай-Юртовский", "Серноводский", "Урус-Мартановский",
-        "Шалинский", "Шаройский", "Шатойский", "Шелковской"
-    ];
-
-    // Элементы DOM
-    const authSection = document.getElementById('authSection');
-    const analysisSection = document.getElementById('analysisSection');
-    const authForm = document.getElementById('authForm');
-    const welcomeTitle = document.getElementById('welcomeTitle');
-    const welcomeText = document.getElementById('welcomeText');
-    const notification = document.getElementById('notification');
-    const fileInput = document.getElementById('fileInput');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const resultsContent = document.getElementById('resultsContent');
-
-    // Обработка формы авторизации
-    authForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+    <script>
+        // Конфигурация
+        const ACCESS_CODE = "admin3377%";
         
-        const institution = document.getElementById('institutionName').value;
-        const responsible = document.getElementById('responsibleName').value;
-        const code = document.getElementById('accessCode').value;
-        
-        if (code === ACCESS_CODE) {
-            showNotification('Доступ предоставлен!', 'success');
-            
-            welcomeTitle.textContent = `Добро пожаловать, ${responsible}!`;
-            welcomeText.textContent = `Учреждение: ${institution}`;
-            
-            setTimeout(() => {
-                authSection.style.display = 'none';
-                analysisSection.style.display = 'block';
-            }, 1000);
-        } else {
-            showNotification('Неверный код доступа!', 'error');
-        }
-    });
-
-    // Обработка выбора файла
-    function handleFileSelect(input) {
-        if (input.files.length > 0) {
-            const file = input.files[0];
-            const fileInfo = document.getElementById('fileInfo');
-            const fileName = document.getElementById('fileName');
-            const fileSize = document.getElementById('fileSize');
-            const analyzeBtn = document.getElementById('analyzeBtn');
-            
-            fileName.textContent = file.name;
-            fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' МБ';
-            fileInfo.style.display = 'block';
-            analyzeBtn.disabled = false;
-            
-            showNotification('Файл успешно выбран', 'success');
-        }
-    }
-
-    // Основная функция анализа данных
-    async function analyzeData() {
-        const analyzeText = document.getElementById('analyzeText');
-        const analyzeSpinner = document.getElementById('analyzeSpinner');
-        const analysisType = document.getElementById('analysisType').value;
+        // DOM элементы
+        const authSection = document.getElementById('authSection');
+        const analysisSection = document.getElementById('analysisSection');
+        const authForm = document.getElementById('authForm');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        const welcomeText = document.getElementById('welcomeText');
+        const notification = document.getElementById('notification');
+        const fileInput = document.getElementById('fileInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultsContent = document.getElementById('resultsContent');
         const resultsSection = document.getElementById('resultsSection');
         const saveBtn = document.getElementById('saveBtn');
 
-        if (!fileInput.files.length) {
-            showNotification('Выберите файл Excel!', 'error');
-            return;
-        }
+        let excelData = null;
 
-        const file = fileInput.files[0];
-
-        // Показываем загрузку
-        analyzeText.style.display = 'none';
-        analyzeSpinner.style.display = 'inline-block';
-        analyzeBtn.disabled = true;
-
-        try {
-            const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data, { type: 'array' });
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-
-            const rows = jsonData.map(row => row.map(cell => String(cell).trim()));
-            let results;
-
-            if (analysisType === 'score5') {
-                results = analyzeScore5(rows);
+        // Авторизация
+        authForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const institution = document.getElementById('institutionName').value;
+            const responsible = document.getElementById('responsibleName').value;
+            const code = document.getElementById('accessCode').value;
+            
+            if (code === ACCESS_CODE) {
+                showNotification('Доступ предоставлен', 'success');
+                
+                welcomeTitle.textContent = `Добро пожаловать, ${responsible}!`;
+                welcomeText.textContent = `Учреждение: ${institution}`;
+                
+                setTimeout(() => {
+                    authSection.style.display = 'none';
+                    analysisSection.style.display = 'block';
+                }, 300);
             } else {
-                results = analyzeMenuCompliance(rows);
+                showNotification('Неверный код доступа', 'error');
             }
+        });
 
-            displayResults(results, analysisType);
-            resultsSection.style.display = 'block';
-            saveBtn.style.display = 'inline-block';
-            showNotification('Анализ завершен!', 'success');
-
-        } catch (error) {
-            console.error(error);
-            showNotification('Ошибка при анализе файла: ' + error.message, 'error');
-        }
-
-        analyzeText.style.display = 'inline-block';
-        analyzeSpinner.style.display = 'none';
-        analyzeBtn.disabled = false;
-    }
-
-    // Анализ "Балл нормированный к 5" (оригинальная версия)
-    function analyzeScore5(rows) {
-        const districtData = {};
-        let currentDistrict = null;
-
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
-            const firstCell = row[0];
-
-            // Ищем название района
-            for (const district of DISTRICTS) {
-                if (firstCell === district) {
-                    currentDistrict = district;
-                    if (!districtData[district]) {
-                        districtData[district] = {
-                            score5Data: [],
-                            recordCount: 0
-                        };
-                    }
-                    break;
-                }
-            }
-
-            // Если в районе и есть дата в первой ячейке
-            if (currentDistrict && i > 0) {
-                const dateRegex = /^\d{1,2}\.\d{1,2}\.\d{4}$/;
-                if (dateRegex.test(firstCell)) {
-                    const scoreStr = row[1];
-                    let score = null;
-
-                    if (scoreStr) {
-                        const numMatch = scoreStr.match(/[\d,]+/);
-                        if (numMatch) {
-                            score = parseFloat(numMatch[0].replace(',', '.'));
-                        }
-                    }
-
-                    districtData[currentDistrict].score5Data.push({
-                        date: firstCell,
-                        score: score,
-                        rawValue: scoreStr
-                    });
-                    districtData[currentDistrict].recordCount++;
-                }
+        // Обработка выбора файла
+        function handleFileSelect(input) {
+            if (input.files.length > 0) {
+                const file = input.files[0];
+                const fileInfo = document.getElementById('fileInfo');
+                const fileName = document.getElementById('fileName');
+                const fileSize = document.getElementById('fileSize');
+                
+                fileName.textContent = file.name;
+                fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' МБ';
+                fileInfo.style.display = 'block';
+                analyzeBtn.disabled = false;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    showNotification('Файл успешно загружен', 'success');
+                };
+                reader.readAsArrayBuffer(file);
             }
         }
 
-        const results = [];
-        for (const district in districtData) {
-            const data = districtData[district];
-            const validScores = data.score5Data
-                .filter(item => item.score !== null)
-                .map(item => item.score);
-
-            let avgScore = null;
-            if (validScores.length > 0) {
-                avgScore = (validScores.reduce((sum, val) => sum + val, 0) / validScores.length).toFixed(2);
+        // Анализ данных
+        function analyzeData() {
+            if (!excelData) {
+                showNotification('Сначала выберите файл Excel', 'error');
+                return;
             }
 
-            results.push({
-                district: district,
-                recordCount: data.recordCount,
-                validRecords: validScores.length,
-                averageScore: avgScore,
-                minScore: validScores.length ? Math.min(...validScores).toFixed(2) : null,
-                maxScore: validScores.length ? Math.max(...validScores).toFixed(2) : null
-            });
+            const analyzeText = document.getElementById('analyzeText');
+            const analyzeSpinner = document.getElementById('analyzeSpinner');
+
+            analyzeText.style.display = 'none';
+            analyzeSpinner.style.display = 'inline-block';
+            analyzeBtn.disabled = true;
+
+            setTimeout(() => {
+                try {
+                    const results = analyzeMenuCompliance(excelData);
+                    displayResults(results);
+                    resultsSection.style.display = 'block';
+                    saveBtn.style.display = 'inline-flex';
+                    showNotification('Анализ успешно завершен', 'success');
+                } catch (error) {
+                    console.error(error);
+                    showNotification('Ошибка при анализе: ' + error.message, 'error');
+                } finally {
+                    analyzeText.style.display = 'inline-block';
+                    analyzeSpinner.style.display = 'none';
+                    analyzeBtn.disabled = false;
+                }
+            }, 100);
         }
 
-        return {
-            type: 'score5',
-            data: results,
-            totalRecords: rows.length
-        };
-    }
-
-    // Анализ "Соответствие типовому меню" (ваша новая версия)
-    function analyzeMenuCompliance(rows) {
-        const districtData = {};
-        const allComplianceData = [];
-
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
-
-            if (!row[0] || row[0].trim() === '') continue;
-
-            const cellValue = String(row[0]).trim();
-            const isInstitutionRow = /(МБОУ|СОШ|ГБОУ|Школа)/i.test(cellValue);
-
-            if (isInstitutionRow) {
-                let districtFound = null;
-                if (row[1]) {
-                    const districtCell = String(row[1]).trim();
-                    for (const district of DISTRICTS) {
-                        if (districtCell.includes(district)) {
-                            districtFound = district;
-                            break;
-                        }
-                    }
+        // Парсинг данных Excel
+        function analyzeMenuCompliance(rows) {
+            const headers = rows[0];
+            let districtColIndex = -1;
+            let complianceColIndex = -1;
+            
+            for (let i = 0; i < headers.length; i++) {
+                const header = String(headers[i]).toLowerCase().trim();
+                if (header.includes('район')) districtColIndex = i;
+                if (header.includes('процент соблюдения') || header.includes('процент соблюдени')) complianceColIndex = i;
+            }
+            
+            if (districtColIndex === -1 || complianceColIndex === -1) {
+                throw new Error('Не найдены необходимые столбцы: "Район" и "Процент Соблюдения"');
+            }
+            
+            const districtsMap = new Map();
+            
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length === 0) continue;
+                
+                const district = row[districtColIndex] ? String(row[districtColIndex]).trim() : '';
+                if (!district) continue;
+                
+                let complianceValue = null;
+                const complianceCell = row[complianceColIndex];
+                
+                if (complianceCell !== undefined && complianceCell !== '') {
+                    const cellStr = String(complianceCell).trim();
+                    const numMatch = cellStr.match(/[\d]+(?:\.\d+)?/);
+                    if (numMatch) complianceValue = parseFloat(numMatch[0]);
                 }
-
-                if (districtFound) {
-                    if (!districtData[districtFound]) {
-                        districtData[districtFound] = {
-                            complianceData: [],
-                            recordCount: 0
-                        };
-                    }
-
-                    for (let j = row.length - 2; j < row.length; j++) {
-                        if (j >= 0 && row[j]) {
-                            const cellValue = String(row[j]).trim();
-                            const numMatch = cellValue.match(/[\d]+(?:\.\d+)?/);
-                            if (numMatch) {
-                                const complianceVal = parseFloat(numMatch[0]);
-                                if (complianceVal >= 0 && complianceVal <= 100) {
-                                    districtData[districtFound].complianceData.push(complianceVal);
-                                    districtData[districtFound].recordCount++;
-                                    allComplianceData.push(complianceVal);
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                
+                if (complianceValue !== null && !isNaN(complianceValue) && complianceValue >= 0 && complianceValue <= 100) {
+                    if (!districtsMap.has(district)) districtsMap.set(district, []);
+                    districtsMap.get(district).push(complianceValue);
                 }
             }
-        }
-
-        const regionStats = calculateRegionStats(allComplianceData);
-        const results = [];
-
-        for (const district of DISTRICTS) {
-            if (districtData[district]) {
-                const data = districtData[district];
-                if (data.recordCount > 0) {
-                    const avgCompliance = data.complianceData.reduce((sum, val) => sum + val, 0) / data.complianceData.length;
-                    results.push({
-                        district: district,
-                        score: Math.round(avgCompliance * 100) / 100,
-                        recordCount: data.recordCount,
-                        analysisType: 'menuCompliance'
-                    });
-                } else {
-                    results.push({
-                        district: district,
-                        score: 0.0,
-                        recordCount: 0,
-                        analysisType: 'menuCompliance'
-                    });
-                }
-            } else {
+            
+            const results = [];
+            let totalRecords = 0, totalPerfect = 0, totalGood = 0;
+            
+            for (const [district, values] of districtsMap) {
+                const avgCompliance = values.reduce((sum, val) => sum + val, 0) / values.length;
                 results.push({
                     district: district,
-                    score: 0.0,
-                    recordCount: 0,
-                    analysisType: 'menuCompliance'
+                    score: Math.round(avgCompliance * 100) / 100,
+                    recordCount: values.length,
+                    perfectCount: values.filter(v => v === 100).length,
+                    goodCount: values.filter(v => v >= 75).length
                 });
+                totalRecords += values.length;
+                totalPerfect += values.filter(v => v === 100).length;
+                totalGood += values.filter(v => v >= 75).length;
             }
+            
+            results.sort((a, b) => b.score - a.score);
+            
+            return {
+                districts: results,
+                totalRecords: totalRecords,
+                totalPerfect: totalPerfect,
+                totalGood: totalGood,
+                totalPerfectPercent: totalRecords > 0 ? (totalPerfect / totalRecords) * 100 : 0,
+                totalGoodPercent: totalRecords > 0 ? (totalGood / totalRecords) * 100 : 0
+            };
         }
 
-        results.push({
-            district: 'ОБЩИЙ ПОКАЗАТЕЛЬ ПО РЕГИОНУ (100%)',
-            score: Math.round(regionStats.perfectPercentage * 100) / 100,
-            recordCount: allComplianceData.length,
-            analysisType: 'menuCompliance',
-            isRegionTotal: true,
-            category: '100%'
-        });
-
-        results.push({
-            district: 'ОБЩИЙ ПОКАЗАТЕЛЬ ПО РЕГИОНУ (75-100%)',
-            score: Math.round(regionStats.goodPercentage * 100) / 100,
-            recordCount: allComplianceData.length,
-            analysisType: 'menuCompliance',
-            isRegionTotal: true,
-            category: '75-100%'
-        });
-
-        const regularResults = results.filter(r => !r.isRegionTotal);
-        const regionTotals = results.filter(r => r.isRegionTotal);
-
-        regularResults.sort((a, b) => b.score - a.score);
-
-        return [...regularResults, ...regionTotals];
-    }
-
-    // Расчёт статистики по региону
-    function calculateRegionStats(complianceData) {
-        if (complianceData.length === 0) {
-            return { perfectPercentage: 0, goodPercentage: 0 };
-        }
-
-        const perfectCount = complianceData.filter(val => val === 100).length;
-        const perfectPercentage = (perfectCount / complianceData.length) * 100;
-
-        const goodCount = complianceData.filter(val => val >= 75 && val <= 100).length;
-        const goodPercentage = (goodCount / complianceData.length) * 100;
-
-        return {
-            perfectPercentage: perfectPercentage,
-            goodPercentage: goodPercentage
-        };
-    }
-
-    // Отображение результатов
-    function displayResults(results, type) {
-        let html = '';
-
-        if (type === 'score5') {
-            html += `
-                <h4>Анализ "Балл нормированный к 5"</h4>
-                <p>Всего обработано записей: ${results.totalRecords}</p>
+        // Отображение результатов
+        function displayResults(results) {
+            let html = `
+                <div class="stat-summary">
+                    <strong>Общая статистика по региону</strong><br>
+                    Всего записей: ${results.totalRecords}<br>
+                    Полное соответствие (100%): ${results.totalPerfect} записей (${results.totalPerfectPercent.toFixed(2)}%)<br>
+                    Хорошее соответствие (75-100%): ${results.totalGood} записей (${results.totalGoodPercent.toFixed(2)}%)
+                </div>
                 <table class="results-table">
                     <thead>
-                        <tr>
-                            <th>Район</th>
-                            <th>Записей</th>
-                            <th>Действительных оценок</th>
-                            <th>Средняя оценка</th>
-                            <th>Мин. оценка</th>
-                            <th>Макс. оценка</th>
-                        </tr>
+                        <tr><th>№</th><th>Район</th><th>Средний процент</th><th>Записей</th><th>100%</th><th>≥75%</th></tr>
                     </thead>
                     <tbody>
             `;
-
-            for (const item of results.data) {
-                html += `
-                    <tr>
-                        <td>${item.district}</td>
-                        <td>${item.recordCount}</td>
-                        <td>${item.validRecords}</td>
-                        <td>${item.averageScore || '—'}</td>
-                        <td>${item.minScore || '—'}</td>
-                        <td>${item.maxScore || '—'}</td>
-                    </tr>
-                `;
+            
+            for (let i = 0; i < results.districts.length; i++) {
+                const item = results.districts[i];
+                const perfectPercent = item.recordCount > 0 ? (item.perfectCount / item.recordCount * 100).toFixed(2) : 0;
+                const goodPercent = item.recordCount > 0 ? (item.goodCount / item.recordCount * 100).toFixed(2) : 0;
+                
+                let scoreClass = '';
+                if (item.score >= 90) scoreClass = 'score-high';
+                else if (item.score >= 75) scoreClass = 'score-medium';
+                else if (item.score >= 50) scoreClass = 'score-low';
+                else scoreClass = 'score-critical';
+                
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${item.district}</strong></td>
+                    <td class="${scoreClass}">${item.score.toFixed(2)}%</td>
+                    <td>${item.recordCount}</td>
+                    <td>${item.perfectCount} (${perfectPercent}%)</td>
+                    <td>${item.goodCount} (${goodPercent}%)</td>
+                </tr>`;
             }
-
-            html += '</tbody></table>';
-
-        } else if (type === 'menuCompliance') {
+            
             html += `
-                <h4>Анализ "Соответствие типовому меню"</h4>
-                <p>Всего обработано пунктов меню: ${results.reduce((sum, r) => sum + (r.recordCount || 0), 0)}</p>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Район</th>
-                            <th>Соответствие (%)</th>
-                            <th>Количество записей</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            for (const item of results) {
-                const rowClass = item.isRegionTotal ? 'region-total' : '';
-                const category = item.category ? ` (${item.category})` : '';
-
-                html += `
-                    <tr class="${rowClass}">
-                        <td>${item.district}${category}</td>
-                        <td>${item.score.toFixed(2)}%</td>
-                        <td>${item.recordCount}</td>
-                    </tr>
-                `;
-            }
-
-            html += '</tbody></table>';
-
-            html += `
-                <div class="results-info">
-                    <p><strong>Пояснения:</strong></p>
+                    </tbody>
+                </table>
+                <div class="info-box">
+                    <strong>Пояснения</strong>
                     <ul>
-                        <li><strong>ОБЩИЙ ПОКАЗАТЕЛЬ ПО РЕГИОНУ (100%)</strong> — процент организаций с полным (100%) соответствием типовому меню.</li>
-                        <li><strong>ОБЩИЙ ПОКАЗАТЕЛЬ ПО РЕГИОНУ (75-100%)</strong> — процент организаций с соответствием типовому меню от 75% до 100%.</li>
+                        <li><strong>Средний процент соблюдения</strong> — среднее арифметическое значений по всем учреждениям района</li>
+                        <li><strong>Полное соответствие (100%)</strong> — количество записей с процентом соблюдения 100%</li>
+                        <li><strong>Хорошее соответствие (≥75%)</strong> — количество записей с процентом соблюдения 75% и выше</li>
                     </ul>
                 </div>
             `;
+            
+            resultsContent.innerHTML = html;
         }
 
-        resultsContent.innerHTML = html;
-    }
-
-    // Сохранение результатов
-    function saveResults() {
-        let html = `
-            <!DOCTYPE html>
-            <html lang="ru">
-            <head>
-                <meta charset="UTF-8">
-                <title>Результаты анализа</title>
+        // Сохранение результатов
+        function saveResults() {
+            const resultsHtml = resultsContent.innerHTML;
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head><meta charset="UTF-8"><title>Анализ соответствия ТМ</title>
                 <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    body { font-family: Arial, sans-serif; margin: 40px; }
                     table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f2f2f2; }
-                    .region-total { background-color: #e6f7ff; font-weight: bold; }
-                    .results-info { margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; }
+                    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                    th { background: #10b981; color: white; }
+                    .stat-summary { background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
                 </style>
-            </head>
-            <body>
-                <h1>Результаты анализа</h1>
-                ${resultsContent.innerHTML}
-            </body>
-            </html>
-        `;
-
-        const blob = new Blob([html], { type: 'text/html' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'результаты_анализа.html';
-        link.click();
-        URL.revokeObjectURL(link.href);
-    }
-
-    // Уведомление
-    function showNotification(message, type = 'success') {
-        notification.textContent = message;
-        notification.className = 'notification';
-        
-        if (type === 'error') {
-            notification.classList.add('error');
-        } else if (type === 'warning') {
-            notification.classList.add('warning');
-        } else {
-            notification.classList.add('success');
+                </head>
+                <body>
+                    <h1>Результаты анализа соответствия типовому меню</h1>
+                    <p>Дата: ${new Date().toLocaleString('ru-RU')}</p>
+                    ${resultsHtml}
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([html], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `анализ_ТМ_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.html`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            
+            showNotification('Результаты сохранены', 'success');
         }
 
-        notification.classList.add('show');
-
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
-    }
-</script>
-
-
+        // Уведомления
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,526 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    .support-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .support-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 32px;
+        padding: 3rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .support-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .support-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .support-hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .support-hero h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .support-hero p {
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .channels-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .channel-card {
+        background: var(--bg-card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        padding: 2rem;
+        text-align: center;
+        transition: var(--transition);
+    }
+
+    .channel-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .channel-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--primary-bg);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .channel-icon svg {
+        width: 32px;
+        height: 32px;
+        stroke: var(--primary);
+    }
+
+    .channel-card h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .channel-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--primary);
+        color: white;
+        border-radius: 60px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .channel-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* ========== НОВЫЙ БЛОК: ПОДПИСКА ========== */
+    .subscription-banner {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 24px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #fcd34d;
+        transition: var(--transition);
+    }
+
+    [data-theme='dark'] .subscription-banner {
+        background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+        border-color: #f59e0b;
+    }
+
+    .subscription-banner:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .subscription-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .subscription-icon {
+        width: 56px;
+        height: 56px;
+        background: rgba(245, 158, 11, 0.2);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .subscription-icon svg {
+        width: 28px;
+        height: 28px;
+        stroke: #f59e0b;
+    }
+
+    .subscription-title {
+        flex: 1;
+    }
+
+    .subscription-title h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #b45309;
+        margin-bottom: 0.25rem;
+    }
+
+    [data-theme='dark'] .subscription-title h3 {
+        color: #fbbf24;
+    }
+
+    .subscription-title p {
+        font-size: 0.85rem;
+        color: #92400e;
+    }
+
+    [data-theme='dark'] .subscription-title p {
+        color: #fed7aa;
+    }
+
+    .subscription-badge {
+        background: rgba(245, 158, 11, 0.3);
+        padding: 0.4rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #b45309;
+    }
+
+    [data-theme='dark'] .subscription-badge {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+    }
+
+    .subscription-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin: 1.25rem 0;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(245, 158, 11, 0.1);
+        border-radius: 16px;
+        transition: var(--transition);
+    }
+
+    .feature-item:hover {
+        transform: translateX(4px);
+        background: rgba(245, 158, 11, 0.2);
+    }
+
+    .feature-icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(245, 158, 11, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .feature-icon svg {
+        width: 18px;
+        height: 18px;
+        stroke: #f59e0b;
+    }
+
+    .feature-text {
+        flex: 1;
+    }
+
+    .feature-text strong {
+        display: block;
+        font-size: 0.85rem;
+        color: #b45309;
+        margin-bottom: 0.2rem;
+    }
+
+    [data-theme='dark'] .feature-text strong {
+        color: #fbbf24;
+    }
+
+    .feature-text span {
+        font-size: 0.7rem;
+        color: #92400e;
+    }
+
+    [data-theme='dark'] .feature-text span {
+        color: #fed7aa;
+    }
+
+    .subscribe-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 0.875rem 2rem;
+        border-radius: 60px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: var(--transition);
+        margin-top: 0.5rem;
+    }
+
+    .subscribe-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .subscribe-button svg {
+        width: 18px;
+        height: 18px;
+        stroke: white;
+    }
+
+    /* Информационная секция */
+    .info-section {
+        background: var(--bg-card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .info-section h3 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-section p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .priority-note {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1rem;
+        margin-top: 1rem;
+        border-left: 3px solid #f59e0b;
+        text-align: left;
+    }
+
+    .priority-note strong {
+        color: #f59e0b;
+    }
+
+    @media (max-width: 768px) {
+        .support-container {
+            padding: 1rem;
+        }
+        
+        .support-hero {
+            padding: 2rem;
+        }
+        
+        .support-hero h1 {
+            font-size: 1.5rem;
+        }
+        
+        .subscription-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .subscription-features {
+            grid-template-columns: 1fr;
+        }
+        
+        .subscribe-button {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .feature-item {
+            text-align: center;
+            flex-direction: column;
+        }
+        
+        .feature-text {
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="support-container">
+    <div class="support-hero">
+        <div class="support-hero-content">
+            <h1>Техническая поддержка</h1>
+            <p>Мы всегда готовы помочь! Выберите удобный способ связи</p>
+        </div>
+    </div>
+
+    <!-- НОВЫЙ БЛОК: ПОДПИСКА С ПРИОРИТЕТНОЙ ПОДДЕРЖКОЙ -->
+    <div class="subscription-banner">
+        <div class="subscription-header">
+            <div class="subscription-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </div>
+            <div class="subscription-title">
+                <h3>Приоритетная техническая поддержка</h3>
+                <p>Для администраторов с платной подпиской</p>
+            </div>
+            <div class="subscription-badge">VIP-поддержка</div>
+        </div>
+        
+        <div class="subscription-features">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 8v4l3 3"/>
+                    </svg>
+                </div>
+                <div class="feature-text">
+                    <strong>Быстрый ответ</strong>
+                    <span>Ответ в течение 2 часов в рабочее время</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 12H4M12 4v16"/>
+                    </svg>
+                </div>
+                <div class="feature-text">
+                    <strong>Приоритетная очередь</strong>
+                    <span>Ваши запросы обрабатываются в первую очередь</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2M7 10l5 5 5-5"/>
+                    </svg>
+                </div>
+                <div class="feature-text">
+                    <strong>Помощь в настройке</strong>
+                    <span>Помощь в настройке админ-панели и дашбордов</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <div class="feature-text">
+                    <strong>Консультации эксперта</strong>
+                    <span>Прямая связь с разработчиком платформы</span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: center; margin-top: 0.5rem;">
+            <a href="/pay.html" class="subscribe-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Оформить подписку → 
+            </a>
+        </div>
+    </div>
+
+    <div class="channels-grid">
+        <div class="channel-card">
+            <div class="channel-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
+            </div>
+            <h3>Чат в Максе</h3>
+            <p>Оперативная помощь в рабочее время</p>
+            <a href="https://max.ru/join/0_ENTACbyqPMRPm5MbX11Sjn7aYzaG924ADcVjCLrag" class="channel-link" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                Перейти в чат
+            </a>
+        </div>
+
+        <div class="channel-card">
+            <div class="channel-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+            </div>
+            <h3>Telegram</h3>
+            <p>Быстрые ответы в мессенджере</p>
+            <a href="https://t.me/+XyS_NUekRoBkZTIy" class="channel-link" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                Перейти в Telegram
+            </a>
+        </div>
+
+        <div class="channel-card">
+            <div class="channel-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+            </div>
+            <h3>Email</h3>
+            <p>Для официальных обращений</p>
+            <a href="mailto:ECM@support-aliev.ru" class="channel-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                ECM@support-aliev.ru
+            </a>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>Время работы поддержки</h3>
+        <p>Пн-Пт: 9:00 - 18:00 (МСК)<br>Сб-Вс: выходной</p>
+        
+        <div class="priority-note">
+            <p><strong>⭐ Для подписчиков платного тарифа:</strong></p>
+            <p style="font-size: 0.8rem; margin-top: 0.25rem;">
+                • Приоритетная обработка обращений<br>
+                • Ответ в течение 2 часов в рабочее время<br>
+                • Прямая связь с разработчиком<br>
+                • Помощь в настройке админ-панели
+            </p>
+        </div>
+        
+        <p style="font-size: 0.85rem; margin-top: 1rem;">
+            В нерабочее время вы можете оставить сообщение, и мы ответим в первый рабочий день
+        </p>
+    </div>
+</div>
+{% endblock %}

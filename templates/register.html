@@ -1,1087 +1,782 @@
 {% extends "layout.html" %}
 {% block content %}
 <style>
-/* === ОБЩИЕ ПЕРЕМЕННЫЕ — БЕЛО-ГОЛУБАЯ ПАЛИТРА === */
-:root {
-  /* Цвета */
-  --blue-primary: #3b82f6;    /* Основной голубой */
-  --blue-secondary: #60a5fa;  /* Светлый голубой */
-  --blue-light: #e0f2ff;      /* Очень светлый фон */
-  --blue-dark: #1e40af;       /* Тёмный акцент */
-  --slate-50: #f8fafc;        /* Белый фон */
-  --slate-100: #f1f5f9;       /* Светло-серый */
-  --slate-200: #e2e8f0;       /* Границы */
-  --slate-300: #cbd5e1;       /* Вторичный текст */
-  --slate-400: #94a3b8;       /* Иконки */
-  --slate-500: #64748b;       /* Подпись */
-  --slate-600: #475569;       /* Текст */
-  --slate-700: #334155;       /* Заголовки */
-  --slate-800: #1e293b;       /* Основной текст */
-  --slate-900: #0f172a;       /* Глубокий тёмный (только для теней) */
-
-  /* Размеры */
-  --radius-lg: 1.5rem;
-  --radius-md: 1rem;
-  --radius-sm: 0.75rem;
-  --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.05);
-  --shadow-xl: 0 20px 25px rgba(0,0,0,0.05);
-
-  /* Цвета для ошибок/успеха */
-  --error-bg: #fee2e2;
-  --error-text: #dc2626;
-  --success-bg: #d1fae5;
-  --success-text: #065f46;
-}
-
-/* === ТЁМНАЯ ТЕМА === */
-[data-theme='dark'] {
-  --slate-50: #0f172a;
-  --slate-100: #1e293b;
-  --slate-200: #334155;
-  --slate-300: #475569;
-  --slate-400: #64748b;
-  --slate-500: #94a3b8;
-  --slate-600: #cbd5e1;
-  --slate-700: #e2e8f0;
-  --slate-800: #f1f5f9;
-  --slate-900: #f8fafc;
-  
-  --blue-light: #1e40af;
-  --blue-dark: #93c5fd;
-  
-  --error-bg: rgba(239, 68, 68, 0.2);
-  --error-text: #f87171;
-  --success-bg: rgba(16, 185, 129, 0.2);
-  --success-text: #6ee7b7;
-  
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
-  --shadow-xl: 0 20px 25px rgba(0,0,0,0.5);
-}
-
-/* === ОБЩИЕ СТИЛИ === */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: transparent; /* Позволяем фону из layout просвечивать */
-  min-height: 100vh;
-  color: var(--slate-800);
-  line-height: 1.6;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 80vh;
-  padding: 2rem 1rem;
-  animation: fadeInUp 0.8s ease-out;
-}
-
-.auth-card {
-  background: var(--card, white);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-lg);
-  padding: 3rem;
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border, var(--slate-200));
-  width: 100%;
-  max-width: 600px;
-  position: relative;
-  overflow: hidden;
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Тёмная тема для карточки */
-[data-theme='dark'] .auth-card {
-  background: var(--card, #1e293b);
-  border-color: var(--border, #334155);
-}
-
-.auth-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
-  transition: left 0.6s;
-}
-
-.auth-card:hover::before {
-  left: 100%;
-}
-
-.register-icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, var(--blue-light) 0%, rgba(255,255,255,0.8) 100%);
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  margin: 0 auto 2.5rem;
-  box-shadow: var(--shadow-md);
-  position: relative;
-  transition: background 0.3s ease;
-}
-
-/* Тёмная тема для иконки */
-[data-theme='dark'] .register-icon {
-  background: linear-gradient(135deg, rgba(30, 64, 175, 0.5) 0%, rgba(51, 65, 85, 0.8) 100%);
-}
-
-.register-icon::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-secondary) 100%);
-  border-radius: 50%;
-  z-index: -1;
-  opacity: 0;
-  transition: var(--transition-base);
-}
-
-.register-icon:hover::after {
-  opacity: 1;
-}
-
-.register-icon svg {
-  width: 36px;
-  height: 36px;
-  color: var(--blue-primary);
-  transition: var(--transition-base);
-}
-
-/* Тёмная тема для svg иконки */
-[data-theme='dark'] .register-icon svg {
-  color: var(--blue-secondary);
-}
-
-.register-icon:hover svg {
-  color: var(--blue-dark);
-  transform: scale(1.1);
-}
-
-.auth-card h2 {
-  text-align: center;
-  font-weight: 700;
-  font-size: 2rem;
-  background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-secondary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 2.5rem;
-  letter-spacing: -0.5px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
-  position: relative;
-  margin-bottom: 1.5rem;
-}
-
-.form-row .form-group {
-  margin-bottom: 0;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-  color: var(--slate-700);
-  font-size: 0.95rem;
-  transition: color 0.3s ease;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 1.125rem 1.125rem 1.125rem 3.5rem;
-  border: 2px solid var(--border, var(--slate-200));
-  border-radius: var(--radius-md);
-  font-size: 1.05rem;
-  background: var(--surface, var(--slate-50));
-  transition: var(--transition-base);
-  font-weight: 500;
-  color: var(--slate-800);
-}
-
-/* Тёмная тема для полей ввода */
-[data-theme='dark'] .form-group input,
-[data-theme='dark'] .form-group select {
-  background: var(--slate-800, #1e293b);
-  border-color: var(--border, #334155);
-  color: var(--slate-200, #e2e8f0);
-}
-
-.form-group select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 1.125rem center;
-  background-size: 1.5em;
-  padding-right: 3.5rem;
-}
-
-/* Тёмная тема для стрелки select */
-[data-theme='dark'] .form-group select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: var(--blue-primary);
-  background: var(--card, white);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-  outline: none;
-  transform: translateY(-1px);
-}
-
-/* Тёмная тема для focused поля */
-[data-theme='dark'] .form-group input:focus,
-[data-theme='dark'] .form-group select:focus {
-  background: var(--slate-700, #334155);
-  border-color: var(--blue-secondary);
-}
-
-.form-group input::placeholder {
-  color: var(--slate-400);
-}
-
-.form-group svg {
-  position: absolute;
-  left: 1.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  color: var(--slate-400);
-  transition: var(--transition-base);
-  pointer-events: none;
-}
-
-.form-group input:focus + svg,
-.form-group select:focus + svg {
-  color: var(--blue-primary);
-}
-
-/* Тёмная тема для иконок в фокусе */
-[data-theme='dark'] .form-group input:focus + svg,
-[data-theme='dark'] .form-group select:focus + svg {
-  color: var(--blue-secondary);
-}
-
-.section-meta {
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border, var(--slate-200));
-  margin-top: 2rem;
-  position: relative;
-  transition: border-color 0.3s ease;
-}
-
-.section-meta::before {
-  content: 'Дополнительно';
-  position: absolute;
-  top: -0.6rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--card, white);
-  padding: 0 1rem;
-  font-size: 0.85rem;
-  color: var(--slate-500);
-  font-weight: 600;
-  border-radius: 0.5rem;
-  backdrop-filter: blur(5px);
-  border: 1px solid var(--border, var(--slate-200));
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
-
-/* Тёмная тема для метки секции */
-[data-theme='dark'] .section-meta::before {
-  background: var(--card, #1e293b);
-  border-color: var(--border, #334155);
-  color: var(--slate-400);
-}
-
-.section-meta .form-group input {
-  background: var(--surface, var(--slate-50));
-}
-
-.section-meta .form-group input:focus {
-  background: var(--card, white);
-}
-
-/* Тёмная тема для полей в секции */
-[data-theme='dark'] .section-meta .form-group input {
-  background: var(--slate-800, #1e293b);
-}
-
-[data-theme='dark'] .section-meta .form-group input:focus {
-  background: var(--slate-700, #334155);
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 1.125rem 2rem;
-  border: none;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-secondary) 100%);
-  color: white;
-  font-weight: 600;
-  font-size: 1.05rem;
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
-  transition: var(--transition-base);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  margin-top: 1.5rem;
-}
-
-.submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(59, 130, 246, 0.3);
-  background: linear-gradient(135deg, var(--blue-secondary) 0%, var(--blue-primary) 100%);
-}
-
-.submit-btn:active {
-  transform: translateY(0);
-}
-
-.submit-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  transition: left 0.6s;
-}
-
-.submit-btn:hover::before {
-  left: 100%;
-}
-
-.switch-link {
-  text-align: center;
-  margin-top: 2rem;
-  font-size: 0.95rem;
-  color: var(--slate-600);
-  transition: color 0.3s ease;
-}
-
-.switch-link a {
-  color: var(--blue-primary);
-  text-decoration: none;
-  font-weight: 600;
-  position: relative;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-  transition: var(--transition-base);
-}
-
-/* Тёмная тема для ссылки */
-[data-theme='dark'] .switch-link a {
-  color: var(--blue-secondary);
-}
-
-.switch-link a:hover {
-  background: rgba(59, 130, 246, 0.1);
-  text-decoration: none;
-}
-
-/* Тёмная тема для hover ссылки */
-[data-theme='dark'] .switch-link a:hover {
-  background: rgba(96, 165, 250, 0.1);
-}
-
-.switch-link a::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--blue-primary);
-  transition: width 0.3s ease;
-}
-
-/* Тёмная тема для подчёркивания ссылки */
-[data-theme='dark'] .switch-link a::after {
-  background: var(--blue-secondary);
-}
-
-.switch-link a:hover::after {
-  width: 100%;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 1.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--slate-400);
-  cursor: pointer;
-  padding: 0.625rem;
-  border-radius: 4px;
-  transition: var(--transition-base);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.password-toggle:hover {
-  color: var(--blue-primary);
-  background: rgba(59, 130, 246, 0.1);
-}
-
-/* Тёмная тема для кнопки показа пароля */
-[data-theme='dark'] .password-toggle:hover {
-  color: var(--blue-secondary);
-  background: rgba(96, 165, 250, 0.1);
-}
-
-.password-toggle svg {
-  width: 20px;
-  height: 20px;
-  pointer-events: none;
-}
-
-.error-message {
-  background: var(--error-bg);
-  color: var(--error-text);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  margin-bottom: 1.5rem;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  font-size: 0.9rem;
-  animation: shake 0.5s ease-in-out;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-.success-message {
-  background: var(--success-bg);
-  color: var(--success-text);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  margin-bottom: 1.5rem;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  font-size: 0.9rem;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-/* === ГРУППА СОГЛАСИЯ === */
-.consent-group {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  border: 1px solid var(--border, var(--slate-200));
-  border-radius: var(--radius-md);
-  background: var(--surface, white);
-  backdrop-filter: blur(5px);
-  box-shadow: var(--shadow-sm);
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Тёмная тема для группы согласия */
-[data-theme='dark'] .consent-group {
-  background: var(--slate-800, #1e293b);
-  border-color: var(--border, #334155);
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  cursor: pointer;
-}
-
-.checkbox-label input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.checkmark {
-  position: relative;
-  top: 2px;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--blue-primary);
-  border-radius: 4px;
-  margin-right: 0.75rem;
-  background: var(--surface, white);
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-/* Тёмная тема для чекбокса */
-[data-theme='dark'] .checkmark {
-  background: var(--slate-700, #334155);
-  border-color: var(--blue-secondary);
-}
-
-.checkbox-label input:checked + .checkmark {
-  background-color: var(--blue-primary);
-  border-color: var(--blue-primary);
-}
-
-/* Тёмная тема для отмеченного чекбокса */
-[data-theme='dark'] .checkbox-label input:checked + .checkmark {
-  background-color: var(--blue-secondary);
-  border-color: var(--blue-secondary);
-}
-
-.checkbox-label input:checked + .checkmark::after {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 6px;
-  height: 11px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-.consent-text {
-  display: block;
-  margin-left: 1.75rem;
-  font-size: 0.9rem;
-  color: var(--slate-600);
-  line-height: 1.4;
-  transition: color 0.3s ease;
-}
-
-/* Тёмная тема для текста согласия */
-[data-theme='dark'] .consent-text {
-  color: var(--slate-400);
-}
-
-.consent-text a {
-  color: var(--blue-primary);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-/* Тёмная тема для ссылок в тексте согласия */
-[data-theme='dark'] .consent-text a {
-  color: var(--blue-secondary);
-}
-
-.consent-text a:hover {
-  text-decoration: underline;
-}
-
-.consent-list {
-  margin: 0.5rem 0 0 1rem;
-  padding-left: 0;
-  list-style: none;
-}
-
-.consent-list li {
-  margin: 0.25rem 0;
-  position: relative;
-  font-size: 0.875rem;
-  color: var(--slate-500);
-  transition: color 0.3s ease;
-}
-
-/* Тёмная тема для списка */
-[data-theme='dark'] .consent-list li {
-  color: var(--slate-400);
-}
-
-.consent-list li::before {
-  content: "•";
-  color: var(--blue-primary);
-  font-weight: bold;
-  display: inline-block;
-  width: 1em;
-  margin-left: -1em;
-}
-
-/* Тёмная тема для маркера списка */
-[data-theme='dark'] .consent-list li::before {
-  color: var(--blue-secondary);
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-@keyframes spin {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-@keyframes inputFocusGlow {
-  0% { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0); }
-  50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
-  100% { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0); }
-}
-
-/* Тёмная тема для анимации фокуса */
-[data-theme='dark'] .form-group input:focus,
-[data-theme='dark'] .form-group select:focus {
-  animation: inputFocusGlowDark 0.4s ease-in-out;
-}
-
-@keyframes inputFocusGlowDark {
-  0% { box-shadow: 0 0 0 2px rgba(96, 165, 250, 0); }
-  50% { box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2); }
-  100% { box-shadow: 0 0 0 2px rgba(96, 165, 250, 0); }
-}
-
-/* === АДАПТИВНОСТЬ === */
-@media (min-width: 1024px) {
-  .auth-card {
-    max-width: 650px;
-    padding: 3.5rem;
-  }
-  
-  .auth-card h2 {
-    font-size: 2.25rem;
-    margin-bottom: 3rem;
-  }
-  
-  .register-icon {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 3rem;
-  }
-  
-  .register-icon svg {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .form-row {
-    gap: 2rem;
-    margin-bottom: 2rem;
-  }
-  
-  .form-group {
-    margin-bottom: 2rem;
-  }
-  
-  .form-group label {
-    font-size: 1rem;
-    margin-bottom: 0.875rem;
-  }
-  
-  .form-group input,
-  .form-group select {
-    padding: 1.25rem 1.25rem 1.25rem 4rem;
-    font-size: 1.1rem;
-  }
-  
-  .form-group svg {
-    left: 1.5rem;
-    width: 24px;
-    height: 24px;
-  }
-  
-  .password-toggle {
-    right: 1.5rem;
-    padding: 0.75rem;
-  }
-  
-  .password-toggle svg {
-    width: 22px;
-    height: 22px;
-  }
-  
-  .submit-btn {
-    padding: 1.25rem 2rem;
-    font-size: 1.1rem;
-    margin-top: 2rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .auth-card {
-    max-width: 550px;
-    padding: 2.5rem;
-  }
-  
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .auth-container {
-    padding: 1rem 0.5rem;
-    min-height: 85vh;
-  }
-  
-  .auth-card {
-    padding: 2rem 1.5rem;
-    margin: 0.5rem;
-    max-width: calc(100% - 1rem);
-  }
-  
-  .auth-card h2 {
-    font-size: 1.75rem;
-    margin-bottom: 2rem;
-  }
-  
-  .register-icon {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 2rem;
-  }
-  
-  .register-icon svg {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .form-group input,
-  .form-group select {
-    padding: 1rem 1rem 1rem 3rem;
-    font-size: 1rem;
-  }
-  
-  .form-group svg {
-    left: 1rem;
-    width: 20px;
-    height: 20px;
-  }
-  
-  .password-toggle {
-    right: 1rem;
-    padding: 0.5rem;
-  }
-  
-  .password-toggle svg {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .submit-btn {
-    padding: 1rem 2rem;
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .auth-card {
-    padding: 1.5rem 1.25rem;
-  }
-  
-  .auth-card h2 {
-    font-size: 1.5rem;
-  }
-  
-  .form-group input,
-  .form-group select {
-    padding: 0.875rem 0.875rem 0.875rem 2.75rem;
-  }
-  
-  .form-group svg {
-    left: 0.875rem;
-  }
-  
-  .section-meta::before {
-    top: -0.5rem;
-    font-size: 0.8rem;
-    padding: 0 0.75rem;
-  }
-  
-  .consent-group {
-    margin-bottom: 1.25rem;
-    padding: 0.75rem;
-  }
-  
-  .consent-text {
-    margin-left: 1.5rem;
-    font-size: 0.85rem;
-  }
-  
-  .consent-list {
-    margin: 0.25rem 0 0 0.75rem;
-  }
-  
-  .switch-link {
-    margin-top: 1.5rem;
-    font-size: 0.9rem;
-  }
-}
-
-/* Состояние загрузки кнопки */
-.submit-btn.loading {
-  pointer-events: none;
-  opacity: 0.8;
-}
-
-.submit-btn.loading::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 73px);
+        padding: 2rem;
+        animation: fadeInUp 0.4s ease-out;
+    }
+
+    .auth-card {
+        background: var(--bg-card);
+        border-radius: 32px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 680px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--primary));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .auth-card:hover::before {
+        opacity: 1;
+    }
+
+    /* Иконка */
+    .auth-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1.5rem;
+        background: var(--primary-bg);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+
+    .auth-icon svg {
+        width: 32px;
+        height: 32px;
+        stroke: var(--primary);
+        stroke-width: 1.5;
+    }
+
+    .auth-icon:hover {
+        transform: scale(1.05);
+        background: var(--primary);
+    }
+
+    .auth-icon:hover svg {
+        stroke: white;
+    }
+
+    /* Заголовок */
+    .auth-title {
+        text-align: center;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.3px;
+    }
+
+    .auth-subtitle {
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+    }
+
+    /* Форма */
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 2.75rem;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        transition: var(--transition);
+        font-family: inherit;
+    }
+
+    .form-group select {
+        cursor: pointer;
+        appearance: none;
+        padding-right: 2.5rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-bg);
+    }
+
+    .form-group input::placeholder {
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+
+    .form-icon {
+        position: absolute;
+        left: 1rem;
+        top: 2.5rem;
+        width: 18px;
+        height: 18px;
+        color: var(--text-secondary);
+        pointer-events: none;
+        transition: var(--transition);
+    }
+
+    .form-group input:focus + .form-icon,
+    .form-group select:focus + .form-icon {
+        color: var(--primary);
+    }
+
+    /* Кнопка показа пароля */
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 2.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        transition: var(--transition);
+        border-radius: 8px;
+    }
+
+    .password-toggle:hover {
+        color: var(--primary);
+        background: var(--primary-bg);
+    }
+
+    /* Секция дополнительной информации */
+    .section-divider {
+        position: relative;
+        text-align: center;
+        margin: 1.5rem 0 1rem;
+    }
+
+    .section-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--border);
+    }
+
+    .section-divider span {
+        position: relative;
+        background: var(--bg-card);
+        padding: 0 1rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ========== НОВЫЙ БЛОК: ПОДПИСКА ========== */
+    .subscription-banner {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 20px;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        transition: var(--transition);
+        border: 1px solid #fcd34d;
+    }
+
+    [data-theme='dark'] .subscription-banner {
+        background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+        border-color: #f59e0b;
+    }
+
+    .subscription-banner:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .subscription-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+
+    .subscription-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(245, 158, 11, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .subscription-icon svg {
+        width: 22px;
+        height: 22px;
+        stroke: #f59e0b;
+    }
+
+    .subscription-text {
+        flex: 1;
+    }
+
+    .subscription-text strong {
+        display: block;
+        font-size: 0.9rem;
+        color: #b45309;
+        margin-bottom: 0.2rem;
+    }
+
+    [data-theme='dark'] .subscription-text strong {
+        color: #fbbf24;
+    }
+
+    .subscription-text span {
+        font-size: 0.7rem;
+        color: #92400e;
+    }
+
+    [data-theme='dark'] .subscription-text span {
+        color: #fed7aa;
+    }
+
+    .subscribe-link {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 0.5rem 1.2rem;
+        border-radius: 2rem;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .subscribe-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .subscribe-link svg {
+        width: 16px;
+        height: 16px;
+        stroke: white;
+    }
+
+    /* Чекбоксы согласия */
+    .consent-group {
+        margin: 0.5rem 0;
+        padding: 0.75rem;
+        background: var(--surface);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        transition: var(--transition);
+    }
+
+    .consent-group:hover {
+        border-color: var(--primary);
+    }
+
+    .checkbox-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        cursor: pointer;
+    }
+
+    .checkbox-wrapper input {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .checkbox-text {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    .checkbox-text strong {
+        color: var(--text-primary);
+    }
+
+    .checkbox-text a {
+        color: var(--primary);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .checkbox-text a:hover {
+        text-decoration: underline;
+    }
+
+    /* Кнопка отправки */
+    .submit-btn {
+        width: 100%;
+        padding: 0.875rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border: none;
+        border-radius: 60px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Ссылка на вход */
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .auth-footer span {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .auth-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    /* Сообщения */
+    .alert {
+        padding: 0.875rem 1rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+
+    .alert svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        stroke: currentColor;
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 640px) {
+        .auth-container {
+            padding: 1rem;
+        }
+        
+        .auth-card {
+            padding: 1.75rem;
+        }
+        
+        .auth-title {
+            font-size: 1.5rem;
+        }
+        
+        .auth-icon {
+            width: 56px;
+            height: 56px;
+        }
+        
+        .auth-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .form-group label {
+            font-size: 0.75rem;
+        }
+        
+        .form-icon {
+            top: 2.3rem;
+        }
+        
+        .password-toggle {
+            top: 2.3rem;
+        }
+        
+        .subscription-banner {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .subscription-info {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .subscribe-link {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 
 <div class="auth-container">
-  <div class="auth-card">
-    <div class="register-icon">
-      <svg fill="currentColor" viewBox="0 0 20 20">
-        <path d="M13 7H7v6h6V7z"/>
-        <path fill-rule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5z" clip-rule="evenodd"/>
-      </svg>
-    </div>
-    
-    <h2>Регистрация</h2>
-    
-    {% if error %}
-    <div class="error-message">
-      {{ error }}
-    </div>
-    {% endif %}
-    
-    {% if success %}
-    <div class="success-message">
-      {{ success }}
-    </div>
-    {% endif %}
-    
-    <form action="/register" method="post">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" name="email" id="email" placeholder="your@email.com" required>
-          <svg fill="currentColor" viewBox="0 0 20 20">
-            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-          </svg>
+    <div class="auth-card">
+        <div class="auth-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="8.5" cy="7" r="4"/>
+                <line x1="20" y1="8" x2="20" y2="14"/>
+                <line x1="23" y1="11" x2="17" y2="11"/>
+            </svg>
         </div>
         
-        <div class="form-group">
-          <label for="password">Пароль</label>
-          <input type="password" name="password" id="password" placeholder="Придумайте надежный пароль" required>
-          <svg fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-          </svg>
-          <button type="button" class="password-toggle" id="passwordToggle">
-            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+        <h1 class="auth-title">Создание аккаунта</h1>
+        <p class="auth-subtitle">Заполните форму для регистрации в системе</p>
+        
+        <!-- Сообщения -->
+        {% if error %}
+        <div class="alert alert-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-          </button>
+            <span>{{ error }}</span>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label for="unit_name">Название учреждения</label>
-        <input type="text" name="unit_name" id="unit_name" placeholder="Например: МБОУ «СОШ № 21» г. Грозного" required>
-        <svg fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-        </svg>
-      </div>
-
-      <div class="form-group">
-        <label for="director_name">ФИО директора</label>
-        <input type="text" name="director_name" id="director_name" placeholder="Фамилия Имя Отчество" required>
-        <svg fill="currentColor" viewBox="0 0 20 20">
-          <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
-          <line x1="10" y1="6" x2="10" y2="14" stroke="currentColor" stroke-width="2"/>
-          <line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="2"/>
-        </svg>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="district">Ваш район</label>
-          <select name="district" id="district" required>
-            {% for d in districts %}
-            <option value="{{ d }}">{{ d }}</option>
-            {% endfor %}
-          </select>
-          <svg fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-          </svg>
+        {% endif %}
+        
+        {% if success %}
+        <div class="alert alert-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>{{ success }}</span>
         </div>
-
-        <div class="form-group">
-          <label for="food_type">Тип питания</label>
-          <select name="food_type" id="food_type" required>
-            {% for ft in food_types %}
-            <option value="{{ ft }}">{{ ft }}</option>
-            {% endfor %}
-          </select>
-          <svg fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
-          </svg>
+        {% endif %}
+        
+        <form action="/register" method="post" id="registerForm" class="auth-form">
+            <!-- Основная информация -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" placeholder="your@email.com" required>
+                    <svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                </div>
+                
+                <div class="form-group">
+                    <label>Пароль *</label>
+                    <input type="password" name="password" id="password" placeholder="Минимум 6 символов" required minlength="6">
+                    <svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <button type="button" class="password-toggle" id="passwordToggle">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Название учреждения *</label>
+                <input type="text" name="unit_name" placeholder="Например: МБОУ «СОШ № 21» г. Грозного" required>
+                <svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            
+            <div class="form-group">
+                <label>ФИО директора</label>
+                <input type="text" name="director_name" placeholder="Фамилия Имя Отчество">
+                <svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Регион *</label>
+                    <input type="text" name="region" placeholder="Чеченская Республика, Московская область..." required>
+                    <svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </div>
+                
+                <div class="form-group" id="district-group">
+                    <label>Район/город *</label>
+                    <div id="district-container">
+                        <select name="district_select" id="district_select">
+                            <option value="">-- Выберите район --</option>
+                            {% for d in districts %}
+                            <option value="{{ d }}">{{ d }}</option>
+                            {% endfor %}
+                            <option value="other">✏️ Другой (ввести вручную)</option>
+                        </select>
+                        <input type="text" name="district_manual" id="district_manual" placeholder="Введите название района" style="margin-top: 0.5rem; display: none;">
+                    </div>
+                    <svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Тип питания *</label>
+                <select name="food_type" required>
+                    {% for ft in food_types %}
+                    <option value="{{ ft }}">{{ ft }}</option>
+                    {% endfor %}
+                </select>
+                <svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/>
+                </svg>
+            </div>
+            
+            <!-- Секция дополнительной информации -->
+            <div class="section-divider">
+                <span>Дополнительно</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Код доступа</label>
+                <input type="text" name="secret_code" placeholder="Только для администраторов">
+                <svg class="form-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            
+            <!-- Блок подписки -->
+            <div class="subscription-banner">
+                <div class="subscription-info">
+                    <div class="subscription-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </div>
+                    <div class="subscription-text">
+                        <strong>Расширьте возможности платформы</strong>
+                        <span>Получите доступ к панели администратора, дашбордам и дочтению меню в базе ФЦМПО</span>
+                    </div>
+                </div>
+                <a href="/pay.html" class="subscribe-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Оформить подписку →
+                </a>
+            </div>
+            
+            <!-- Согласия -->
+            <div class="consent-group">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" name="consent_pd" required>
+                    <span class="checkbox-text">
+                        Я даю <strong>добровольное согласие</strong> на обработку персональных данных
+                        в соответствии с <a href="/privacy.html" target="_blank">Политикой конфиденциальности</a>
+                    </span>
+                </label>
+            </div>
+            
+            <div class="consent-group">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" name="consent_agree" required>
+                    <span class="checkbox-text">
+                        Я ознакомился и <strong>полностью принимаю</strong> условия
+                        <a href="/agree.html" target="_blank">Пользовательского соглашения</a>
+                    </span>
+                </label>
+            </div>
+            
+            <div class="consent-group">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" name="consent_oferta" required>
+                    <span class="checkbox-text">
+                        Я принимаю условия <a href="/oferta.html" target="_blank">Договора оферты</a>
+                    </span>
+                </label>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                    <line x1="20" y1="8" x2="20" y2="14"/>
+                    <line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+                Создать аккаунт
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <span>Уже есть аккаунт? </span>
+            <a href="/login">Войти в систему</a>
         </div>
-      </div>
-
-      <div class="section-meta">
-        <div class="form-group">
-          <label for="secret_code">Код доступа (только для админов)</label>
-          <input type="text" name="secret_code" id="secret_code" placeholder="Введите код, если есть">
-          <svg fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-          </svg>
-        </div>
-      </div>
-
-      <div class="consent-group">
-        <label class="checkbox-label">
-          <input
-            type="checkbox"
-            name="consent_pd"
-            id="consent_pd"
-            required
-          >
-          <span class="checkmark"></span>
-          <span class="consent-text">
-            Я даю <strong>добровольное согласие</strong> на обработку персональных данных
-            в соответствии с <a href="/privacy.html" target="_blank">Политикой конфиденциальности</a><br>
-            Согласие действует до момента его отзыва в письменной форме.
-          </span>
-        </label>
-      </div>
-
-      <div class="consent-group">
-        <label class="checkbox-label">
-          <input
-            type="checkbox"
-            name="consent_agree"
-            id="consent_agree"
-            required
-          >
-          <span class="checkmark"></span>
-          <span class="consent-text">
-            Я ознакомился и <strong>полностью принимаю</strong> условия
-            <a href="/agree.html" target="_blank">Пользовательского соглашения</a>
-          </span>
-        </label>
-      </div>
-
-      <div class="consent-group">
-        <label class="checkbox-label">
-          <input
-            type="checkbox"
-            name="consent_oferta"
-            id="consent_oferta"
-            required
-          >
-          <span class="checkmark"></span>
-          <span class="consent-text">
-            Я принимаю условия <a href="/oferta.html" target="_blank">Договора оферты</a>
-          </span>
-        </label>
-      </div>
-
-      <button type="submit" class="submit-btn">
-        <span>Создать аккаунт</span>
-      </button>
-    </form>
-    
-    <div class="switch-link">
-      Уже есть аккаунт? <a href="/login">Войти в систему</a>
     </div>
-  </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Обработчик для кнопки переключения пароля
-  const passwordToggle = document.getElementById('passwordToggle');
-  const passwordInput = document.getElementById('password');
-  
-  if (passwordToggle && passwordInput) {
-    passwordToggle.addEventListener('click', function() {
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        passwordToggle.innerHTML = `
-          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"/>
-            <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>
-          </svg>
-        `;
-        passwordToggle.setAttribute('title', 'Скрыть пароль');
-      } else {
-        passwordInput.type = 'password';
-        passwordToggle.innerHTML = `
-          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-          </svg>
-        `;
-        passwordToggle.setAttribute('title', 'Показать пароль');
-      }
-    });
-  }
-
-  // Анимация появления полей формы
-  const inputs = document.querySelectorAll('.form-group input, .form-group select');
-  
-  inputs.forEach((input, index) => {
-    input.style.opacity = '0';
-    input.style.transform = 'translateY(10px)';
+    // Переключение видимости пароля
+    const passwordToggle = document.getElementById('passwordToggle');
+    const passwordInput = document.getElementById('password');
     
-    setTimeout(() => {
-      input.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-      input.style.opacity = '1';
-      input.style.transform = 'translateY(0)';
-    }, index * 100);
-  });
+    if (passwordToggle && passwordInput) {
+        passwordToggle.addEventListener('click', function() {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            
+            this.innerHTML = isPassword ? `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+            ` : `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            `;
+        });
+    }
 
-  // Улучшенный фокус для полей ввода
-  inputs.forEach(input => {
-    input.addEventListener('focus', function() {
-      this.parentElement.style.zIndex = '10';
-    });
+    // Обработка выбора района
+    const districtSelect = document.getElementById('district_select');
+    const districtManual = document.getElementById('district_manual');
     
-    input.addEventListener('blur', function() {
-      this.parentElement.style.zIndex = '1';
-    });
-  });
+    if (districtSelect && districtManual) {
+        function updateDistrictFields() {
+            if (districtSelect.value === 'other') {
+                districtManual.style.display = 'block';
+                districtManual.required = true;
+                districtSelect.name = 'district_temp';
+                districtManual.name = 'district';
+            } else {
+                districtManual.style.display = 'none';
+                districtManual.required = false;
+                districtSelect.name = 'district';
+                districtManual.name = 'district_manual';
+            }
+        }
+        
+        districtSelect.addEventListener('change', updateDistrictFields);
+        updateDistrictFields();
+    }
 });
 </script>
 {% endblock %}

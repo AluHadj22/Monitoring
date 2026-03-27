@@ -1,176 +1,483 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Политика конфиденциальности</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f9f9f9;
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    .privacy-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
     }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-      border-bottom: 2px solid #3498db;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
+
+    /* Hero секция */
+    .privacy-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 32px;
+        padding: 3rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
     }
-    h2 {
-      color: #2980b9;
-      margin-top: 30px;
-      border-left: 4px solid #3498db;
-      padding-left: 10px;
+
+    .privacy-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
     }
-    p, li {
-      margin: 10px 0;
+
+    .privacy-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
     }
-    .definition {
-      background-color: #ecf0f1;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 15px 0;
+
+    .privacy-hero-content {
+        position: relative;
+        z-index: 1;
     }
-    .contact-info {
-      background-color: #e8f4fd;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      border: 1px solid #3498db;
+
+    .privacy-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16, 185, 129, 0.2);
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #10b981;
+        margin-bottom: 1rem;
     }
-    a {
-      color: #3498db;
-      text-decoration: none;
+
+    .privacy-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
     }
-    a:hover {
-      text-decoration: underline;
+
+    .privacy-subtitle {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 600px;
     }
-  </style>
-</head>
-<body>
-  <h1>Политика конфиденциальности</h1>
 
-  <h2>1. Общие положения</h2>
-  <ol>
-    <li>Настоящая Политика определяет порядок обработки и защиты персональных данных пользователей веб‑сервиса <strong>monitoring95</strong> (далее — Сервис).</li>
-    <li>Использование Сервиса означает безоговорочное согласие пользователя с условиями данной Политики.</li>
-    <li>Если пользователь не принимает условия Политики, он обязан прекратить использование Сервиса.</li>
-    <li>Акцептом (согласием с политикой) считается проставление Пользователем отметки в чекбоксе «Я даю добровольное согласие на обработку персональных данных в соответствии с Политикой конфиденциальности. Согласие действует до момента его отзыва в письменной форме» при регистрации на сайте <span class="highlight">monitoring95.ru</span>, а также дальнейшее использование Платформы.</li>
-  </ol>
+    /* Основной контент */
+    .privacy-content {
+        background: var(--bg-card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
 
-  <h2>2. Определения</h2>
-  <p>В целях Политики используются термины:</p>
-  <div class="definition">
-    <p><strong>Персональные данные</strong> — любая информация, позволяющая идентифицировать физическое лицо (ФИО, email, IP‑адрес, файлы cookie (технические, необходимые для функционирования сервиса), данные форм регистрации, ФИО директора школы и др.).</p>
-    <p><strong>Обработка</strong> — сбор, хранение, систематизация, изменение, передача, блокирование, удаление, обезличивание данных, в том числе обновление ФИО директора при изменении его персональных данных по инициативе самого директора либо при назначении нового директора.</p>
-    <p><strong>Оператор</strong> — Хаджиев Алу Ибрагимович, физическое лицо, осуществляющее обработку персональных данных в рамках функционирования Сервиса.</p>
-  </div>
+    .content-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
 
-  <h2>3. Цели обработки персональных данных</h2>
-  <p>Оператор обрабатывает персональные данные для:</p>
-  <ul>
-    <li>регистрации и аутентификации пользователей;</li>
-    <li>предоставления доступа к функционалу Сервиса;</li>
-    <li>обработки заявок и обращений;</li>
-    <li>соблюдения требований законодательства;</li>
-    <li>предотвращения мошенничества и обеспечения безопасности;</li>
-    <li>верификации принадлежности пользователя к образовательному учреждению (на основании предоставленных данных о директоре школы).</li>
-  </ul>
+    .content-section:last-child {
+        border-bottom: none;
+    }
 
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
-  <h2>4. Правовые основания обработки</h2>
-  <p>Обработка осуществляется на основании:</p>
-  <ul>
-    <li>согласия пользователя (ст. 9 ФЗ‑152 «О персональных данных»);</li>
-    <li>необходимости исполнения договора (ст. 6 ФЗ‑152);</li>
-    <li>законных интересов Оператора (обеспечение работы Сервиса, защита данных);</li>
-    <li>требований закона (налоговые, судебные запросы и т. п.).</li>
-  </ul>
+    .section-title svg {
+        width: 24px;
+        height: 24px;
+        stroke: var(--primary);
+    }
 
-  <h2>5. Объём и категории обрабатываемых данных</h2>
-  <p>Собираются:</p>
-  <ul>
-    <li>данные, предоставленные пользователем при регистрации (email, ФИО, название организации и др.);</li>
-    <li>ФИО директора образовательного учреждения (при указании пользователем в соответствующих формах);</li>
-    <li>технические данные (IP‑адрес, cookies (технические для функционирования сервиса));</li>
-    <li>история действий в Сервисе (запросы, транзакции, время сессии).</li>
-  </ul>
+    .section-text {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
 
-  <h2>6. Сроки хранения данных</h2>
-  <p>Данные хранятся:</p>
-  <ul>
-    <li>до отзыва согласия пользователем;</li>
-    <li>в течение сроков, установленных законодательством (например, 5 лет для финансовых операций, если применимо);</li>
-    <li>до прекращения функционирования Сервиса (с последующим обезличиванием или удалением);</li>
-    <li>в случае смены директора образовательного учреждения — ранее указанные данные о директоре подлежат удалению в течение 3 рабочих дней с момента назначения нового директора.</li>
-  </ul>
+    .definition-block {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin: 1.25rem 0;
+        border-left: 3px solid var(--primary);
+    }
 
- <h2>7. Передача данных третьим лицам</h2>
-<p>Оператор вправе передавать персональные данные строго в предусмотренных законом случаях:</p>
-<ul>
-  <li>
-    <strong>Партнёрам по договору</strong> (провайдерам хостинга, CRM‑системам и иным подрядчикам) — исключительно в объёме, необходимом для исполнения договорных обязательств, при обязательном соблюдении требований о конфиденциальности и защите данных.
-  </li>
-  <li>
-    <strong>На территории РФ</strong> — все персональные данные хранятся на серверах, расположенных в Российской Федерации, обслуживаемых хостинг‑провайдерами российского происхождения, что обеспечивает соблюдение требований локализации данных (ст. 18 ФЗ № 152‑ФЗ).
-  </li>
-  <li>
-    <strong>Государственным органам</strong> — только на основании законного запроса, оформленного в порядке, предусмотренном действующим законодательством РФ.
-  </li>
-  <li>
-    <strong>Правопреемникам</strong> — в случае реорганизации, продажи бизнеса или передачи прав на Сервис, при условии сохранения уровня защиты данных, предусмотренного настоящей Политикой.
-  </li>
-</ul>
-<p>
-  <strong>Анонимизированные и агрегированные данные</strong> могут обрабатываться и использоваться Оператором для статистических исследований, анализа пользовательского поведения и улучшения функционала Сервиса. При этом гарантируется невозможность идентификации конкретных лиц на основании таких данных.
-</p>
+    .definition-block p {
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+    }
 
+    .definition-block p:last-child {
+        margin-bottom: 0;
+    }
 
-  <h2>8. Права и обязанности пользователя</h2>
-  <p>Пользователь вправе:</p>
-  <ul>
-    <li>запросить копию своих данных;</li>
-    <li>исправить неточности;</li>
-    <li>потребовать удаления данных (с учётом законных ограничений);</li>
-    <li>отозвать согласие (отправив письмо на <a href="mailto:ecmpservice@yandex.ru">ecmpservice@yandex.ru</a>);</li>
-    <li>подать жалобу в надзорный орган (Роскомнадзор).</li>
-  </ul>
-  <p>Пользователь обязан:</p>
-  <ul>
-    <li>обеспечивать актуальность предоставленных данных о директоре школы;</li>
-    <li>предоставлять персональные данные директора школы только с его добровольного согласия, подтверждённого в порядке, предусмотренном действующим законодательством РФ о персональных данных;</li>
-    <li>в случае изменения ФИО директора по его инициативе либо при назначении нового директора — своевременно обновить информацию в системе;</li>
-    <li>удалить устаревшие персональные данные прежнего директора из системы в течение 3 рабочих дней после назначения нового директора.</li>
-  </ul>
+    .definition-block strong {
+        color: var(--primary);
+    }
 
-  <h2>9. Безопасность данных</h2>
-  <p>Оператор применяет:</p>
-  <ul>
-    <li>шифрование передачи данных (HTTPS);</li>
-    <li>разграничение доступа к базам данных;</li>
-    <li>регулярное резервное копирование;</li>
-    <li>мониторинг угроз.</li>
-  </ul>
+    .info-list {
+        list-style: none;
+        padding: 0;
+    }
 
-  <h2>10. Изменения Политики</h2>
-  <p>Оператор вправе обновлять Политику. Актуальная версия всегда доступна по адресу: <a href="https://monitoring95.ru/privacy">https://monitoring95.ru/privacy</a>.</p>
-  <p>Пользователь обязан периодически проверять изменения. Продолжение использования Сервиса после изменений означает согласие с новой версией.</p>
+    .info-list li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
 
-   <h2>11. Контакты</h2>
-  <div class="contact-info">
-    <p>По вопросам конфиденциальности обращайтесь:</p>
-    <ul>
-      <li><strong>Email:</strong> <a href="mailto:ecmpservice@yandex.ru">ecmpservice@yandex.ru</a></li>
-      <li><strong>ФИО:</strong> Хаджиев Алу Ибрагимович</li>
-      <li><strong>Место жительства:</strong> Чеченская Республика, город Грозный</li>
-    </ul>
-    <p>Для официальных запросов (в том числе от государственных органов) используйте указанный электронный адрес с пометкой «Официальный запрос» в теме письма.</p>
-  </div>
+    .info-list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.5rem;
+        width: 6px;
+        height: 6px;
+        background: var(--primary);
+        border-radius: 50%;
+    }
 
-</body>
-</html>
+    .numbered-list {
+        list-style: none;
+        padding: 0;
+        counter-reset: item;
+    }
+
+    .numbered-list li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        counter-increment: item;
+    }
+
+    .numbered-list li::before {
+        content: counter(item) ".";
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .contact-card {
+        background: linear-gradient(135deg, var(--primary-bg) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .contact-card p {
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .contact-card a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .contact-card a:hover {
+        text-decoration: underline;
+    }
+
+    .highlight {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .last-updated {
+        text-align: center;
+        padding: 1.5rem;
+        background: var(--surface);
+        border-radius: 16px;
+        margin-top: 2rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .privacy-container {
+            padding: 1rem;
+        }
+        
+        .privacy-hero {
+            padding: 2rem;
+        }
+        
+        .privacy-title {
+            font-size: 1.5rem;
+        }
+        
+        .content-section {
+            padding: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+        }
+        
+        .definition-block {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="privacy-container">
+    <!-- Hero секция -->
+    <div class="privacy-hero">
+        <div class="privacy-hero-content">
+            <div class="privacy-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>Политика конфиденциальности</span>
+            </div>
+            <h1 class="privacy-title">Защита персональных данных</h1>
+            <p class="privacy-subtitle">
+                Мы ценим ваше доверие и обеспечиваем надёжную защиту предоставленной информации
+            </p>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="privacy-content">
+        <!-- Общие положения -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                1. Общие положения
+            </h2>
+            <ul class="numbered-list">
+                <li>Настоящая Политика определяет порядок обработки и защиты персональных данных пользователей веб‑сервиса <strong class="highlight">monitoring95</strong> (далее — Сервис).</li>
+                <li>Использование Сервиса означает безоговорочное согласие пользователя с условиями данной Политики.</li>
+                <li>Если пользователь не принимает условия Политики, он обязан прекратить использование Сервиса.</li>
+                <li>Акцептом (согласием с политикой) считается проставление Пользователем отметки в чекбоксе при регистрации на сайте <span class="highlight">monitoring95.ru</span>, а также дальнейшее использование Платформы.</li>
+            </ul>
+        </div>
+
+        <!-- Определения -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                2. Определения
+            </h2>
+            <div class="definition-block">
+                <p><strong>Персональные данные</strong> — любая информация, позволяющая идентифицировать физическое лицо (ФИО, email, IP‑адрес, файлы cookie, данные форм регистрации, ФИО директора школы и др.).</p>
+                <p><strong>Обработка</strong> — сбор, хранение, систематизация, изменение, передача, блокирование, удаление, обезличивание данных, в том числе обновление ФИО директора при изменении его персональных данных по инициативе самого директора либо при назначении нового директора.</p>
+                <p><strong>Оператор</strong> — Хаджиев Алу Ибрагимович, физическое лицо, осуществляющее обработку персональных данных в рамках функционирования Сервиса.</p>
+            </div>
+        </div>
+
+        <!-- Цели обработки -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+                3. Цели обработки персональных данных
+            </h2>
+            <p class="section-text">Оператор обрабатывает персональные данные для:</p>
+            <ul class="info-list">
+                <li>регистрации и аутентификации пользователей;</li>
+                <li>предоставления доступа к функционалу Сервиса;</li>
+                <li>обработки заявок и обращений;</li>
+                <li>соблюдения требований законодательства;</li>
+                <li>предотвращения мошенничества и обеспечения безопасности;</li>
+                <li>верификации принадлежности пользователя к образовательному учреждению (на основании предоставленных данных о директоре школы).</li>
+            </ul>
+        </div>
+
+        <!-- Правовые основания -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                4. Правовые основания обработки
+            </h2>
+            <p class="section-text">Обработка осуществляется на основании:</p>
+            <ul class="info-list">
+                <li>согласия пользователя (ст. 9 ФЗ‑152 «О персональных данных»);</li>
+                <li>необходимости исполнения договора (ст. 6 ФЗ‑152);</li>
+                <li>законных интересов Оператора (обеспечение работы Сервиса, защита данных);</li>
+                <li>требований закона (налоговые, судебные запросы и т. п.).</li>
+            </ul>
+        </div>
+
+        <!-- Объём и категории -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                5. Объём и категории обрабатываемых данных
+            </h2>
+            <p class="section-text">Собираются:</p>
+            <ul class="info-list">
+                <li>данные, предоставленные пользователем при регистрации (email, ФИО, название организации и др.);</li>
+                <li>ФИО директора образовательного учреждения (при указании пользователем в соответствующих формах);</li>
+                <li>технические данные (IP‑адрес, cookies);</li>
+                <li>история действий в Сервисе (запросы, транзакции, время сессии).</li>
+            </ul>
+        </div>
+
+        <!-- Сроки хранения -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                6. Сроки хранения данных
+            </h2>
+            <ul class="info-list">
+                <li>до отзыва согласия пользователем;</li>
+                <li>в течение сроков, установленных законодательством (например, 5 лет для финансовых операций, если применимо);</li>
+                <li>до прекращения функционирования Сервиса (с последующим обезличиванием или удалением);</li>
+                <li>в случае смены директора образовательного учреждения — ранее указанные данные о директоре подлежат удалению в течение 3 рабочих дней с момента назначения нового директора.</li>
+            </ul>
+        </div>
+
+        <!-- Передача данных -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                7. Передача данных третьим лицам
+            </h2>
+            <p class="section-text">Оператор вправе передавать персональные данные строго в предусмотренных законом случаях:</p>
+            <ul class="info-list">
+                <li><strong>Партнёрам по договору</strong> (провайдерам хостинга, CRM‑системам и иным подрядчикам) — исключительно в объёме, необходимом для исполнения договорных обязательств, при обязательном соблюдении требований о конфиденциальности и защите данных.</li>
+                <li><strong>На территории РФ</strong> — все персональные данные хранятся на серверах, расположенных в Российской Федерации.</li>
+                <li><strong>Государственным органам</strong> — только на основании законного запроса, оформленного в порядке, предусмотренном действующим законодательством РФ.</li>
+                <li><strong>Правопреемникам</strong> — в случае реорганизации, продажи бизнеса или передачи прав на Сервис, при условии сохранения уровня защиты данных.</li>
+            </ul>
+            <p class="section-text">Анонимизированные и агрегированные данные могут обрабатываться и использоваться Оператором для статистических исследований, анализа пользовательского поведения и улучшения функционала Сервиса.</p>
+        </div>
+
+        <!-- Права пользователя -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 12v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3M12 2v12M8 10l4 4 4-4"/>
+                </svg>
+                8. Права и обязанности пользователя
+            </h2>
+            <p class="section-text">Пользователь вправе:</p>
+            <ul class="info-list">
+                <li>запросить копию своих данных;</li>
+                <li>исправить неточности;</li>
+                <li>потребовать удаления данных (с учётом законных ограничений);</li>
+                <li>отозвать согласие (отправив письмо на <a href="mailto:ecmpservice@yandex.ru">ecmpservice@yandex.ru</a>);</li>
+                <li>подать жалобу в надзорный орган (Роскомнадзор).</li>
+            </ul>
+            <p class="section-text">Пользователь обязан:</p>
+            <ul class="info-list">
+                <li>обеспечивать актуальность предоставленных данных о директоре школы;</li>
+                <li>предоставлять персональные данные директора школы только с его добровольного согласия;</li>
+                <li>в случае изменения ФИО директора своевременно обновить информацию в системе;</li>
+                <li>удалить устаревшие персональные данные прежнего директора из системы в течение 3 рабочих дней после назначения нового директора.</li>
+            </ul>
+        </div>
+
+        <!-- Безопасность -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                9. Безопасность данных
+            </h2>
+            <p class="section-text">Оператор применяет:</p>
+            <ul class="info-list">
+                <li>шифрование передачи данных (HTTPS);</li>
+                <li>разграничение доступа к базам данных;</li>
+                <li>регулярное резервное копирование;</li>
+                <li>мониторинг угроз.</li>
+            </ul>
+        </div>
+
+        <!-- Изменения -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3M7 8l5 5 5-5"/>
+                </svg>
+                10. Изменения Политики
+            </h2>
+            <p class="section-text">Оператор вправе обновлять Политику. Актуальная версия всегда доступна по адресу: <a href="https://monitoring95.ru/privacy" class="highlight">https://monitoring95.ru/privacy</a>.</p>
+            <p class="section-text">Пользователь обязан периодически проверять изменения. Продолжение использования Сервиса после изменений означает согласие с новой версией.</p>
+        </div>
+
+        <!-- Контакты -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                11. Контакты
+            </h2>
+            <div class="contact-card">
+                <p>По вопросам конфиденциальности обращайтесь:</p>
+                <p><strong>Email:</strong> <a href="mailto:ecmpservice@yandex.ru">ecmpservice@yandex.ru</a></p>
+                <p><strong>ФИО:</strong> Хаджиев Алу Ибрагимович</p>
+                <p><strong>Место жительства:</strong> Чеченская Республика, город Грозный</p>
+                <p>Для официальных запросов (в том числе от государственных органов) используйте указанный электронный адрес с пометкой «Официальный запрос» в теме письма.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="last-updated">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; margin-right: 0.5rem;">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Актуальная версия: {{ current_date }}. Все права защищены.
+    </div>
+</div>
+{% endblock %}

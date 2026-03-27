@@ -1,0 +1,797 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    .payment-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Hero секция */
+    .payment-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 32px;
+        padding: 3rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .payment-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .payment-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .payment-hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16, 185, 129, 0.2);
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #10b981;
+        margin-bottom: 1rem;
+    }
+
+    .payment-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .payment-subtitle {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 600px;
+    }
+
+    /* Основная сетка */
+    .payment-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+        .payment-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Карточка тарифа */
+    .tariff-card {
+        background: var(--bg-card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        position: sticky;
+        top: 2rem;
+        transition: var(--transition);
+    }
+
+    .tariff-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 2rem;
+        text-align: center;
+        color: white;
+    }
+
+    .tariff-name {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .tariff-price {
+        font-size: 2.5rem;
+        font-weight: 800;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+
+    .tariff-price span {
+        font-size: 1rem;
+        font-weight: 500;
+        opacity: 0.8;
+    }
+
+    .tariff-period {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+    }
+
+    .tariff-features {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .feature-item svg {
+        width: 18px;
+        height: 18px;
+        stroke: var(--primary);
+        flex-shrink: 0;
+    }
+
+    .feature-item.disabled {
+        opacity: 0.5;
+    }
+
+    .feature-item.disabled svg {
+        stroke: var(--text-secondary);
+    }
+
+    .tariff-footer {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    /* Форма оплаты */
+    .payment-form-card {
+        background: var(--bg-card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .form-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .form-header h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-body {
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-bg);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    /* Информация о подписке */
+    .subscription-info {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 1rem;
+        margin-top: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .total-price {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    /* Кнопка оплаты */
+    .pay-button {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border: none;
+        border-radius: 60px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .pay-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .pay-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Блок важной информации */
+    .important-info {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 20px;
+        padding: 1.25rem;
+        margin-top: 1.5rem;
+        border-left: 4px solid #f59e0b;
+    }
+
+    [data-theme='dark'] .important-info {
+        background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+        border-left-color: #fbbf24;
+    }
+
+    .important-info h4 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #b45309;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    [data-theme='dark'] .important-info h4 {
+        color: #fbbf24;
+    }
+
+    .important-info p {
+        font-size: 0.8rem;
+        color: #92400e;
+        line-height: 1.5;
+        margin-bottom: 0.5rem;
+    }
+
+    [data-theme='dark'] .important-info p {
+        color: #fed7aa;
+    }
+
+    .important-info ul {
+        margin: 0.5rem 0 0 1.25rem;
+        color: #92400e;
+        font-size: 0.8rem;
+    }
+
+    [data-theme='dark'] .important-info ul {
+        color: #fed7aa;
+    }
+
+    .important-info li {
+        margin-bottom: 0.25rem;
+    }
+
+    .contact-links {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .contact-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(245, 158, 11, 0.2);
+        border-radius: 2rem;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #b45309;
+        transition: var(--transition);
+    }
+
+    [data-theme='dark'] .contact-link {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+    }
+
+    .contact-link:hover {
+        background: #f59e0b;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .contact-link svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+    }
+
+    /* Уведомления */
+    .notification {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 16px;
+        background: var(--bg-card);
+        border-left: 3px solid var(--primary);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transform: translateX(calc(100% + 1.5rem));
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+    }
+
+    .notification.show {
+        transform: translateX(0);
+    }
+
+    .notification-success {
+        border-left-color: var(--success);
+    }
+    .notification-error {
+        border-left-color: var(--error);
+    }
+    .notification-warning {
+        border-left-color: var(--warning);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .payment-container {
+            padding: 1rem;
+        }
+        
+        .payment-hero {
+            padding: 2rem;
+        }
+        
+        .payment-title {
+            font-size: 1.5rem;
+        }
+        
+        .form-body {
+            padding: 1.5rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .tariff-header {
+            padding: 1.5rem;
+        }
+        
+        .tariff-price {
+            font-size: 2rem;
+        }
+        
+        .tariff-features {
+            padding: 1.5rem;
+        }
+        
+        .contact-links {
+            flex-direction: column;
+        }
+        
+        .contact-link {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="payment-container">
+    <!-- Hero секция -->
+    <div class="payment-hero">
+        <div class="payment-hero-content">
+            <div class="payment-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>Оплата подписки</span>
+            </div>
+            <h1 class="payment-title">Оформите доступ к расширенным возможностям</h1>
+            <p class="payment-subtitle">
+                Выберите тариф и заполните форму для подключения платного доступа
+            </p>
+        </div>
+    </div>
+
+    <div class="payment-grid">
+        <!-- Карточка тарифа -->
+        <div class="tariff-card">
+            <div class="tariff-header">
+                <div class="tariff-name">Супер-пользователь</div>
+                <div class="tariff-price">
+                    400 <span>₽</span>
+                </div>
+                <div class="tariff-period">в месяц</div>
+            </div>
+            <div class="tariff-features">
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Аккаунт регионального администратора</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Аккаунт муниципального администратора</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Доступ ко всем дашбордам</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Анализ статистики питания</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Админ рассмотрит ваши заявки (по дочтению и т. д.) в базе ФЦМПО.</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Массовые операции с файлами</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Приоритетная техподдержка</span>
+                </div>
+            </div>
+            <div class="tariff-footer">
+                <div class="feature-item disabled">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    <span>Бесплатный тариф «Школа» всегда доступен - для всех</span>
+                    <span>Функции Супер-пользователя доступны для учреждений Чеченской Республики бесплатно</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Форма оплаты -->
+        <div class="payment-form-card">
+            <div class="form-header">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                    Реквизиты для оплаты
+                </h2>
+            </div>
+            <div class="form-body">
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" placeholder="example@school.ru" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Наименование учреждения *</label>
+                        <input type="text" id="schoolName" placeholder="МБОУ СОШ №..." required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Сумма *</label>
+                            <input type="text" id="amount" value="400 ₽" readonly style="background: var(--surface); font-weight: 600; color: var(--primary);">
+                        </div>
+                        <div class="form-group">
+                            <label>Период *</label>
+                            <select id="period">
+                                <option value="1">1 месяц (400 ₽)</option>
+                                <option value="3">3 месяца (1 200 ₽)</option>
+                                <option value="6">6 месяцев (2 400 ₽)</option>
+                                <option value="12">12 месяцев (4 800 ₽)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="subscription-info">
+                        <div class="info-row">
+                            <span class="info-label">Тариф</span>
+                            <span class="info-value">Супер-пользователь</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Срок подписки</span>
+                            <span class="info-value" id="periodText">1 месяц</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Сумма к оплате</span>
+                            <span class="info-value total-price" id="totalAmount">400 ₽</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Блок важной информации -->
+                    <div class="important-info">
+                        <h4>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            ⚠️ Важная информация
+                        </h4>
+                        <p><strong>Для получения доступа к региональной или муниципальной админке необходимо:</strong></p>
+                        <ul>
+                            <li>Быть региональным ответственным, назначенным в вашем регионе (требуется подтверждение)</li>
+                            <li>Или быть работником районного отдела образования / назначенным ответственным лицом (требуется подтверждение)</li>
+                        </ul>
+                        <p style="margin-top: 0.75rem;">После оплаты свяжитесь со мной в одном из мессенджеров, пришлите чек и подтвердите свои полномочия.</p>
+                        
+                        <div class="contact-links">
+                            <a href="https://t.me/Alu4477" target="_blank" class="contact-link">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                </svg>
+                                Telegram: @Alu4477
+                            </a>
+                            <!-- Новая ссылка на бота для оплаты -->
+                            <a href="https://t.me/ECM_food_Monitoring_BOT" target="_blank" class="contact-link">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                    <path d="M2 3L12 13 22 3"></path>
+                                </svg>
+                                Бот для оплаты: @ECM_food_Monitoring_BOT
+                            </a>
+                            <a href="https://max.ru/join/0_ENTACbyqPMRPm5MbX11Sjn7aYzaG924ADcVjCLrag" class="contact-link" id="maxLink" target="_blank">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                                </svg>
+                                Max: тема "Оплата подписки"
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="pay-button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        Оплатить
+                    </button>
+                </form>
+                
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: center;">
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">
+                        Нажимая кнопку «Оплатить», вы соглашаетесь с 
+                        <a href="/oferta.html" target="_blank" style="color: var(--primary);">Договором-офертой</a> 
+                        и <a href="/privacy.html" target="_blank" style="color: var(--primary);">Политикой конфиденциальности</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<script>
+// Реквизиты для оплаты
+const PAYMENT_DETAILS = {
+    cardNumber: "2200 2001 3094 6791",
+    bank: "MinB банк (карта Мир)",
+    recipient: "Хаджиев Алу Ибрагимович"
+};
+
+// Обновление суммы при изменении периода
+document.getElementById('period').addEventListener('change', function() {
+    const months = parseInt(this.value);
+    const amount = months * 400;
+    const periodText = months === 1 ? '1 месяц' : months === 3 ? '3 месяца' : months === 6 ? '6 месяцев' : '12 месяцев';
+    
+    document.getElementById('periodText').textContent = periodText;
+    document.getElementById('amount').value = `${amount} ₽`;
+    document.getElementById('totalAmount').textContent = `${amount} ₽`;
+});
+
+// Установка ссылки на Max
+document.getElementById('maxLink').href = 'https://max.ru/join/0_ENTACbyqPMRPm5MbX11Sjn7aYzaG924ADcVjCLrag';
+
+// Показать уведомление
+function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    notification.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>${message}`;
+    notification.className = `notification notification-${type} show`;
+    setTimeout(() => notification.classList.remove('show'), 8000);
+}
+
+// Обработка отправки формы
+document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const schoolName = document.getElementById('schoolName').value;
+    const period = document.getElementById('period').value;
+    const amount = period * 400;
+    
+    if (!email || !schoolName) {
+        showNotification('Заполните все обязательные поля', 'warning');
+        return;
+    }
+    
+    const submitBtn = this.querySelector('.pay-button');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Формирование счета...';
+    submitBtn.disabled = true;
+    
+    // Имитация отправки на сервер
+    setTimeout(() => {
+        // Сохраняем заявку в localStorage
+        const paymentRequests = JSON.parse(localStorage.getItem('payment_requests') || '[]');
+        paymentRequests.push({
+            id: Date.now(),
+            date: new Date().toLocaleString('ru-RU'),
+            email: email,
+            schoolName: schoolName,
+            period: period,
+            amount: amount,
+            status: 'pending'
+        });
+        localStorage.setItem('payment_requests', JSON.stringify(paymentRequests));
+        
+        // Показываем реквизиты
+        const message = `💳 Реквизиты для оплаты:
+
+💳 Номер карты: ${PAYMENT_DETAILS.cardNumber}
+🏦 Банк: ${PAYMENT_DETAILS.bank}
+👤 Получатель: ${PAYMENT_DETAILS.recipient}
+
+💰 Сумма: ${amount} ₽
+📝 Назначение: Оплата доступа к платформе monitoring95.ru, учреждение: ${schoolName}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 ПОСЛЕ ОПЛАТЫ:
+
+1. Отправьте чек об оплате в один из мессенджеров или через БОТ:
+   • Бот для оплаты: https://t.me/ECM_food_Monitoring_BOT
+   • Telegram (личные сообщения): @Alu4477
+   • Max: тема "Оплата подписки"
+
+2. В сообщении укажите:
+   - Название учреждения
+   - Email, указанный при оплате
+   - Подтверждение ваших полномочий (скан приказа о назначении региональным/муниципальным ответственным)
+
+3. После проверки (в течение 24 часов) вы получите доступ к административной панели.
+
+⚠️ Доступ к региональной или муниципальной админке предоставляется только при подтверждении ваших полномочий!`;
+        
+        alert(message);
+        showNotification('Заявка на оплату создана! Проверьте реквизиты в уведомлении', 'success');
+        
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        // Очистка формы
+        document.getElementById('paymentForm').reset();
+        document.getElementById('amount').value = '400 ₽';
+        document.getElementById('totalAmount').textContent = '400 ₽';
+        document.getElementById('periodText').textContent = '1 месяц';
+        document.getElementById('period').value = '1';
+    }, 1500);
+});
+
+// Стиль для спиннера
+const style = document.createElement('style');
+style.textContent = `
+    .loading-spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
